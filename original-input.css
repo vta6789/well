@@ -1,0 +1,226 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: var(--font-body);
+}
+h1,
+h2,
+.serif {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: 800;
+  letter-spacing: normal;
+}
+.btn {
+  border-radius: var(--radius-button);
+}
+.card {
+  border-radius: var(--radius-card);
+}
+.brand-mark {
+  background: #16a34a;
+}
+.project-workspace {
+  background: #fafaf9;
+  min-height: 70vh;
+}
+.upgraded-module {
+  max-width: 1280px;
+  padding-top: 32px;
+}
+.project-function-bar {
+  max-width: 1280px;
+  margin: auto;
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid #e7e5e4;
+}
+.project-tabs {
+  display: flex;
+  gap: 8px;
+  overflow: auto;
+}
+.project-tabs button {
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 12px 14px;
+  border-radius: var(--radius-button);
+  color: #78716c;
+}
+.project-tabs button.active {
+  background: #dcfce7;
+  color: #15803d;
+}
+.project-module-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #78716c;
+  display: grid;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.project-module-label select {
+  font-size: 12px;
+  max-width: 220px;
+  padding: 9px;
+  background: white;
+}
+.hero-panel {
+  background: linear-gradient(120deg, #14532d, #166534);
+  border-radius: var(--radius-card);
+}
+.hero-panel h2 {
+  font-size: 28px;
+}
+.hero-panel:after {
+  display: none;
+}
+.page-head h1 {
+  font-size: 30px;
+}
+.eyebrow {
+  letter-spacing: 1px;
+}
+.tag {
+  font-family: inherit;
+}
+.original-site header .btn {
+  font-size: 12px;
+  padding: 10px 13px;
+  font-weight: 700;
+}
+@media (max-width: 760px) {
+  .project-function-bar {
+    padding: 12px 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .project-module-label {
+    grid-template-columns: auto 1fr;
+    align-items: center;
+  }
+  .project-module-label select {
+    max-width: 100%;
+    width: 100%;
+  }
+  .project-tabs button {
+    padding: 9px 11px;
+  }
+  .upgraded-module {
+    padding: 24px 16px;
+  }
+  .page-head h1 {
+    font-size: 25px;
+  }
+}
+
+.original-site {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  background: #fafaf9;
+  color: #292524;
+  min-height: 100vh;
+}
+.original-site :where(h1, h2, h3, h4, h5, h6) {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+.original-site :where(ul, ol) {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.original-site h1,
+.original-site h2,
+.original-site h3,
+.original-site h4 {
+  font-family: inherit;
+  letter-spacing: normal;
+}
+.original-site .glass {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+}
+.original-site a {
+  color: inherit;
+}
+.original-site .line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.original-site [id^="sec-"] {
+  scroll-margin-top: 100px;
+}
+.original-site button {
+  font-family: inherit;
+}
+.original-site .project-menu {
+  display: none;
+}
+.original-site .project-quick-menu {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  border-top: 1px solid #e7e5e4;
+  background: white;
+}
+.original-site .project-quick-menu button {
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #f0fdf4;
+  color: #15803d;
+  font-weight: 600;
+}
+@media (min-width: 1280px) {
+  .original-site .project-quick-menu {
+    display: none;
+  }
+}
+@media (max-width: 640px) {
+  .original-site #navAuthArea {
+    gap: 5px;
+  }
+  .original-site #navAuthArea .btn {
+    font-size: 11px;
+    padding: 8px;
+  }
+  .original-site header .h-20 {
+    height: auto;
+    min-height: 80px;
+    gap: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .original-site header .text-xl {
+    font-size: 18px;
+  }
+  .original-site header .w-11 {
+    width: 34px;
+    height: 34px;
+  }
+  .original-site header .gap-3 {
+    gap: 6px;
+  }
+  .original-site header .text-\[11px\] {
+    font-size: 9px;
+  }
+}
+
+/* Scale legacy pixel typography with the reading preference. */
+html.large-text .original-site {
+  zoom: 1.12;
+}
+:focus-visible {
+  outline: 3px solid #15803d;
+  outline-offset: 3px;
+}

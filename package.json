@@ -1,0 +1,19 @@
+{
+  "name": "wellness-farm-original-upgrade",
+  "private": true,
+  "version": "2.0.0",
+  "scripts": {
+    "build:styles": "tailwindcss -i ./original-input.css -o ./original-theme.css --minify",
+    "test:e2e": "playwright test",
+    "check": "node tools/check-scripts.js",
+    "format": "prettier --write \"frontend/*.js\" \"*.css\" \"*.js\" \"tests/e2e/*.js\" \"assets/fonts/fonts.css\"",
+    "vendor:fonts": "python tools/vendor_fonts.py"
+  },
+  "devDependencies": {
+    "@fontsource/plus-jakarta-sans": "^5.3.0",
+    "@fortawesome/fontawesome-free": "6.4.0",
+    "@playwright/test": "^1.63.0",
+    "prettier": "^3.9.9",
+    "tailwindcss": "3.4.17"
+  }
+}

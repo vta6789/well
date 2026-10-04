@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="vi">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>Wellness Farm - Nông Trại Dưỡng Lão & Chăm Sóc Sức Khỏe</title>
+ <link rel="stylesheet" href="/assets/fonts/fonts.css">
+ <link rel="stylesheet" href="/style.css">
+ <link rel="stylesheet" href="/design-tokens.css">
+ <link rel="stylesheet" href="/original-theme.css">
+ <link rel="stylesheet" href="/assets/fontawesome/css/all.min.css">
+ <script src="/frontend/core.js" defer></script>
+ <script src="/frontend/components.js" defer></script>
+ <script src="/frontend/navigation.js" defer></script>
+ <script src="/frontend/pages.js" defer></script>
+ <script src="/frontend/forms.js" defer></script>
+ <script src="/frontend/account.js" defer></script>
+ <script src="/frontend/events.js" defer></script>
+ <script src="/frontend/bootstrap.js" defer></script>
+</head>
+<body>
+ <a class="skip" href="#main">Đến nội dung chính</a>
+ <div id="app"></div>
+ <dialog role="dialog" aria-modal="true" id="modal" aria-labelledby="modal-title"></dialog>
+ <div id="toast" role="status" aria-live="polite"></div>
+ <template id="original-project">
+  <div class="original-site" id="original-site">
+<header class="sticky top-0 z-40 glass border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <!-- Logo & Author Subtitle -->
+                <div class="flex items-center gap-3 cursor-pointer" data-action="original-home">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 to-emerald-400 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                        <i class="fa-solid fa-leaf text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl font-extrabold tracking-tight text-stone-900 block leading-none">Wellness<span class="text-brand-600">Farm</span></span>
+                        <span class="text-[11px] text-stone-500 font-semibold block mt-0.5">Trương Huỳnh Phương Khanh • 25DATA1</span>
+                    </div>
+                </div>
+
+                <!-- Nav Links -->
+                <nav class="hidden xl:flex space-x-6 text-sm font-semibold text-stone-600">
+                    <button data-action="original-home" class="hover:text-brand-600 transition">Trang Chủ</button>
+                    <a href="#sec-about" data-action="original-home" class="hover:text-brand-600 transition">Giới Thiệu</a>
+                    <a href="#sec-zones" data-action="original-home" class="hover:text-brand-600 transition">5 Phân Khu</a>
+                    <a href="#sec-process" data-action="original-home" class="hover:text-brand-600 transition">Quy Trình</a>
+                    <a href="#sec-nabc" data-action="original-home" class="hover:text-brand-600 transition">NABC & SDGs</a>
+                    <button data-action="original-packages" class="hover:text-brand-600 transition">Gói Vé Dưỡng Lão</button>
+                    <button data-action="original-trips" class="hover:text-brand-600 transition">Chuyến Đã Đăng Ký</button>
+                </nav>
+
+                <!-- Auth Buttons & Profile -->
+                <div class="flex items-center gap-3" id="navAuthArea">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </div>
+    <nav class="project-quick-menu" aria-label="Điều hướng trên màn hình nhỏ"><button data-action="original-home">Trang chủ</button><button data-action="original-packages">Gói dưỡng lão</button><button data-action="original-trips">Chuyến đã đăng ký</button><button data-action="original-dashboard">Không gian quản lý</button></nav></header>
+<main class="flex-grow" id="main"><section id="sec-home" class="py-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                <!-- Author Header Banner -->
+                <div class="mb-8 p-4 rounded-2xl bg-gradient-to-r from-stone-900 via-brand-900 to-stone-900 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-brand-500/20 border border-brand-400/40 flex items-center justify-center text-brand-400">
+                            <i class="fa-solid fa-graduation-cap text-lg"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs uppercase font-bold text-brand-300 tracking-wider">Thông Tin Tác Giả & Dự Án</span>
+                            <h2 class="text-base font-bold">Trương Huỳnh Phương Khanh — Lớp 25DATA1 — Nhóm 3</h2>
+                        </div>
+                    </div>
+                    <span class="text-xs bg-white/10 px-3 py-1.5 rounded-xl border border-white/10 font-mono text-emerald-300">
+                        Nông Trại Dưỡng Lão Kế Thừa Sinh Thái
+                    </span>
+                </div>
+
+                <!-- Hero Header -->
+                <div class="grid lg:grid-cols-2 gap-12 items-center mb-16">
+                    <div>
+                        <span class="px-4 py-1.5 rounded-full text-xs font-bold bg-brand-100 text-brand-800 inline-block mb-4 border border-brand-200">
+                            🌿 Sống Khỏe Giữa Thiên Nhiên Bình Mỹ
+                        </span>
+                        <h1 class="text-4xl sm:text-5xl font-extrabold text-stone-900 leading-tight mb-6">
+                            Nơi Tận Hưởng Tuổi Già An Yên, Khỏe Mạnh & Kết Nối
+                        </h1>
+                        <p class="text-stone-600 text-lg mb-8 leading-relaxed">
+                            Mô hình Nông trại Dưỡng lão kết hợp chăm sóc sức khỏe toàn diện. Tận dụng nguồn nông sản sinh thái, không gian xanh mát và mô hình điều dưỡng y tế hiện đại dành cho người cao tuổi.
+                        </p>
+
+                        <!-- Metric Cards -->
+                        <div class="grid grid-cols-3 gap-4 mb-8">
+                            <div class="p-3 bg-white rounded-2xl border border-stone-200 text-center">
+                                <span class="text-2xl font-extrabold text-brand-600 block">278+</span>
+                                <span class="text-[11px] text-stone-500 font-semibold">Nhu cầu khảo sát</span>
+                            </div>
+                            <div class="p-3 bg-white rounded-2xl border border-stone-200 text-center">
+                                <span class="text-2xl font-extrabold text-brand-600 block">5 trong 1</span>
+                                <span class="text-[11px] text-stone-500 font-semibold">Phân khu chức năng</span>
+                            </div>
+                            <div class="p-3 bg-white rounded-2xl border border-stone-200 text-center">
+                                <span class="text-2xl font-extrabold text-brand-600 block">SDG 3-11-12</span>
+                                <span class="text-[11px] text-stone-500 font-semibold">Mục tiêu bền vững</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-4">
+                            <button data-action="original-packages" class="px-8 py-4 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl font-bold shadow-lg shadow-brand-600/30 transition transform hover:-translate-y-0.5">
+                                Đăng Ký Gói Khám Phá <i class="fa-solid fa-arrow-right ml-2"></i>
+                            </button>
+                            <button data-action="login" class="px-6 py-4 bg-white hover:bg-stone-100 text-stone-800 border border-stone-200 rounded-2xl font-semibold transition">
+                                Đăng Nhập / Tạo Tài Khoản
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <img src="/assets/images/farm.jpg" alt="Nông trại Wellness Farm" class="rounded-3xl shadow-2xl object-cover h-[450px] w-full">
+                        <div class="absolute -bottom-6 -left-6 glass p-6 rounded-2xl border border-white/60 shadow-xl hidden sm:flex items-center gap-4 max-w-xs">
+                            <div class="w-12 h-12 bg-warm-100 text-warm-600 rounded-xl flex items-center justify-center font-bold text-xl">
+                                <i class="fa-solid fa-heart-pulse"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-stone-900 text-sm">Chăm Sóc Y Tế 24/7</h4>
+                                <p class="text-xs text-stone-500">Đội ngũ y tế túc trực & phục vụ chu đáo.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GIỚI THIỆU & BỐI CẢNH (ABOUT) -->
+                <div id="sec-about" class="pt-16 border-t border-stone-200 mb-20">
+                    <div class="text-center max-w-3xl mx-auto mb-12">
+                        <span class="text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-50 px-3 py-1 rounded-full">Bối Cảnh & Tầm Nhìn</span>
+                        <h2 class="text-3xl font-bold text-stone-900 mt-3">Mô Hình Làng Sức Khỏe Tại Bình Mỹ</h2>
+                        <p class="text-stone-600 mt-2 text-sm">Giải pháp kết hợp giữa dưỡng lão sinh thái, nông nghiệp trải nghiệm và y học dự phòng.</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-8 mb-12">
+                        <div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm">
+                            <div class="w-12 h-12 bg-brand-100 text-brand-700 rounded-2xl flex items-center justify-center font-bold text-xl mb-4">
+                                <i class="fa-solid fa-map-location-dot"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-stone-900 mb-2">Bối Cảnh Xã Bình Mỹ</h3>
+                            <p class="text-stone-600 text-sm leading-relaxed mb-4">
+                                Bình Mỹ sở hữu không gian sinh thái trong lành, phù hợp phát triển mô hình dưỡng lão nghỉ dưỡng. Wellness Farm tiên phong tái định nghĩa khái niệm "Viện dưỡng lão" thành "Nông trại nghỉ dưỡng & kết nối".
+                            </p>
+                            <span class="text-xs font-bold text-brand-700 bg-brand-50 px-3 py-1 rounded-lg">Không gian xanh 100% sinh thái</span>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm">
+                            <div class="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center font-bold text-xl mb-4">
+                                <i class="fa-solid fa-lightbulb"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-stone-900 mb-2">Tầm Nhìn & Triết Lý Đột Phá</h3>
+                            <p class="text-stone-600 text-sm leading-relaxed mb-4">
+                                Giúp người cao tuổi duy trì tinh thần minh mẫn, sống có ý nghĩa thông qua việc tự tay lao động nhẹ nhàng, thu hoạch thực phẩm sạch và sinh hoạt cộng đồng văn minh.
+                            </p>
+                            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg">Thân - Tâm - Trí An Lạc</span>
+                        </div>
+                    </div>
+
+                    <!-- 4 Nhóm đối tượng Target -->
+                    <h3 class="text-xl font-bold text-stone-900 mb-6 text-center">4 Nhóm Đối Tượng Mục Tiêu (Target Groups)</h3>
+                    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-white p-6 rounded-2xl border border-stone-200 hover:border-brand-500 transition">
+                            <i class="fa-solid fa-user-nurse text-2xl text-brand-600 mb-3 block"></i>
+                            <h4 class="font-bold text-stone-900 text-sm">1. Người Cao Tuổi Tuổi Nghỉ Hưu</h4>
+                            <p class="text-xs text-stone-500 mt-2">Cần không gian yên tĩnh, hòa mình cùng thiên nhiên để thư giãn và phục hồi sức khỏe.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl border border-stone-200 hover:border-brand-500 transition">
+                            <i class="fa-solid fa-notes-medical text-2xl text-brand-600 mb-3 block"></i>
+                            <h4 class="font-bold text-stone-900 text-sm">2. Người Cần Phục Hồi Thể Trạng</h4>
+                            <p class="text-xs text-stone-500 mt-2">Cần chế độ dinh dưỡng cá nhân hóa và theo dõi y tế nhẹ nhàng định kỳ.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl border border-stone-200 hover:border-brand-500 transition">
+                            <i class="fa-solid fa-people-roof text-2xl text-brand-600 mb-3 block"></i>
+                            <h4 class="font-bold text-stone-900 text-sm">3. Gia Đình Con Cái Đột Biến Công Việc</h4>
+                            <p class="text-xs text-stone-500 mt-2">Gửi gắm ông bà cha mẹ ngắn hạn (ngày/tuần) an tâm tuyệt đối.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl border border-stone-200 hover:border-brand-500 transition">
+                            <i class="fa-solid fa-seedling text-2xl text-brand-600 mb-3 block"></i>
+                            <h4 class="font-bold text-stone-900 text-sm">4. Nhóm Yêu Thích Nông Nghiệp Xanh</h4>
+                            <p class="text-xs text-stone-500 mt-2">Tham gia trải nghiệm trồng trọt, thu hoạch nông sản hữu cơ cùng gia đình.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- THỰC TRẠNG & VẤN ĐỀ (NEED/PROBLEMS) -->
+                <div class="mb-20 bg-stone-900 text-white rounded-3xl p-8 sm:p-12 shadow-xl">
+                    <div class="max-w-3xl mb-10">
+                        <span class="text-xs font-bold text-brand-400 uppercase tracking-widest bg-brand-900/50 px-3 py-1 rounded-full border border-brand-500/30">Thực Trạng Nhu Cầu</span>
+                        <h2 class="text-3xl font-bold mt-3">4 Nguyên Nhân Cốt Lõi Cần Giải Quyết</h2>
+                        <p class="text-stone-400 text-sm mt-2">Kết quả khảo sát từ 278+ đối tượng người cao tuổi và gia đình tại đô thị.</p>
+                    </div>
+
+                    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-stone-800 p-6 rounded-2xl border border-stone-700">
+                            <span class="text-red-400 text-2xl font-black block mb-2">01</span>
+                            <h4 class="font-bold text-white text-base">Thiếu Không Gian Xanh</h4>
+                            <p class="text-xs text-stone-400 mt-2">Đô thị hóa khiến người già gò bó trong 4 bức tường, thiếu môi trường trong lành.</p>
+                        </div>
+                        <div class="bg-stone-800 p-6 rounded-2xl border border-stone-700">
+                            <span class="text-red-400 text-2xl font-black block mb-2">02</span>
+                            <h4 class="font-bold text-white text-base">Cô Đơn & Thiếu Kết Nối</h4>
+                            <p class="text-xs text-stone-400 mt-2">Con cái bận rộn công việc, thiếu môi trường giao lưu đồng niên lành mạnh.</p>
+                        </div>
+                        <div class="bg-stone-800 p-6 rounded-2xl border border-stone-700">
+                            <span class="text-red-400 text-2xl font-black block mb-2">03</span>
+                            <h4 class="font-bold text-white text-base">Sức Khỏe Giảm Sút</h4>
+                            <p class="text-xs text-stone-400 mt-2">Thiếu chế độ vận động hợp lý và theo dõi chỉ số y tế định kỳ khoa học.</p>
+                        </div>
+                        <div class="bg-stone-800 p-6 rounded-2xl border border-stone-700">
+                            <span class="text-red-400 text-2xl font-black block mb-2">04</span>
+                            <h4 class="font-bold text-white text-base">Lo Lắng Thực Phẩm Sạch</h4>
+                            <p class="text-xs text-stone-400 mt-2">Khó tiếp cận nguồn rau củ quả thực sự hữu cơ & an toàn cho người lớn tuổi.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5 PHÂN KHU CHỨC NĂNG (ZONES) -->
+                <div id="sec-zones" class="pt-10 mb-20">
+                    <div class="text-center max-w-3xl mx-auto mb-12">
+                        <span class="text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-50 px-3 py-1 rounded-full">Cơ Sở Hạ Tầng</span>
+                        <h2 class="text-3xl font-bold text-stone-900 mt-3">5 Phân Khu Chức Năng Của Wellness Farm</h2>
+                        <p class="text-stone-600 mt-2 text-sm">Quy hoạch đồng bộ đáp ứng trọn vẹn sinh hoạt, nghỉ dưỡng và y tế.</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-sm hover:shadow-md transition">
+                            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center font-bold text-xl mb-4">
+                                <i class="fa-solid fa-user-doctor"></i>
+                            </div>
+                            <h3 class="font-bold text-stone-900 text-lg mb-2">1. Khu Chăm Sóc Sức Khỏe</h3>
+                            <p class="text-xs text-stone-600 leading-relaxed">
+                                Phòng đo chỉ số y tế, thăm khám bác sĩ, vật lý trị liệu, tư vấn dinh dưỡng và chăm sóc y tế 24/7.
+                            </p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-sm hover:shadow-md transition">
+                            <div class="w-12 h-12 bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center font-bold text-xl mb-4">
+                                <i class="fa-solid fa-wheat-awn"></i>
+                            </div>
+                            <h3 class="font-bold text-stone-900 text-lg mb-2">2. Nông Nghiệp Trải Nghiệm</h3>
+                            <p class="text-xs text-stone-600 leading-relaxed">
+                                Vườn rau hữu cơ, khu trồng thảo dược, cây ăn trái tự tay chăm sóc và thu hoạch thực phẩm tươi.
+                            </p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-sm hover:shadow-md transition">
+                            <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center font-bold text-xl mb-4">
+                                <i class="fa-solid fa-house-chimney-window"></i>
+                            </div>
+                            <h3 class="font-bold text-stone-900 text-lg mb-2">3. Khu Nghỉ Dưỡng Xanh</h3>
+                            <p class="text-xs text-stone-600 leading-relaxed">
+                                Bungalow gỗ thoáng mát, phòng nghỉ thiết kế chuẩn an toàn cho người già (tay vịn, sàn chống trượt).
+                            </p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-sm hover:shadow-md transition md:col-span-1 lg:col-span-1">
+                            <div class="w-12 h-12 bg-warm-100 text-warm-600 rounded-2xl flex items-center justify-center font-bold text-xl mb-4">
+                                <i class="fa-solid fa-person-walking-with-cane"></i>
+                            </div>
+                            <h3 class="font-bold text-stone-900 text-lg mb-2">4. Khu Vận Động Nhẹ</h3>
+                            <p class="text-xs text-stone-600 leading-relaxed">
+                                Đường dạo bộ ven hồ, sân tập Yoga, Thiền định, khí công dưới bóng cây xanh mát.
+                            </p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-3xl border border-stone-200 shadow-sm hover:shadow-md transition md:col-span-2 lg:col-span-2">
+                            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center font-bold text-xl mb-4">
+                                <i class="fa-solid fa-people-group"></i>
+                            </div>
+                            <h3 class="font-bold text-stone-900 text-lg mb-2">5. Sinh Hoạt Cộng Đồng & Giao Lưu</h3>
+                            <p class="text-xs text-stone-600 leading-relaxed">
+                                Câu lạc bộ đọc sách, trà đạo, làm đồ thủ công, giao lưu văn nghệ và thưởng thức ẩm thực thực dưỡng.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CƠ CHẾ HOẠT ĐỘNG 8 BƯỚC (PROCESS) -->
+                <div id="sec-process" class="pt-10 mb-20 bg-brand-50/60 p-8 sm:p-12 rounded-3xl border border-brand-100">
+                    <div class="text-center max-w-3xl mx-auto mb-12">
+                        <span class="text-xs font-bold text-brand-700 uppercase tracking-widest bg-brand-100 px-3 py-1 rounded-full">Quy Trình Chuẩn Chu Đáo</span>
+                        <h2 class="text-3xl font-bold text-stone-900 mt-3">Cơ Chế Hoạt Động 8 Bước Chuẩn Hóa</h2>
+                        <p class="text-stone-600 mt-2 text-sm">Khép kín từ khi tiếp nhận đến quá trình phục hồi & đánh giá.</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div class="bg-white p-4 rounded-2xl border border-brand-200 text-center">
+                            <span class="w-8 h-8 rounded-full bg-brand-600 text-white font-bold text-xs inline-flex items-center justify-center mb-2">1</span>
+                            <h4 class="font-bold text-stone-800 text-xs">Đánh Giá Ban Đầu</h4>
+                            <p class="text-[11px] text-stone-500 mt-1">Đo chỉ số sức khỏe & hồ sơ bệnh lý.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-brand-200 text-center">
+                            <span class="w-8 h-8 rounded-full bg-brand-600 text-white font-bold text-xs inline-flex items-center justify-center mb-2">2</span>
+                            <h4 class="font-bold text-stone-800 text-xs">Cá Nhân Hóa Lộ Trình</h4>
+                            <p class="text-[11px] text-stone-500 mt-1">Thiết kế thực đơn & hoạt động phù hợp.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-brand-200 text-center">
+                            <span class="w-8 h-8 rounded-full bg-brand-600 text-white font-bold text-xs inline-flex items-center justify-center mb-2">3</span>
+                            <h4 class="font-bold text-stone-800 text-xs">Trải Nghiệm Vườn</h4>
+                            <p class="text-[11px] text-stone-500 mt-1">Lao động nhẹ, trồng củ rau sạch.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-brand-200 text-center">
+                            <span class="w-8 h-8 rounded-full bg-brand-600 text-white font-bold text-xs inline-flex items-center justify-center mb-2">4</span>
+                            <h4 class="font-bold text-stone-800 text-xs">Vận Động Dưỡng Sinh</h4>
+                            <p class="text-[11px] text-stone-500 mt-1">Tập Yoga, Thiền & Dạo bộ ngoài trời.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-brand-200 text-center">
+                            <span class="w-8 h-8 rounded-full bg-brand-600 text-white font-bold text-xs inline-flex items-center justify-center mb-2">5</span>
+                            <h4 class="font-bold text-stone-800 text-xs">Dinh Dưỡng Thực Dưỡng</h4>
+                            <p class="text-[11px] text-stone-500 mt-1">Bữa ăn hữu cơ từ chính nông trại.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-brand-200 text-center">
+                            <span class="w-8 h-8 rounded-full bg-brand-600 text-white font-bold text-xs inline-flex items-center justify-center mb-2">6</span>
+                            <h4 class="font-bold text-stone-800 text-xs">Giao Tiếp Cộng Đồng</h4>
+                            <p class="text-[11px] text-stone-500 mt-1">Trà đạo, kết bạn & sinh hoạt CLB.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-brand-200 text-center">
+                            <span class="w-8 h-8 rounded-full bg-brand-600 text-white font-bold text-xs inline-flex items-center justify-center mb-2">7</span>
+                            <h4 class="font-bold text-stone-800 text-xs">Nghỉ Dưỡng An Yên</h4>
+                            <p class="text-[11px] text-stone-500 mt-1">Phòng yên tĩnh, ngủ sâu giấc.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-brand-200 text-center">
+                            <span class="w-8 h-8 rounded-full bg-brand-600 text-white font-bold text-xs inline-flex items-center justify-center mb-2">8</span>
+                            <h4 class="font-bold text-stone-800 text-xs">Đánh Giá & Báo Cáo</h4>
+                            <p class="text-[11px] text-stone-500 mt-1">Gửi báo cáo định kỳ cho gia đình.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TUYÊN NGÔN GIÁ TRỊ NABC & SDGs -->
+                <div id="sec-nabc" class="pt-10 mb-16">
+                    <div class="grid lg:grid-cols-2 gap-8 mb-12">
+                        <!-- NABC -->
+                        <div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm">
+                            <h3 class="text-xl font-bold text-stone-900 mb-6 flex items-center gap-2">
+                                <i class="fa-solid fa-bullseye text-brand-600"></i> Mô Hình Khung NABC
+                            </h3>
+                            <div class="space-y-4 text-xs leading-relaxed">
+                                <div class="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                                    <strong class="text-stone-900 block mb-1">N - Need (Nhu Cầu):</strong>
+                                    Nhu cầu dưỡng lão nghỉ dưỡng sinh thái kết hợp theo dõi y tế ngày càng cao ở khu vực đô thị.
+                                </div>
+                                <div class="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                                    <strong class="text-stone-900 block mb-1">A - Approach (Giải Pháp):</strong>
+                                    Mô hình Nông trại Dưỡng lão kết hợp giữa thiên nhiên, thực phẩm hữu cơ và chăm sóc y tế chủ động.
+                                </div>
+                                <div class="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                                    <strong class="text-stone-900 block mb-1">B - Benefits (Lợi Ích):</strong>
+                                    Người cao tuổi sống khỏe - an vui, gia đình an tâm, đóng góp phát triển kinh tế sinh thái địa phương.
+                                </div>
+                                <div class="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                                    <strong class="text-stone-900 block mb-1">C - Competition (Cạnh Tranh):</strong>
+                                    Điểm khác biệt vượt trội so với viện dưỡng lão truyền thống nhờ không gian trải nghiệm nông nghiệp thực tế.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SDGs -->
+                        <div class="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm">
+                            <h3 class="text-xl font-bold text-stone-900 mb-6 flex items-center gap-2">
+                                <i class="fa-solid fa-earth-americas text-emerald-600"></i> Mục Tiêu Phát Triển Bền Vững (SDGs)
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-4 p-4 bg-emerald-50 rounded-2xl border border-emerald-200">
+                                    <span class="w-10 h-10 rounded-xl bg-emerald-600 text-white font-extrabold flex items-center justify-center shrink-0">3</span>
+                                    <div>
+                                        <h4 class="font-bold text-stone-900 text-sm">SDG 3: Sức Khỏe & Cuộc Sống Tốt Đẹp</h4>
+                                        <p class="text-xs text-stone-600 mt-0.5">Nâng cao thể chất và tinh thần cho người cao tuổi Việt Nam.</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start gap-4 p-4 bg-amber-50 rounded-2xl border border-amber-200">
+                                    <span class="w-10 h-10 rounded-xl bg-amber-600 text-white font-extrabold flex items-center justify-center shrink-0">11</span>
+                                    <div>
+                                        <h4 class="font-bold text-stone-900 text-sm">SDG 11: Thành Phố & Cộng Đồng Bền Vững</h4>
+                                        <p class="text-xs text-stone-600 mt-0.5">Xây dựng không gian sống xanh, thân thiện cho mọi lứa tuổi tại Bình Mỹ.</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start gap-4 p-4 bg-blue-50 rounded-2xl border border-blue-200">
+                                    <span class="w-10 h-10 rounded-xl bg-blue-600 text-white font-extrabold flex items-center justify-center shrink-0">12</span>
+                                    <div>
+                                        <h4 class="font-bold text-stone-900 text-sm">SDG 12: Tiêu Dùng & Sản Xuất Có Trách Nhiệm</h4>
+                                        <p class="text-xs text-stone-600 mt-0.5">Thúc đẩy nông nghiệp hữu cơ không hóa chất, bảo vệ hệ sinh thái.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section><section id="sec-packages" class="py-12 bg-stone-100 hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-2xl mx-auto mb-12">
+                    <span class="text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-50 px-3 py-1 rounded-full">Đặt Vé Trải Nghiệm</span>
+                    <h2 class="text-3xl font-bold text-stone-900 mt-2">Các Gói Dưỡng Lão & Trải Nghiệm</h2>
+                    <p class="text-stone-600 mt-2 text-sm">Lựa chọn các gói linh hoạt từ 1 - 12 thời lượng (Ngày, Tuần hoặc Tháng).</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8 mb-12">
+                    <!-- Option 1: Theo Ngày -->
+                    <div class="bg-white rounded-3xl p-8 shadow-sm border border-stone-200 hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-brand-600 bg-brand-50 px-3 py-1 rounded-full uppercase">Ngắn Hạn</span>
+                            <h3 class="text-2xl font-bold text-stone-900 mt-4">Gói Theo Ngày</h3>
+                            <p class="text-stone-500 text-sm mt-2">Trải nghiệm dã ngoại, thực phẩm xanh & tham quan nông trại.</p>
+                            <div class="my-6">
+                                <span class="text-3xl font-extrabold text-stone-900">500.000 VNĐ</span>
+                                <span class="text-stone-500 text-sm">/ ngày</span>
+                            </div>
+                            <ul class="space-y-3 text-sm text-stone-600 mb-6">
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500"></i> Tham quan & hái rau hữu cơ</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500"></i> 2 Bữa ăn dinh dưỡng/ngày</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500"></i> Hoạt động Yoga/Thiền nhẹ nhàng</li>
+                            </ul>
+                        </div>
+                        <button data-action="original-book" data-days="1" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition">
+                            Đăng Ký Gói Ngày
+                        </button>
+                    </div>
+
+                    <!-- Option 2: Theo Tuần -->
+                    <div class="bg-white rounded-3xl p-8 shadow-md border-2 border-brand-500 relative flex flex-col justify-between">
+                        <span class="absolute -top-3 right-8 text-xs font-bold text-white bg-brand-600 px-3 py-1 rounded-full uppercase">Phổ Biến Nhất</span>
+                        <div>
+                            <span class="text-xs font-bold text-brand-600 bg-brand-50 px-3 py-1 rounded-full uppercase">Trung Hạn</span>
+                            <h3 class="text-2xl font-bold text-stone-900 mt-4">Gói Theo Tuần</h3>
+                            <p class="text-stone-500 text-sm mt-2">Nghỉ dưỡng phục hồi thể trạng, thanh lọc cơ thể.</p>
+                            <div class="my-6">
+                                <span class="text-3xl font-extrabold text-stone-900">3.200.000 VNĐ</span>
+                                <span class="text-stone-500 text-sm">/ tuần</span>
+                            </div>
+                            <ul class="space-y-3 text-sm text-stone-600 mb-6">
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500"></i> Phòng nghỉ Bungalow riêng biệt</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500"></i> Thực đơn cá nhân hóa theo sức khỏe</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500"></i> Kiểm tra huyết áp, chỉ số hàng ngày</li>
+                            </ul>
+                        </div>
+                        <button data-action="original-book" data-days="7" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition">
+                            Đăng Ký Gói Tuần
+                        </button>
+                    </div>
+
+                    <!-- Option 3: Theo Tháng -->
+                    <div class="bg-white rounded-3xl p-8 shadow-sm border border-stone-200 hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-brand-600 bg-brand-50 px-3 py-1 rounded-full uppercase">Dài Hạn</span>
+                            <h3 class="text-2xl font-bold text-stone-900 mt-4">Gói Theo Tháng</h3>
+                            <p class="text-stone-500 text-sm mt-2">An dưỡng lâu dài, chăm sóc y tế & bác sĩ tận tâm.</p>
+                            <div class="my-6">
+                                <span class="text-3xl font-extrabold text-stone-900">12.000.000 VNĐ</span>
+                                <span class="text-stone-500 text-sm">/ tháng</span>
+                            </div>
+                            <ul class="space-y-3 text-sm text-stone-600 mb-6">
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500"></i> Toàn bộ tiện ích cao cấp</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500"></i> Điều dưỡng hỗ trợ 24/7</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-brand-500"></i> Báo cáo sức khỏe định kỳ cho gia đình</li>
+                            </ul>
+                        </div>
+                        <button data-action="original-book" data-days="30" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition">
+                            Đăng Ký Gói Tháng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section></main><footer class="bg-stone-900 text-stone-400 py-12 border-t border-stone-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center text-white font-bold">
+                            <i class="fa-solid fa-leaf"></i>
+                        </div>
+                        <span class="text-xl font-bold text-white">Wellness Farm</span>
+                    </div>
+                    <p class="text-xs text-stone-400 leading-relaxed">
+                        Dự án Nông Trại Dưỡng Lão Kết Hợp Sinh Thái & Chăm Sóc Sức Khỏe Toàn Diện.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold text-sm mb-3">Tác Giả & Lớp Học</h4>
+                    <ul class="text-xs space-y-2">
+                        <li>Họ và Tên: <strong class="text-stone-200">Trương Huỳnh Phương Khanh</strong></li>
+                        <li>Lớp: <strong class="text-stone-200">25DATA1</strong> — <strong class="text-stone-200">Nhóm 3</strong></li>
+                        <li>Địa điểm nghiên cứu: Xã Bình Mỹ, TP.HCM</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold text-sm mb-3">Liên Hệ Ban Quản Lý</h4>
+                    <p class="text-xs text-stone-400">Hotline: 0999 888 777</p>
+                    <p class="text-xs text-stone-400 mt-1">Email: contact@wellnessfarm.com</p>
+                    <p class="text-xs text-stone-400 mt-1">Địa chỉ: Xã Bình Mỹ, TP. Hồ Chí Minh</p>
+                </div>
+            </div>
+            <div class="border-t border-stone-800 pt-6 text-center text-xs text-stone-500">
+                © 2026 Wellness Farm. Tất cả quyền được bảo lưu | Thiết kế bởi Trương Huỳnh Phương Khanh (Lớp 25DATA1 - Nhóm 3).
+            </div>
+        </div>
+    </footer>
+  </div>
+ </template>
+</body>
+</html>

@@ -1,0 +1,15 @@
+/* Shared brand and semantic tokens. Edit this file to change the visual system. */
+:root {
+  --green: #16a34a;
+  --green-light: #f0fdf4;
+  --ink: #292524;
+  --muted: #78716c;
+  --paper: #fafaf9;
+  --border: #e7e5e4;
+  --gold: #bf9052;
+  --red: #a44639;
+  --shadow: 0 14px 45px #243e3309;
+  --font-body: "Plus Jakarta Sans", Arial, sans-serif;
+  --radius-button: 12px;
+  --radius-card: 24px;
+}
