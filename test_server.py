@@ -69,7 +69,7 @@ class WellnessTests(unittest.TestCase):
             db.execute('DELETE FROM audit')
             db.execute("DELETE FROM records WHERE kind NOT IN ('packages','rooms')")
             db.execute('DELETE FROM users')
-            for role in ['FAMILY', 'MANAGER', 'ADMIN', 'NURSE', 'ACCOUNTANT']:
+            for role in ['FAMILY', 'MANAGER', 'ADMIN', 'NURSE', 'ACCOUNTANT', 'SENIOR', 'EXPERT']:
                 db.execute('INSERT INTO users VALUES(?,?,?,?,?,?,?,?)', (role, role, role.lower()+'@test.example', '090000'+str(len(role)).zfill(4), server.password_hash('long-test-password'), role, 1, server.now()))
         server.ATTEMPTS.clear()
         self.family = self.login('FAMILY')
@@ -83,7 +83,8 @@ class WellnessTests(unittest.TestCase):
 
     def login(self, role):
         client = Client(self.port)
-        status, _ = client.request('login', 'POST', {'email': role.lower()+'@test.example', 'password': 'long-test-password'})
+        payload = {'email': role.lower()+'@test.example', 'password': 'long-test-password'}
+        status, result = client.request('login', 'POST', payload)
         self.assertEqual(status, 200)
         return client
 
@@ -123,7 +124,25 @@ class WellnessTests(unittest.TestCase):
         status,result=self.nurse.request('vitals','POST',{'resident':self.resident['id'],'systolic':185,'diastolic':95,'pulse':75,'spo2':98})
         self.assertEqual(status,200,result)
         self.assertTrue(result['alert'])
-        self.assertEqual(self.admin.request('vitals')[1],[])
+        self.assertEqual(self.admin.request('vitals')[1][0]['id'],result['id'])
+
+    def test_admin_receives_and_manages_family_information(self):
+        booking = self.booking()
+        _, request = self.family.request('requests', 'POST', {'resident': self.resident['id'], 'title': 'Family needs assistance'})
+        self.assertEqual(self.admin.request('residents')[1][0]['id'], self.resident['id'])
+        self.assertEqual(self.admin.request('bookings')[1][0]['id'], booking['id'])
+        self.assertEqual(self.admin.request('requests')[1][0]['id'], request['id'])
+        status, result = self.admin.request('requests/'+request['id'], 'PATCH', {'status': 'Hoàn tất', 'response': 'Received by admin'})
+        self.assertEqual(status, 200, result)
+        self.assertEqual(self.family.request('requests')[1][0]['response'], 'Received by admin')
+        status, result = self.admin.request('residents/'+self.resident['id'], 'PATCH', {'staff_ids': ['NURSE'], 'family_ids': ['FAMILY']})
+        self.assertEqual(status, 200, result)
+        self.assertEqual(result['staff_ids'], ['NURSE'])
+        self.assertEqual(self.admin.request('users')[0], 200)
+        self.assertEqual(self.admin.request('audit')[0], 200)
+        self.assertEqual(self.admin.request('export')[0], 200)
+        for kind in server.POLICY:
+            self.assertIn('ADMIN', server.POLICY[kind], kind)
 
     def test_concurrent_room_capacity(self):
         room=next(r for r in self.rooms if r['capacity']==2)
@@ -137,6 +156,10 @@ class WellnessTests(unittest.TestCase):
 
     def test_payments_idempotency_and_refund(self):
         b=self.booking()
+        # Historical paid bookings retain their quotation after free experiences launch.
+        b['total'] = 500000
+        with server.connect() as db:
+            server.update(db, b['id'], b)
         payment={'booking_id':b['id'],'amount':b['total'],'reference':'bank-123','type':'Thu tiền'}
         self.assertEqual(self.accountant.request('payments','POST',payment)[0],200)
         self.assertEqual(self.accountant.request('payments','POST',payment)[0],409)
@@ -188,19 +211,91 @@ class WellnessTests(unittest.TestCase):
         self.assertEqual(self.family.request('enrollments','POST',payload)[0],200)
         self.assertEqual(self.family.request('enrollments','POST',payload)[0],409)
 
-    def test_totp_mfa(self):
-        _,setup=self.family.request('mfa/setup','POST',{'password':'long-test-password'})
-        def otp(step):
-            digest=hmac.new(base64.b32decode(setup['secret']),struct.pack('>Q',step),hashlib.sha1).digest()
-            offset=digest[-1]&15
-            return f'{(struct.unpack(">I",digest[offset:offset+4])[0]&0x7fffffff)%1000000:06}'
-        step=int(time.time()//30)
-        self.assertEqual(self.family.request('mfa/enable','POST',{'password':'long-test-password','otp':otp(step-1)})[0],200)
-        client=Client(self.port)
-        payload={'email':'family@test.example','password':'long-test-password'}
-        self.assertEqual(client.request('login','POST',payload)[0],401)
-        self.assertEqual(client.request('login','POST',dict(payload,otp=otp(step)))[0],200)
-        self.assertEqual(client.request('login','POST',dict(payload,otp=otp(step)))[0],401)
+
+    def test_registration_without_phone_and_password_login(self):
+        for email in ['first@test.example', 'second@test.example']:
+            client = Client(self.port)
+            payload = {'name': 'Family', 'email': email, 'password': 'another-long-password'}
+            status, result = client.request('register', 'POST', payload)
+            self.assertEqual(status, 200, result)
+            self.assertEqual(result['user']['phone'], '')
+            self.assertIn('csrf', result)
+            self.assertEqual(client.request('me')[0], 200)
+            client.request('logout', 'POST', {})
+            self.assertEqual(client.request('login', 'POST', payload)[0], 200)
+            self.assertEqual(client.request('login', 'POST', dict(payload, password='wrong'))[0], 401)
+        duplicate = Client(self.port)
+        self.assertEqual(duplicate.request('register', 'POST', payload)[0], 409)
+
+    def test_free_experiences_and_safe_registration_roles(self):
+        self.assertTrue(all(p['price'] == 0 for p in self.packages))
+        booking = self.booking()
+        self.assertEqual(booking['total'], 0)
+        self.assertEqual(self.accountant.request('payments', 'POST', {'booking_id': booking['id'], 'amount': 1, 'reference': 'charge-free', 'type': 'Thu tiền'})[0], 400)
+        status, result = self.admin.request('packages/'+self.packages[0]['id'], 'PATCH', {'price': 999999})
+        self.assertEqual(status, 200, result)
+        self.assertEqual(result['price'], 0)
+        senior = Client(self.port)
+        status, result = senior.request('register', 'POST', {'name': 'Senior learner', 'email': 'new-senior@test.example', 'password': 'senior-test-password', 'account_type': 'SENIOR', 'role': 'ADMIN'})
+        self.assertEqual(status, 200, result)
+        self.assertEqual(result['user']['role'], 'SENIOR')
+
+    def test_workshop_waitlist_and_expert_access(self):
+        expert = self.login('EXPERT')
+        _, workshop = self.admin.request('activities', 'POST', {'name': 'Learn farming', 'date': date.today().isoformat(), 'capacity': 1, 'active': True, 'expert_id': 'EXPERT', 'topic': 'Nông nghiệp', 'fitness': 'Nhẹ nhàng'})
+        self.assertEqual(expert.request('residents')[1], [])
+        _, enrolled = self.family.request('enrollments', 'POST', {'resident': self.resident['id'], 'activity_id': workshop['id']})
+        self.assertEqual(enrolled['status'], 'Đã đăng ký')
+        self.assertEqual(expert.request('residents')[1][0]['name'], self.resident['name'])
+        self.assertNotIn('phone', expert.request('residents')[1][0])
+        self.assertEqual(expert.request('vitals')[1], [])
+        _, other_workshop = self.admin.request('activities', 'POST', {'name': 'Another workshop', 'date': date.today().isoformat(), 'capacity': 10, 'active': True})
+        _, other_enrollment = self.family.request('enrollments', 'POST', {'resident': self.resident['id'], 'activity_id': other_workshop['id']})
+        self.assertEqual(expert.request('enrollments/'+other_enrollment['id'], 'PATCH', {'status': 'Đã tham gia'})[0], 403)
+        self.assertEqual(expert.request('enrollments', 'POST', {'resident': self.resident['id'], 'activity_id': other_workshop['id']})[0], 403)
+        _, second = self.family.request('residents', 'POST', {'name': 'Second learner', 'dob': '1950-01-01'})
+        status, waiting = self.family.request('enrollments', 'POST', {'resident': second['id'], 'activity_id': workshop['id'], 'waitlist': True})
+        self.assertEqual(status, 200, waiting)
+        self.assertEqual(waiting['status'], 'Danh sách chờ')
+        self.assertEqual(self.admin.request('enrollments/'+waiting['id'], 'PATCH', {'status': 'Đã đăng ký'})[0], 409)
+        self.family.request('enrollments/'+enrolled['id'], 'PATCH', {'status': 'Đã hủy'})
+        self.assertEqual(self.admin.request('enrollments/'+waiting['id'], 'PATCH', {'status': 'Đã đăng ký'})[0], 200)
+        public = Client(self.port).request('public')[1]
+        self.assertEqual(next(w for w in public['workshops'] if w['id'] == workshop['id'])['remaining'], 0)
+
+    def test_learning_portfolio_consent_and_impact(self):
+        expert = self.login('EXPERT')
+        _, workshop = self.admin.request('activities', 'POST', {'name': 'Learn gardening', 'date': date.today().isoformat(), 'capacity': 10, 'active': True, 'expert_id': 'EXPERT'})
+        self.family.request('enrollments', 'POST', {'resident': self.resident['id'], 'activity_id': workshop['id']})
+        _, skill = self.family.request('skills', 'POST', {'resident': self.resident['id'], 'title': 'Grow vegetables', 'activity_id': workshop['id'], 'status': 'Đã học'})
+        self.assertEqual(skill['status'], 'Chờ xác nhận')
+        self.assertEqual(expert.request('skills/'+skill['id'], 'PATCH', {'status': 'Đã học'})[0], 200)
+        _, garden = self.family.request('gardens', 'POST', {'resident': self.resident['id'], 'name': 'Silver artisan', 'focus': 'Vegetables', 'story': 'Learning story', 'public_consent': True, 'publication': 'Đã duyệt'})
+        self.assertEqual(garden['publication'], 'Chờ duyệt')
+        _, product = self.family.request('products', 'POST', {'resident': self.resident['id'], 'name': 'Herb pot', 'description': 'Grown in my garden', 'quantity': 2, 'unit': 'pots', 'public_consent': True})
+        self.assertEqual(Client(self.port).request('public')[1]['artisans'], [])
+        self.admin.request('gardens/'+garden['id'], 'PATCH', {'publication': 'Đã duyệt'})
+        self.admin.request('products/'+product['id'], 'PATCH', {'publication': 'Đã duyệt'})
+        public = Client(self.port).request('public')[1]
+        self.assertEqual(public['artisans'][0]['skills_count'], 1)
+        self.assertEqual(len(public['products']), 1)
+        self.assertNotIn('resident', public['artisans'][0])
+        self.assertNotIn('phone', public['artisans'][0])
+        _, tour = self.family.request('tour_bookings', 'POST', {'artisan_id': garden['id'], 'date': date.today().isoformat(), 'guests': 3, 'contact': 'visitor@example.test', 'status': 'Đã tham quan'})
+        self.assertEqual(tour['status'], 'Chờ duyệt')
+        self.admin.request('tour_bookings/'+tour['id'], 'PATCH', {'status': 'Đã tham quan'})
+        self.assertEqual(Client(self.port).request('public')[1]['impact']['visitors'], 3)
+        self.family.request('gardens/'+garden['id'], 'PATCH', {'public_consent': False})
+        self.assertEqual(Client(self.port).request('public')[1]['artisans'], [])
+        self.assertEqual(Client(self.port).request('public')[1]['products'], [])
+
+    def test_expert_application_requires_admin_approval(self):
+        _, application = self.family.request('expert_applications', 'POST', {'specialty': 'Gardening', 'bio': 'Experienced gardener', 'status': 'Đã duyệt'})
+        self.assertEqual(application['status'], 'Chờ duyệt')
+        self.assertEqual(self.family.request('me')[1]['user']['role'], 'FAMILY')
+        self.assertEqual(self.admin.request('expert_applications/'+application['id'], 'PATCH', {'status': 'Đã duyệt'})[0], 200)
+        self.assertEqual(self.family.request('me')[0], 401)
+        self.assertEqual(self.login('FAMILY').request('me')[1]['user']['role'], 'EXPERT')
 
 
 if __name__=='__main__':

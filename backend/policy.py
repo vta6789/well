@@ -1,9 +1,9 @@
 """Roles and booking lifecycle shared by domain validation and HTTP routes."""
 
-ROLES = ["FAMILY", "RECEPTION", "NURSE", "DOCTOR", "ACCOUNTANT", "MANAGER", "ADMIN"]
-OPS = ["RECEPTION", "MANAGER"]
-CLINICAL = ["NURSE", "DOCTOR", "MANAGER"]
-FINANCE = ["ACCOUNTANT", "MANAGER"]
+ROLES = ["FAMILY", "SENIOR", "EXPERT", "RECEPTION", "NURSE", "DOCTOR", "ACCOUNTANT", "MANAGER", "ADMIN"]
+OPS = ["RECEPTION", "MANAGER", "ADMIN"]
+CLINICAL = ["NURSE", "DOCTOR", "MANAGER", "ADMIN"]
+FINANCE = ["ACCOUNTANT", "MANAGER", "ADMIN"]
 STATES = [
     "Chờ duyệt",
     "Danh sách chờ",

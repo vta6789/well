@@ -22,12 +22,14 @@ const today = () => {
 };
 const roleNames = {
   FAMILY: "Gia đình",
+  SENIOR: "Học viên cao tuổi",
+  EXPERT: "Chuyên gia",
   RECEPTION: "Lễ tân",
   NURSE: "Điều dưỡng",
   DOCTOR: "Bác sĩ",
   ACCOUNTANT: "Kế toán",
   MANAGER: "Quản lý",
-  ADMIN: "Quản trị kỹ thuật",
+  ADMIN: "Quản trị viên",
 };
 const state = {
   user: null,
@@ -38,6 +40,7 @@ const state = {
   audit: [],
   query: "",
   filter: "",
+  medicationView: "medications",
   month: new Date().getMonth(),
   year: new Date().getFullYear(),
 };
@@ -101,10 +104,19 @@ const permissions = {
   reports: ["NURSE", "DOCTOR", "MANAGER"],
   payments: ["ACCOUNTANT", "MANAGER"],
 };
-const can = (kind) => (permissions[kind] || []).includes(state.user?.role);
+const can = (kind) => state.user?.role === "ADMIN" || (permissions[kind] || []).includes(state.user?.role);
+const isLearner = () => ["FAMILY", "SENIOR"].includes(state.user?.role);
+for (const kind of ["residents", "bookings", "requests", "visits", "enrollments"]) permissions[kind].push("SENIOR");
+permissions.activities.push("EXPERT");
+permissions.enrollments.push("EXPERT");
+const learningKinds = ["gardens", "skills", "practice", "products", "tour_bookings", "expert_applications"];
+kinds.push(...learningKinds);
+Object.assign(names, { activities: "Workshop & Talkshow", enrollments: "Đăng ký workshop", gardens: "Vườn riêng & câu chuyện", skills: "Kỹ năng đã học", practice: "Nhật ký thực hành", products: "Sản phẩm học viên", tour_bookings: "Đặt tham quan vườn", expert_applications: "Hồ sơ chuyên gia" });
+for (const kind of learningKinds) permissions[kind] = ["FAMILY", "SENIOR", "EXPERT", "MANAGER"];
 kinds.push("attachments");
 names.attachments = "Hồ sơ đính kèm";
 permissions.attachments = ["FAMILY", "RECEPTION", "NURSE", "DOCTOR", "MANAGER"];
+permissions.attachments.push("SENIOR");
 const data = (kind) => state.data[kind] || [];
 const lookup = (kind, id) => data(kind).find((x) => x.id === id);
 const residentName = (id) =>
@@ -140,6 +152,7 @@ async function refresh() {
   const demo = state.data.demo;
   state.data = Object.fromEntries(results);
   state.data.demo = demo;
+  state.public = await api("public");
   if (["MANAGER", "ADMIN"].includes(state.user.role))
     [state.users, state.audit] = await Promise.all([
       api("users"),

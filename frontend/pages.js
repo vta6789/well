@@ -1,6 +1,22 @@
 function metric(label, value, note) {
   return `<article class="card metric"><div class="eyebrow">${esc(label)}</div><strong>${esc(value)}</strong><span>${esc(note)}</span></article>`;
 }
+function adminDashboard() {
+  const pendingBookings = data("bookings").filter((r) => r.status === "Chờ duyệt");
+  const openRequests = data("requests")
+    .filter((r) => r.status !== "Hoàn tất")
+    .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  const families = state.users
+    .filter((u) => ["FAMILY", "SENIOR"].includes(u.role))
+    .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  return header("Quản trị hệ thống", "Quản lý tài khoản, tiếp nhận thông tin người dùng và điều phối hoạt động Wellness Farm.") +
+    `<div class="grid four">${metric("Người dùng", families.length, "Tài khoản gia đình đã đăng ký")}${metric("Chờ duyệt lưu trú", pendingBookings.length, "Đơn cần được tiếp nhận")}${metric("Yêu cầu cần xử lý", openRequests.length, "Yêu cầu đang chờ hoặc đang xử lý")}${metric("Hồ sơ lưu trú", data("residents").length, "Hồ sơ được gửi lên hệ thống")}</div>
+    <div class="admin-quick-actions section-title">${actionButton("+ Tạo tài khoản nhân viên", "new-user", "", "")}${actionButton("Quản lý người dùng", "page-users")}${actionButton("Báo cáo vận hành", "page-analytics")}${actionButton("Nhật ký hệ thống", "page-audit")}</div>
+    <section class="card section-title"><div class="admin-section-heading"><h2>Học – làm – du lịch · Miễn phí</h2>${actionButton("Bảng tác động", "page-impact")}</div><p class="small muted">${data("activities").length} workshop · ${data("products").length} sản phẩm · ${data("expert_applications").filter((r) => r.status === "Chờ duyệt").length} hồ sơ chuyên gia chờ duyệt · ${data("tour_bookings").filter((r) => r.status === "Chờ duyệt").length} yêu cầu tham quan mới</p><div class="row">${actionButton("Quản lý workshop", "page-activities")}${actionButton("Duyệt chuyên gia", "page-expert_applications")}${actionButton("Duyệt nghệ nhân bạc", "page-gardens")}${actionButton("Duyệt sản phẩm", "page-products")}${actionButton("Tiếp nhận khách", "page-tour_bookings")}${actionButton("Xem trang công khai", "learning-public", "artisans")}</div></section>
+    <div class="grid two"><section class="card"><div class="admin-section-heading"><h2>Yêu cầu cần tiếp nhận</h2>${actionButton("Xem tất cả", "page-requests")}</div>${openRequests.length ? openRequests.slice(0, 5).map((r) => `<article class="admin-inbox-item"><strong>${esc(r.title)}</strong><p>${esc(residentName(r.resident))} · ${day(r.created_at)}</p><div class="row">${tag(r.status)}${recordButtons("requests", r)}</div></article>`).join("") : empty("Không có yêu cầu chờ xử lý", "Yêu cầu mới từ gia đình sẽ hiển thị tại đây khi bạn làm mới dữ liệu.")}</section>
+    <section class="card"><div class="admin-section-heading"><h2>Đơn lưu trú chờ duyệt</h2>${actionButton("Xem tất cả", "page-bookings")}</div>${pendingBookings.length ? pendingBookings.slice(0, 5).map((r) => `<article class="admin-inbox-item"><strong>${esc(residentName(r.resident))}</strong><p>${esc(r.code)} · ${esc(r.package_name)}<br>${day(r.start)} – ${day(r.end)}</p><div class="row">${tag(r.status)}${recordButtons("bookings", r)}</div></article>`).join("") : empty("Không có đơn chờ duyệt", "Đơn đăng ký lưu trú mới sẽ xuất hiện tại đây.")}</section></div>
+    <section class="card section-title"><div class="admin-section-heading"><h2>Người dùng đăng ký gần đây</h2>${actionButton("Quản lý tài khoản", "page-users")}</div>${families.length ? table(["Họ tên", "Email", "Ngày đăng ký", "Trạng thái", "Thao tác"], families.slice(0, 6).map((u) => [esc(u.name), esc(u.email), day(u.created_at), tag(u.active ? "Hoạt động" : "Đã khóa"), actionButton("Cấp quyền / khóa", "edit-user", u.id)])) : empty("Chưa có người dùng đăng ký", "Tài khoản gia đình mới sẽ hiển thị tại đây.")}</section>`;
+}
 function dashboard() {
   const role = state.user.role,
     bookings = data("bookings"),
@@ -13,14 +29,8 @@ function dashboard() {
   const pending = bookings.filter((b) => b.status === "Chờ duyệt");
   const tasks = data("care").filter((t) => t.status !== "Hoàn tất");
   const alerts = data("vitals").filter((v) => v.alert);
-  if (role === "ADMIN")
-    return (
-      header(
-        "Quản trị hệ thống",
-        "Quản lý tài khoản, quyền truy cập và dấu vết thao tác.",
-      ) +
-      `<div class="grid three">${metric("Tài khoản", state.users.length, "Tài khoản được cấp quyền")}${metric("Đang hoạt động", state.users.filter((u) => u.active).length, "Quản lý trạng thái truy cập")}${metric("Nhật ký", state.audit.length, "Tối đa 500 sự kiện gần nhất")}</div><div class="card section-title"><h2>Quyền kỹ thuật được tách riêng</h2><p class="muted">Tài khoản quản trị kỹ thuật quản lý quyền và tài khoản. Để thao tác lưu trú hoặc chăm sóc, tạo tài khoản với vai trò phù hợp.</p>${actionButton("Quản lý tài khoản", "page-users", "", "")}</div>`
-    );
+  if (role === "ADMIN") return adminDashboard();
+  if (["FAMILY", "SENIOR", "EXPERT"].includes(role)) return learningDashboard();
   const cards =
     role === "FAMILY"
       ? [
@@ -120,12 +130,12 @@ function filtered(kind) {
   );
 }
 function recordButtons(kind, item) {
-  const immutable = ["vitals", "payments", "doses", "enrollments"].includes(
-    kind,
-  );
-  return `<div class="row">${actionButton("Chi tiết", "detail", item.id)}${can(kind) && !immutable ? actionButton(kind === "bookings" ? "Xử lý" : "Sửa", "edit", item.id) : ""}${kind === "bookings" && state.user.role === "FAMILY" && ["Chờ duyệt", "Đã xác nhận"].includes(item.status) ? actionButton("Hủy", "cancel-booking", item.id, "danger compact") : ""}</div>`;
+  const immutable = ["vitals", "payments", "doses"].includes(kind) || (kind === "enrollments" && isLearner());
+  return `<div class="row">${actionButton("Chi tiết", "detail", item.id)}${can(kind) && !immutable && (state.user.role !== "EXPERT" || kind !== "activities" || item.expert_id === state.user.id) ? actionButton(kind === "bookings" ? "Xử lý" : "Sửa", "edit", item.id) : ""}${kind === "bookings" && isLearner() && ["Chờ duyệt", "Đã xác nhận"].includes(item.status) ? actionButton("Hủy", "cancel-booking", item.id, "danger compact") : ""}</div>`;
 }
 function listPage(kind) {
+  const medicationHub = ["medications", "doses"].includes(kind);
+  if (medicationHub) kind = state.medicationView;
   const records = filtered(kind);
   const statuses =
     kind === "bookings"
@@ -166,16 +176,9 @@ function listPage(kind) {
       })
       .join("")}</div>`;
   else if (kind === "packages")
-    content = `<div class="grid three">${records.map((r, i) => `<article class="card package ${i === 1 ? "featured" : ""}">${tag(r.active ? "Nhận đăng ký" : "Tạm ngừng")}<h2 class="section-title">${esc(r.name)}</h2><p class="muted">${esc(r.description)}</p><div class="price">${money(r.price)}</div><p class="small muted">${r.days} ngày / đơn vị</p>${state.user.role === "FAMILY" ? actionButton("Đặt gói này", "book-package", r.id, "") : recordButtons(kind, r)}</article>`).join("")}</div>`;
+    content = `<div class="grid three">${records.map((r, i) => `<article class="card package ${i === 1 ? "featured" : ""}">${tag(r.active ? "Nhận đăng ký" : "Tạm ngừng")}<h2 class="section-title">${esc(r.name)}</h2><p class="muted">${esc(r.description)}</p><div class="price">${r.price === 0 ? "Miễn phí" : money(r.price)}</div><p class="small muted">${r.days} ngày / đơn vị</p>${isLearner() ? actionButton("Đặt gói này", "book-package", r.id, "") : recordButtons(kind, r)}</article>`).join("")}</div>`;
   else if (kind === "activities")
-    content = `<div class="grid three">${records
-      .map((r) => {
-        const count = data("enrollments").filter(
-          (e) => e.activity_id === r.id,
-        ).length;
-        return `<article class="card"><span class="eyebrow">${day(r.date)} · ${esc(r.time)}</span><h2 class="section-title">${esc(r.name)}</h2><p class="muted small">${esc(r.description)}</p><p class="small">Địa điểm: ${esc(r.location)}<br>Đăng ký: ${count}/${r.capacity} · Phụ trách: ${esc(r.assignee || "Chưa phân công")}</p>${tag(r.active ? "Mở đăng ký" : "Đã đóng")}<div class="row section-title">${can("enrollments") && r.active ? actionButton("Đăng ký tham gia", "join-activity", r.id, "") : ""}${recordButtons(kind, r)}</div></article>`;
-      })
-      .join("")}</div>`;
+    content = `<div class="grid three">${records.map((r) => workshopCard(r)).join("")}</div>`;
   else {
     let headings = ["Người lưu trú", "Nội dung", "Trạng thái", "Thao tác"];
     let cells = records.map((r) => [
@@ -394,7 +397,14 @@ function listPage(kind) {
           ? '<div class="notice warn section-title">Trong tình huống khẩn cấp, gọi trực tiếp nhân viên trực hoặc cấp cứu. Chưa kết nối hệ thống báo động bên ngoài.</div>'
           : "";
   return (
-    header(names[kind], descriptions[kind], add) +
+    header(
+      medicationHub ? "Thuốc & nhật ký dùng thuốc" : names[kind],
+      medicationHub ? descriptions[state.medicationView] : descriptions[kind],
+      add,
+    ) +
+    (medicationHub
+      ? `<div class="row section-title" role="group" aria-label="Nội dung thuốc"><button type="button" class="btn ${state.medicationView === "medications" ? "primary" : "secondary"}" data-action="medication-view" data-view="medications" aria-pressed="${state.medicationView === "medications"}">Thuốc & chỉ định</button><button type="button" class="btn ${state.medicationView === "doses" ? "primary" : "secondary"}" data-action="medication-view" data-view="doses" aria-pressed="${state.medicationView === "doses"}">Nhật ký dùng thuốc</button></div>`
+      : "") +
     controls(kind, statuses) +
     notice +
     (records.length
@@ -466,7 +476,7 @@ function analytics() {
     header(
       "Báo cáo vận hành",
       "Số liệu từ đơn đăng ký và giao dịch đã được ghi nhận.",
-      ["MANAGER", "ACCOUNTANT"].includes(state.user.role)
+      ["MANAGER", "ACCOUNTANT", "ADMIN"].includes(state.user.role)
         ? '<a class="btn secondary" href="/api/export" download>↓ Xuất CSV tài chính</a>'
         : "",
     ) +
@@ -550,16 +560,31 @@ function settings() {
         ["Thanh toán tự động", tag("Chưa kết nối")],
         ["Email / Zalo", tag("Chưa kết nối")],
         ["Thiết bị y tế", tag("Chưa kết nối")],
-        ["MFA / xác minh email", tag("Chưa kết nối")],
+        ["Đăng nhập", tag("Email và mật khẩu")],
         ["Cơ sở dữ liệu", tag("SQLite cục bộ")],
       ],
     )}<p class="small muted section-title">Xem README để cấu hình sao lưu và các yêu cầu trước khi vận hành công khai.</p></article><article class="card"><h2>Quyền riêng tư</h2><p class="small muted">Chủ hồ sơ có thể bật hoặc thu hồi sự đồng ý chia sẻ trong hồ sơ người lưu trú. Báo cáo chỉ xuất hiện cho gia đình khi nhân viên chọn chia sẻ và hồ sơ cho phép.</p>${actionButton("Xem hồ sơ", "page-residents")}</article><article class="card"><h2>Trải nghiệm đọc</h2><p class="small muted">Thay đổi cỡ chữ để dễ theo dõi. Giao diện hỗ trợ màn hình nhỏ và điều hướng bằng bàn phím.</p>${actionButton("Đổi cỡ chữ Aᴀ", "font")}</article></div>`
   );
 }
+function projectPage() {
+  const template = $("#original-project").content;
+  const sections = ["sec-about", "sec-survey", "sec-zones", "sec-process", "sec-nabc"]
+    .map((id) => template.querySelector(`#${id}`)?.outerHTML || "")
+    .join("");
+  return (
+    header("Về dự án", "Nông trại dưỡng lão kế thừa sinh thái tại Bình Mỹ.") +
+    `<section class="project-author"><h2>Tác giả</h2><p><strong>Malware</strong></p></section>${sections}`
+  );
+}
 function renderPage() {
   const main = $("#main");
   if (!main) return;
-  if (state.page === "dashboard") main.innerHTML = dashboard();
+  if (state.page === "project") main.innerHTML = projectPage();
+  else if (learningKinds.includes(state.page)) main.innerHTML = learningListPage(state.page);
+  else if (state.page === "journey") main.innerHTML = journeyPage();
+  else if (state.page === "impact") main.innerHTML = header("Bảng tác động", "Học tập suốt đời và giá trị được tạo ra cho cộng đồng.") + publicImpact(state.public?.impact || {});
+  else if (state.page === "basic-health") main.innerHTML = basicHealthPage();
+  else if (state.page === "dashboard") main.innerHTML = dashboard();
   else if (state.page === "calendar") main.innerHTML = calendarPage();
   else if (state.page === "analytics") main.innerHTML = analytics();
   else if (state.page === "users") main.innerHTML = userPage();
@@ -571,18 +596,9 @@ function renderPage() {
   $$("[data-width]", main).forEach(
     (el) => (el.style.width = el.dataset.width + "%"),
   );
-  if (state.page === "settings") {
-    const first = $(".grid .card", main);
-    first.insertAdjacentHTML(
-      "beforeend",
-      `<div class="row section-title">${tag(state.user.mfa ? "MFA đã bật" : "MFA chưa bật")}${!state.user.mfa ? actionButton("Bật xác thực hai bước", "mfa", "", "secondary") : ""}</div>`,
-    );
-    const mfaRow = $$("tr", main).find((r) =>
-      r.textContent.includes("MFA / xác minh email"),
-    );
-    if (mfaRow)
-      mfaRow.innerHTML = `<td>MFA TOTP</td><td>${tag(state.user.mfa ? "Đã bật" : "Sẵn sàng thiết lập")}</td>`;
-  }
+  const nextScene = main.dataset.motionPage !== state.page;
+  main.dataset.motionPage = state.page;
+  enhanceExperience(main, nextScene);
 }
 function notificationsPage() {
   const items = [

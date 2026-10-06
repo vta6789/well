@@ -6,6 +6,7 @@ const F = (key, label, type = "text", options = {}) => ({
 });
 const statusOptions = ["Chờ xử lý", "Đang xử lý", "Hoàn tất"];
 function schema(kind, old = {}, preset = {}) {
+  if (learningKinds.includes(kind)) return learningSchema(kind, old);
   const resident = F("resident", "Người lưu trú", "select", {
     options: data("residents").map((r) => [r.id, r.name]),
     required: true,
@@ -20,8 +21,8 @@ function schema(kind, old = {}, preset = {}) {
     residents: [
       F("name", "Họ tên", "text", { required: true }),
       F("dob", "Ngày sinh", "date", { required: true, max: today() }),
-      F("phone", "Số điện thoại liên hệ", "tel", { required: true }),
-      F("emergency", "Liên hệ khẩn cấp", "text", { required: true }),
+      F("phone", "Số điện thoại liên hệ", "tel"),
+      F("emergency", "Liên hệ khẩn cấp", "text"),
       F("health", "Tình trạng sức khỏe", "textarea", { wide: true }),
       F("allergies", "Dị ứng / Thực phẩm cần tránh", "textarea"),
       F("diet", "Nhu cầu dinh dưỡng", "textarea"),
@@ -82,11 +83,6 @@ function schema(kind, old = {}, preset = {}) {
         ],
     packages: [
       F("name", "Tên gói", "text", { required: true }),
-      F("price", "Đơn giá (VNĐ)", "number", {
-        min: 1000,
-        max: 1000000000,
-        required: true,
-      }),
       F("days", "Số ngày / đơn vị", "number", {
         min: 1,
         max: 365,
@@ -203,7 +199,7 @@ function schema(kind, old = {}, preset = {}) {
         options: ["Thông thường", "Cần theo dõi", "Khẩn cấp"],
       }),
       notes,
-      ...(state.user.role === "FAMILY"
+      ...(isLearner()
         ? []
         : [
             status,
@@ -217,7 +213,7 @@ function schema(kind, old = {}, preset = {}) {
       F("date", "Ngày thăm", "date", { min: today(), required: true }),
       F("time", "Giờ thăm", "time", { required: true }),
       F("phone", "Điện thoại", "tel", { required: true }),
-      ...(state.user.role === "FAMILY"
+      ...(isLearner()
         ? []
         : [
             F("status", "Trạng thái", "select", {
@@ -228,6 +224,10 @@ function schema(kind, old = {}, preset = {}) {
     ],
     activities: [
       F("name", "Tên hoạt động", "text", { required: true }),
+      F("topic", "Chủ đề", "select", { options: ["Nông nghiệp", "Sức khỏe", "Số hóa", "Thủ công"] }),
+      F("format", "Hình thức", "select", { options: ["Workshop", "Talkshow"] }),
+      F("fitness", "Mức vận động phù hợp", "select", { options: ["Nhẹ nhàng", "Vừa sức", "Cần hỗ trợ"] }),
+      ...(state.user.role === "EXPERT" ? [] : [F("expert_id", "Chuyên gia phụ trách", "select", { options: [["", "Chưa phân công"], ...(state.public?.experts || []).map((u) => [u.id, u.name])] })]),
       F("date", "Ngày", "date", { required: true }),
       F("time", "Giờ", "time", { required: true }),
       F("location", "Địa điểm", "text", { required: true }),
@@ -248,7 +248,9 @@ function schema(kind, old = {}, preset = {}) {
           .map((a) => [a.id, a.name + " · " + day(a.date)]),
         required: true,
       }),
+      F("waitlist", "Vào danh sách chờ nếu workshop đã đủ chỗ", "checkbox", { value: false }),
       notes,
+      ...(old.id && !isLearner() ? [F("status", "Trạng thái tham gia", "select", { options: ["Đã đăng ký", "Danh sách chờ", "Đã tham gia", "Vắng mặt", "Đã hủy"] })] : []),
     ],
     shifts: [
       F("date", "Ngày", "date", { required: true, value: today() }),
@@ -331,7 +333,7 @@ function schema(kind, old = {}, preset = {}) {
     fields.enrollments = [
       F("status", "Tham gia", "select", {
         options:
-          state.user.role === "FAMILY"
+          isLearner()
             ? ["Đã hủy"]
             : ["Đã đăng ký", "Đã tham gia", "Vắng mặt", "Đã hủy"],
       }),
@@ -348,7 +350,7 @@ function schema(kind, old = {}, preset = {}) {
       value: false,
     }),
   ];
-  if (kind === "residents" && state.user.role === "MANAGER")
+  if (kind === "residents" && ["MANAGER", "ADMIN"].includes(state.user.role))
     fields.residents.push(
       F("staff_ids", "Phân công nhân viên chăm sóc", "multi", {
         wide: true,
@@ -359,7 +361,7 @@ function schema(kind, old = {}, preset = {}) {
       F("family_ids", "Gia đình được liên kết", "multi", {
         wide: true,
         options: state.users
-          .filter((u) => u.role === "FAMILY" && u.active)
+          .filter((u) => ["FAMILY", "SENIOR"].includes(u.role) && u.active)
           .map((u) => [u.id, u.name + " · " + u.email]),
       }),
     );
@@ -396,7 +398,7 @@ function editForm(kind, id = "", preset = {}) {
   const old = id ? lookup(kind, id) : {},
     values = { ...old, ...preset };
   if (!can(kind)) return toast("Không có quyền thực hiện.", true);
-  if (kind === "bookings" && id && state.user.role === "FAMILY")
+  if (kind === "bookings" && id && isLearner())
     return detail(id);
   if (kind === "requests" && !values.status) values.status = "Chờ xử lý";
   if (kind === "visits" && !values.status) values.status = "Chờ duyệt";
@@ -410,12 +412,14 @@ function editForm(kind, id = "", preset = {}) {
       "activities",
       "shifts",
       "payments",
+      "expert_applications",
+      "tour_bookings",
     ].includes(kind);
   modal(
     (id ? "Cập nhật · " : "Tạo mới · ") + names[kind],
     noResidents
       ? `<div class="notice">Cần tạo hồ sơ người lưu trú trước.</div><div class="form-actions">${actionButton("Tạo hồ sơ", "new", "residents", "")}</div>`
-      : `${kind === "bookings" && id ? `<div class="notice section-title">${esc(old.code)} · ${day(old.start)} → ${day(old.end)} · ${money(old.total)}. Máy chủ kiểm tra sức chứa trước khi xác nhận phòng.</div>` : ""}${kind === "medications" ? '<div class="notice warn section-title">Nhập đúng chỉ định đã được chuyên môn duyệt. Hệ thống không tự đề xuất thuốc hoặc liều.</div>' : ""}<form id="record-form" data-kind="${kind}" data-id="${id}"><div class="form-grid">${fields.map((f) => fieldHTML(f, values)).join("")}</div>${kind === "bookings" && !id ? '<div id="quote" class="notice section-title"></div>' : ""}${kind === "payments" ? '<div id="payment-balance" class="notice section-title"></div>' : ""}${kind === "meals" ? '<div id="diet-notice" class="notice section-title"></div>' : ""}<p id="form-error" class="error-text" role="alert"></p><div class="form-actions">${actionButton("Đóng", "close")}<button class="btn" type="submit">${id ? "Lưu thay đổi" : "Xác nhận tạo"}</button></div></form>`,
+      : `${kind === "bookings" && id ? `<div class="notice section-title">${esc(old.code)} · ${day(old.start)} → ${day(old.end)} · ${money(old.total)}. Máy chủ kiểm tra sức chứa trước khi xác nhận phòng.</div>` : ""}${kind === "medications" ? '<div class="notice warn section-title">Nhập đúng chỉ định đã được chuyên môn duyệt. Hệ thống không tự đề xuất thuốc hoặc liều.</div>' : ""}<form id="record-form" data-kind="${kind}" data-id="${id}"><div class="form-grid">${renderRecordFields(fields, values, kind)}</div>${kind === "bookings" && !id ? '<div id="quote" class="notice section-title"></div>' : ""}${kind === "payments" ? '<div id="payment-balance" class="notice section-title"></div>' : ""}${kind === "meals" ? '<div id="diet-notice" class="notice section-title"></div>' : ""}<p id="form-error" class="error-text" role="alert"></p><div class="form-actions">${actionButton("Đóng", "close")}<button class="btn" type="submit">${id ? "Lưu thay đổi" : "Xác nhận tạo"}</button></div></form>`,
   );
   if (!noResidents) {
     $("#record-form").addEventListener("submit", saveForm);
@@ -441,7 +445,7 @@ function quote() {
   const end = new Date(start + "T12:00:00");
   end.setDate(end.getDate() + duration * p.days);
   $("#quote").textContent =
-    `Dự kiến ${duration * p.days} ngày · Ngày về ${end.toLocaleDateString("vi-VN")} · Tổng phí ${money(p.price * duration)}. Giá chính thức được tính lại tại máy chủ.`;
+    `Dự kiến ${duration * p.days} ngày · Ngày về ${end.toLocaleDateString("vi-VN")} · Miễn phí. Lịch cần được quản trị viên xác nhận theo sức chứa.`;
 }
 function paymentBalance() {
   const b = lookup("bookings", $("#field-booking_id")?.value);
@@ -476,9 +480,9 @@ async function saveForm(e) {
           ? Number(form.elements[f.key].value)
           : form.elements[f.key].value;
   }
-  if (kind === "requests" && state.user.role === "FAMILY")
+  if (kind === "requests" && isLearner())
     values.status = old?.status || "Chờ xử lý";
-  if (kind === "visits" && state.user.role === "FAMILY")
+  if (kind === "visits" && isLearner())
     values.status = old?.status || "Chờ duyệt";
   const button = $('button[type="submit"]', form);
   button.disabled = true;
@@ -497,10 +501,15 @@ async function saveForm(e) {
       });
     }
     await api(kind + (id ? "/" + id : ""), id ? "PATCH" : "POST", values);
-    closeModal();
     await refresh();
+    closeModal();
     if (kind === "bookings") state.page = "bookings";
     shell();
+    if (kind === "residents" && state.pendingWorkshop) {
+      const workshopId = state.pendingWorkshop;
+      state.pendingWorkshop = "";
+      await learningIntent("learning-enroll", workshopId);
+    }
     toast("Đã lưu thành công.");
   } catch (error) {
     $("#form-error").textContent = error.message;

@@ -9,13 +9,13 @@ function syncFontButtons() {
 function originalAuth() {
   const area = $("#navAuthArea");
   if (!area) return;
-  if (state.user)
-    area.innerHTML = `<span class="text-xs text-stone-500 hidden sm:block">${esc(state.user.name)}</span>${actionButton(state.user.role === "FAMILY" ? "Không gian gia đình" : "Trang quản lý", "original-dashboard", "", "")}${actionButton("Đăng xuất", "logout")}`;
-  else area.innerHTML = actionButton("Đăng Nhập / Đăng Ký", "login", "", "");
-  area.insertAdjacentHTML("beforeend", actionButton("Cỡ chữ Aᴀ", "font"));
+  area.innerHTML = `${actionButton("Đăng nhập", "login", "", "secondary")}${actionButton("Tạo tài khoản", "register", "", "primary")}`;
   syncFontButtons();
 }
 function landing(section = "home") {
+  return learningLanding(section);
+}
+function legacyLanding(section = "home") {
   const template = $("#original-project");
   $("#app").replaceChildren(template.content.cloneNode(true));
   originalAuth();
@@ -43,8 +43,18 @@ function landing(section = "home") {
   });
   window.scrollTo(0, 0);
 }
-function navigation() {
+function navigationGroups() {
   const role = state.user.role;
+  if (["FAMILY", "SENIOR", "EXPERT"].includes(role)) return learningNavigation(role);
+  if (role === "ADMIN") {
+    return [
+      { title: "Học – làm – du lịch", links: [["activities", "❧", "Workshop & Talkshow"], ["enrollments", "♧", "Đăng ký workshop"], ["journey", "↗", "Hành trình giá trị"], ["gardens", "♧", "Vườn riêng & câu chuyện"], ["skills", "✓", "Kỹ năng đã học"], ["practice", "▤", "Nhật ký thực hành"], ["products", "◇", "Sản phẩm học viên"], ["tour_bookings", "⌂", "Đặt tham quan vườn"], ["expert_applications", "♙", "Hồ sơ chuyên gia"], ["impact", "▥", "Bảng tác động"]] },
+      { title: "Quản trị", links: [["dashboard", "◫", "Bảng điều hành"], ["users", "♙", "Tài khoản & quyền"], ["audit", "◎", "Nhật ký hệ thống"]] },
+      { title: "Tiếp nhận người dùng", links: [["requests", "✉", "Yêu cầu gia đình"], ["bookings", "⌂", "Đặt lịch & lưu trú"], ["residents", "♡", "Hồ sơ lưu trú"], ["visits", "◷", "Lịch thăm"], ["notifications", "◎", "Thông báo & nhắc việc"]] },
+      { title: "Quản lý vận hành", links: [["rooms", "▥", "Phòng & sức chứa"], ["packages", "◇", "Gói dịch vụ"], ["activities", "❧", "Hoạt động nông trại"], ["enrollments", "♧", "Đăng ký hoạt động"], ["shifts", "◴", "Phân ca"], ["payments", "₫", "Thu chi & đối soát"], ["analytics", "▥", "Báo cáo vận hành"], ["calendar", "▦", "Lịch tổng hợp"]] },
+      { title: "Hỗ trợ tùy chọn", links: [["basic-health", "♡", "Sức khỏe cơ bản"], ["attachments", "▧", "Hồ sơ đính kèm"]] },
+    ].map((group) => ({ ...group, links: group.links.filter(([id]) => !["vitals", "doses", "attachments"].includes(id)).map(([id, icon, label]) => ({ id, icon, label: id === "medications" ? "Thuốc & nhật ký dùng thuốc" : label })) }));
+  }
   const groups = [
     [
       "TỔNG QUAN",
@@ -94,8 +104,7 @@ function navigation() {
   groups[2][1].push(["attachments", "▧", "Hồ sơ đính kèm"]);
   groups[0][1].push(["notifications", "◎", "Thông báo & nhắc việc"]);
   const allowed = (page) => {
-    if (role === "ADMIN")
-      return ["dashboard", "users", "audit", "settings"].includes(page);
+    if (role === "ADMIN") return true;
     if (["users", "audit"].includes(page)) return role === "MANAGER";
     if (page === "analytics")
       return ["MANAGER", "ACCOUNTANT", "RECEPTION"].includes(role);
@@ -131,38 +140,78 @@ function navigation() {
       ].includes(page);
     return true;
   };
-  return groups
-    .map(([group, links]) => {
-      const visible = links.filter(([id]) => allowed(id));
-      return visible.length
-        ? `<div class="nav-group">${group}</div>${visible.map(([id, icon, label]) => `<button class="nav-item ${state.page === id ? "active" : ""}" data-page="${id}" ${state.page === id ? 'aria-current="page"' : ""}><span class="nav-icon">${icon}</span>${label}</button>`).join("")}`
-        : "";
-    })
-    .join("");
+  const titles = [
+    "Tổng quan",
+    "Lưu trú",
+    "Chăm sóc",
+    role === "FAMILY" ? "Tiện ích" : "Vận hành",
+  ];
+  const result = groups
+    .map(([, links], index) => ({
+      title: titles[index],
+      links: links
+        .filter(([id]) => id !== "settings" && !["packages", "visits", "requests", "vitals", "doses", "attachments"].includes(id) && allowed(id))
+        .map(([id, icon, label]) => ({
+          id,
+          icon,
+          label: id === "medications"
+            ? "Thuốc & nhật ký dùng thuốc"
+            : role === "FAMILY" && id === "bookings" ? "Lưu trú của tôi" : label,
+        })),
+    }))
+    .filter((group) => group.links.length);
+  if (role === "FAMILY") {
+    result.splice(1, 0, ...learningNavigation(role).filter((group) => ["Học & thực hành", "Trải nghiệm"].includes(group.title)));
+    for (const group of result) group.links = group.links.filter((link) => !["vitals", "medications", "doses", "payments"].includes(link.id));
+    result.push({ title: "Tùy chọn", links: [{ id: "basic-health", icon: "♡", label: "Sức khỏe cơ bản" }] });
+  }
+  if (role === "MANAGER") {
+    const learning = learningNavigation(role).find((group) => group.title === "Học & thực hành");
+    const target = result[result.length - 1];
+    target.links.push(...learning.links.filter((link) => !result.some((group) => group.links.some((existing) => existing.id === link.id))));
+    target.links.push({ id: "expert_applications", icon: "♙", label: "Hồ sơ chuyên gia" }, { id: "tour_bookings", icon: "⌂", label: "Đặt tham quan vườn" });
+  }
+  return result;
+}
+function navigationLink(link) {
+  return `<button type="button" data-page="${link.id}" ${state.page === link.id ? 'aria-current="page"' : ""}><span class="project-link-icon" aria-hidden="true">${link.icon}</span><span>${esc(link.label)}</span>${state.page === link.id ? '<span class="project-current-mark" aria-hidden="true">✓</span>' : ""}</button>`;
+}
+function adminShell() {
+  const groups = navigationGroups();
+  const current = groups.flatMap((group) => group.links).find((link) => link.id === state.page);
+  const pageTitle = current?.label || (state.page === "settings" ? "Cài đặt & bảo mật" : "Quản trị hệ thống");
+  $("#app").innerHTML = `<div class="original-site admin-portal">
+    <aside id="sidebar" class="admin-sidebar" aria-label="Menu quản trị">
+      <button class="admin-brand" data-page="dashboard"><span class="admin-brand-icon" aria-hidden="true">❧</span><span>Wellness Farm<small>TRANG QUẢN TRỊ</small></span></button>
+      <div class="admin-access-label">Quản trị viên <span>ADMIN</span></div>
+      <nav aria-label="Chức năng quản trị">${groups.map((group) => `<section class="admin-nav-group"><h2>${esc(group.title)}</h2>${group.links.map(navigationLink).join("")}</section>`).join("")}</nav>
+      <div class="admin-sidebar-bottom"><button data-page="settings">⚙ Cài đặt & bảo mật</button><button data-action="logout">↪ Đăng xuất</button></div>
+    </aside>
+    <button class="admin-menu-backdrop" data-action="menu" aria-label="Đóng menu quản trị"></button>
+    <div class="admin-workspace"><header class="admin-header"><div class="admin-header-title"><button class="admin-menu-toggle" data-action="menu" aria-label="Mở menu quản trị" aria-controls="sidebar" aria-expanded="false">☰</button><div><small>Quản trị & quản lý</small><strong>${esc(pageTitle)}</strong></div></div>
+      <div class="admin-header-actions">${actionButton("Làm mới", "refresh", "", "secondary compact")}<details class="project-user-menu"><summary><span class="project-user-avatar" aria-hidden="true">${esc(state.user.name.trim().charAt(0).toUpperCase())}</span><span class="project-user-name">${esc(state.user.name)}</span><span aria-hidden="true">⌄</span><span class="project-sr-only">Tài khoản</span></summary><div class="project-user-menu-items"><div class="project-account-label">${esc(state.user.email)}<small>Quản trị viên</small></div>${actionButton("Cỡ chữ Aᴀ", "font", "", "project-font-toggle")}<button data-page="settings">Cài đặt & bảo mật</button><button class="project-logout" data-action="logout">Đăng xuất</button></div></details></div>
+    </header><main class="main admin-main" id="main" tabindex="-1"></main></div>
+  </div>`;
+  if (state.data.demo) $("#main").insertAdjacentHTML("beforebegin", '<div class="notice" role="status">DỮ LIỆU DEMO · Tài khoản, hồ sơ và giao dịch hoàn toàn giả.</div>');
+  renderPage();
 }
 function shell() {
+  if (state.user.role === "ADMIN") return adminShell();
   const original = $("#original-project").content;
-  const nav = document.createElement("div");
-  nav.innerHTML = navigation();
-  const choices = $$("button[data-page]", nav).map((b) => ({
-    id: b.dataset.page,
-    label: b.textContent.trim(),
-  }));
-  const favorite =
-    state.user.role === "FAMILY"
-      ? [
-          "dashboard",
-          "residents",
-          "bookings",
-          "reports",
-          "requests",
-          "activities",
-        ]
-      : ["dashboard", "bookings", "residents", "care", "analytics", "users"];
-  const tabs = choices.filter((c) => favorite.includes(c.id));
+  const groups = navigationGroups();
+  const desktopNav = groups
+    .map(
+      (group) =>
+        `<details class="project-function-menu"><summary class="${group.links.some((link) => link.id === state.page) ? "active" : ""}">${esc(group.title)}<span aria-hidden="true">⌄</span></summary><div class="project-function-items">${group.links.map(navigationLink).join("")}</div></details>`,
+    )
+    .join("");
+  const mobileNav = `<details class="project-mobile-nav"><summary>Chức năng <span aria-hidden="true">⌄</span></summary><div class="project-mobile-panel">${groups.map((group) => `<section><h2>${esc(group.title)}</h2>${group.links.map(navigationLink).join("")}</section>`).join("")}</div></details>`;
+  const logo = $(
+    ".flex.items-center.gap-3.cursor-pointer",
+    original,
+  ).outerHTML.replace('data-action="original-home"', 'data-page="dashboard"');
   $("#app").innerHTML =
-    `<div class="original-site">${$("header", original).outerHTML}<div class="project-workspace"><div class="project-function-bar"><nav class="project-tabs" aria-label="Chức năng chính">${tabs.map((c) => `<button class="${state.page === c.id ? "active" : ""}" data-page="${c.id}">${esc(c.label)}</button>`).join("")}</nav><label class="project-module-label">Tất cả chức năng<select id="module-select" aria-label="Chọn chức năng">${choices.map((c) => `<option value="${c.id}" ${state.page === c.id ? "selected" : ""}>${esc(c.label)}</option>`).join("")}</select></label></div><main class="main upgraded-module" id="main" tabindex="-1"></main></div>${$("footer", original).outerHTML}</div>`;
-  originalAuth();
+    `<div class="original-site"><header class="project-app-header sticky top-0 z-40"><div class="project-app-header-inner">${logo}<nav class="project-desktop-nav" aria-label="Chức năng theo vai trò">${desktopNav}</nav><div class="project-user-controls">${mobileNav}<details class="project-user-menu"><summary><span class="project-user-avatar" aria-hidden="true">${esc(state.user.name.trim().charAt(0).toUpperCase())}</span><span class="project-user-name">${esc(state.user.name)}</span><span class="project-user-chevron" aria-hidden="true">⌄</span><span class="project-sr-only">Tài khoản</span></summary><div class="project-user-menu-items"><div class="project-account-label">${esc(state.user.name)}<small>${esc(roleNames[state.user.role])}</small></div>${actionButton("Cỡ chữ Aᴀ", "font", "", "project-font-toggle")}<button data-page="settings">Cài đặt & bảo mật</button><button data-action="project">Về dự án</button><button class="project-logout" data-action="logout">Đăng xuất</button></div></details></div></div></header><div class="project-workspace"><main class="main upgraded-module" id="main" tabindex="-1"></main></div>${$("footer", original).outerHTML}</div>`;
   if (state.data.demo)
     $("#app").insertAdjacentHTML(
       "afterbegin",
@@ -170,3 +219,41 @@ function shell() {
     );
   renderPage();
 }
+
+// Native details retain keyboard semantics. Keep one menu open and dismiss it
+// on Escape or an outside click, without installing listeners on every render.
+document.addEventListener(
+  "toggle",
+  (event) => {
+    const menu = event.target;
+    if (!menu.matches?.(".project-app-header details, .admin-header details") || !menu.open) return;
+    $$(".project-app-header details[open], .admin-header details[open]").forEach((other) => {
+      if (other !== menu) other.open = false;
+    });
+  },
+  true,
+);
+document.addEventListener("click", (event) => {
+  $$(".project-app-header details[open], .admin-header details[open]").forEach((menu) => {
+    if (!menu.contains(event.target)) menu.open = false;
+  });
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  const menu = document.activeElement?.closest(
+    ".project-app-header details[open], .admin-header details[open]",
+  );
+  if (menu) {
+    menu.open = false;
+    $("summary", menu).focus();
+    event.preventDefault();
+  }
+  const sidebar = $(".admin-sidebar.open");
+  if (sidebar) {
+    sidebar.classList.remove("open");
+    const toggle = $(".admin-menu-toggle");
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.focus();
+    event.preventDefault();
+  }
+});

@@ -11,7 +11,6 @@ import os
 import re
 import secrets
 import sqlite3
-import struct
 import threading
 import time
 from datetime import date, datetime, timedelta, timezone
@@ -27,7 +26,6 @@ from backend.security import (
     iso_date,
     password_hash,
     password_ok,
-    totp_step,
 )
 
 from backend.records import now, uid, insert, unpack, rows, get_record, update
@@ -50,6 +48,7 @@ COOKIE_SECURE = os.environ.get("WF_COOKIE_SECURE") == "1"
 DB = DATA / "wellness.sqlite3"
 LOCK = threading.RLock()
 from backend.policy import ROLES, OPS, CLINICAL, FINANCE, STATES
+from backend.learning import LEARNERS, LEARNING_KINDS, public_learning, migrate_packages
 
 ATTEMPTS = {}
 
@@ -144,6 +143,8 @@ def init_db():
                         active=True,
                     ),
                 )
+
+        migrate_packages(db)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -255,7 +256,7 @@ class Handler(BaseHTTPRequestHandler):
                 if path == "/index.html":
                     assets[path] = ("index.html", "text/html; charset=utf-8")
                 elif re.fullmatch(
-                    r"/frontend/(core|components|navigation|pages|forms|account|events|bootstrap)\.js",
+                    r"/frontend/(core|components|navigation|pages|forms|account|learning|events|bootstrap)\.js",
                     path,
                 ):
                     assets[path] = (path[1:], "application/javascript; charset=utf-8")
@@ -310,58 +311,21 @@ class Handler(BaseHTTPRequestHandler):
                             "packages": rows(db, "packages"),
                             "rooms": rows(db, "rooms"),
                             "activities": rows(db, "activities"),
+                            **public_learning(db),
                         },
                     )
+                if path == "/api/impact" and method == "GET":
+                    user, _ = self.session(db)
+                    require(user, ["ADMIN", "MANAGER", "EXPERT"])
+                    return self.send(200, public_learning(db)["impact"])
                 user, session = self.session(db)
                 if method != "GET" and not hmac.compare_digest(
                     self.headers.get("X-CSRF-Token", ""), session["csrf"]
                 ):
                     raise APIError(403, "Mã bảo vệ phiên không hợp lệ.")
                 if path == "/api/me" and method == "GET":
-                    mfa = db.execute(
-                        "SELECT enabled FROM mfa WHERE user_id=?", (user["id"],)
-                    ).fetchone()
-                    return self.send(
-                        200,
-                        {
-                            "user": dict(user, mfa=bool(mfa and mfa["enabled"])),
-                            "csrf": session["csrf"],
-                            "demo": DEMO,
-                        },
-                    )
-                if path in ["/api/mfa/setup", "/api/mfa/enable"] and method == "POST":
-                    stored = db.execute(
-                        "SELECT password FROM users WHERE id=?", (user["id"],)
-                    ).fetchone()[0]
-                    if not password_ok(str(body.get("password", "")), stored):
-                        raise APIError(400, "Mật khẩu hiện tại không đúng.")
-                    mfa = db.execute(
-                        "SELECT * FROM mfa WHERE user_id=?", (user["id"],)
-                    ).fetchone()
-                    if mfa and mfa["enabled"]:
-                        raise APIError(400, "MFA đã được bật.")
-                    if path.endswith("setup"):
-                        secret = base64.b32encode(secrets.token_bytes(20)).decode()
-                        db.execute(
-                            "INSERT OR REPLACE INTO mfa VALUES(?,?,0,-1)",
-                            (user["id"], secret),
-                        )
-                        return self.send(200, {"secret": secret})
-                    step = totp_step(mfa["secret"], body.get("otp")) if mfa else None
-                    if step is None:
-                        raise APIError(400, "Mã xác thực không đúng.")
-                    db.execute(
-                        "UPDATE mfa SET enabled=1,last_step=? WHERE user_id=?",
-                        (step, user["id"]),
-                    )
-                    db.execute(
-                        "DELETE FROM sessions WHERE user_id=? AND token<>?",
-                        (user["id"], session["token"]),
-                    )
-                    audit(
-                        db, user, "Bật MFA và thu hồi phiên khác", "users", user["id"]
-                    )
-                    return self.send(200, {"ok": True})
+                    return self.send(200, {"user": user,
+                                           "csrf": session["csrf"], "demo": DEMO})
                 if path == "/api/logout" and method == "POST":
                     db.execute(
                         "DELETE FROM sessions WHERE token=?", (session["token"],)
@@ -548,6 +512,8 @@ class Handler(BaseHTTPRequestHandler):
                         "shifts",
                         "residents",
                         "payments",
+                        "expert_applications",
+                        "tour_bookings",
                     ]
                     and not resident_id
                 ):
@@ -555,7 +521,7 @@ class Handler(BaseHTTPRequestHandler):
                 if (
                     old
                     and kind == "residents"
-                    and user["role"] == "FAMILY"
+                    and user["role"] in LEARNERS
                     and old["owner"] != user["id"]
                 ):
                     raise APIError(
@@ -608,20 +574,15 @@ class Handler(BaseHTTPRequestHandler):
             raise APIError(429, "Quá nhiều lần thử. Vui lòng chờ 15 phút.")
         recent.append(time.time())
         if path == "/api/register":
-            self.create_user(db, dict(body, role="FAMILY"), None, respond=False)
+            account_type = "SENIOR" if body.get("account_type") == "SENIOR" else "FAMILY"
+            self.create_user(db, dict(body, role=account_type), None, respond=False)
         email = text_field(body, "email", True, 254).lower()
         row = db.execute(
-            "SELECT * FROM users WHERE (email=? OR phone=?) AND active=1",
-            (email, email),
+            "SELECT * FROM users WHERE email=? AND active=1",
+            (email,),
         ).fetchone()
         if not row or not password_ok(str(body.get("password", "")), row["password"]):
             raise APIError(401, "Thông tin đăng nhập không đúng.")
-        mfa = db.execute("SELECT * FROM mfa WHERE user_id=?", (row["id"],)).fetchone()
-        if mfa and mfa["enabled"]:
-            step = totp_step(mfa["secret"], body.get("otp"))
-            if step is None or step <= mfa["last_step"]:
-                raise APIError(401, "Cần mã MFA mới từ ứng dụng xác thực.")
-            db.execute("UPDATE mfa SET last_step=? WHERE user_id=?", (step, row["id"]))
         token, csrf = secrets.token_urlsafe(32), secrets.token_urlsafe(32)
         db.execute("DELETE FROM sessions WHERE expires<?", (time.time(),))
         db.execute(
@@ -633,7 +594,7 @@ class Handler(BaseHTTPRequestHandler):
         return self.send(
             200,
             {
-                "user": dict(public_user(row), mfa=bool(mfa and mfa["enabled"])),
+                "user": public_user(row),
                 "csrf": csrf,
             },
             extra={"Set-Cookie": self.session_cookie(token, 28800)},
@@ -642,17 +603,17 @@ class Handler(BaseHTTPRequestHandler):
     def create_user(self, db, body, actor=None, respond=True):
         name = text_field(body, "name", True, 120)
         email = text_field(body, "email", True, 254).lower()
-        phone = text_field(body, "phone", True, 30)
+        phone = text_field(body, "phone", False, 30)
         password = str(body.get("password", ""))
         role = body.get("role", "FAMILY")
-        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email) or not re.fullmatch(
+        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email) or (phone and not re.fullmatch(
             r"[+\d ()-]{8,30}", phone
-        ):
+        )):
             raise APIError(400, "Email hoặc điện thoại không hợp lệ.")
         if not 12 <= len(password) <= 128 or role not in ROLES:
             raise APIError(400, "Mật khẩu cần 12–128 ký tự; vai trò phải hợp lệ.")
         if db.execute(
-            "SELECT 1 FROM users WHERE email=? OR phone=?", (email, phone)
+            "SELECT 1 FROM users WHERE email=? OR (phone<>'' AND phone=?)", (email, phone)
         ).fetchone():
             raise APIError(409, "Email hoặc điện thoại đã được sử dụng.")
         record = uid()
@@ -694,11 +655,11 @@ def main():
             audit(
                 db,
                 public_user(user),
-                "Khôi phục mật khẩu / MFA qua CLI",
+                "Khôi phục mật khẩu qua CLI",
                 "users",
                 user["id"],
             )
-        print("Password reset; MFA cleared; sessions revoked.")
+        print("Password reset; sessions revoked.")
         return
     if args.backup:
         destination = DATA / (

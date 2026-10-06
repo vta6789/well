@@ -1,12 +1,9 @@
-"""Password hashing, TOTP and request validation utilities."""
+"""Password hashing and request validation utilities."""
 
-import base64
 import hashlib
 import hmac
 import re
 import secrets
-import struct
-import time
 from datetime import date
 
 
@@ -57,18 +54,3 @@ def iso_date(value):
         return date.fromisoformat(str(value))
     except ValueError:
         raise APIError(400, "Ngày không hợp lệ.")
-
-
-def totp_step(secret, code):
-    if not re.fullmatch(r"\d{6}", str(code)):
-        return None
-    key = base64.b32decode(secret)
-    for step in range(int(time.time() // 30) - 1, int(time.time() // 30) + 2):
-        digest = hmac.new(key, struct.pack(">Q", step), hashlib.sha1).digest()
-        offset = digest[-1] & 15
-        number = (
-            struct.unpack(">I", digest[offset : offset + 4])[0] & 0x7FFFFFFF
-        ) % 1000000
-        if hmac.compare_digest(f"{number:06}", str(code)):
-            return step
-    return None

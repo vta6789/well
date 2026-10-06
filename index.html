@@ -3,7 +3,8 @@
 <head>
  <meta charset="utf-8">
  <meta name="viewport" content="width=device-width, initial-scale=1">
- <title>Wellness Farm - Nông Trại Dưỡng Lão & Chăm Sóc Sức Khỏe</title>
+ <title>Wellness Farm — Học, thực hành và trải nghiệm miễn phí</title>
+ <meta name="description" content="Đến để học. Ở lại để tạo giá trị. Workshop miễn phí, hành trình học của người cao tuổi và những câu chuyện Nghệ nhân bạc tại Wellness Farm.">
  <link rel="stylesheet" href="/assets/fonts/fonts.css">
  <link rel="stylesheet" href="/style.css">
  <link rel="stylesheet" href="/design-tokens.css">
@@ -15,6 +16,7 @@
  <script src="/frontend/pages.js" defer></script>
  <script src="/frontend/forms.js" defer></script>
  <script src="/frontend/account.js" defer></script>
+ <script src="/frontend/learning.js" defer></script>
  <script src="/frontend/events.js" defer></script>
  <script src="/frontend/bootstrap.js" defer></script>
 </head>
@@ -28,26 +30,28 @@
 <header class="sticky top-0 z-40 glass border-b border-stone-200 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
-                <!-- Logo & Author Subtitle -->
+                <!-- Brand -->
                 <div class="flex items-center gap-3 cursor-pointer" data-action="original-home">
                     <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 to-emerald-400 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
                         <i class="fa-solid fa-leaf text-xl"></i>
                     </div>
                     <div>
                         <span class="text-xl font-extrabold tracking-tight text-stone-900 block leading-none">Wellness<span class="text-brand-600">Farm</span></span>
-                        <span class="text-[11px] text-stone-500 font-semibold block mt-0.5">Trương Huỳnh Phương Khanh • 25DATA1</span>
                     </div>
                 </div>
 
-                <!-- Nav Links -->
-                <nav class="hidden xl:flex space-x-6 text-sm font-semibold text-stone-600">
-                    <button data-action="original-home" class="hover:text-brand-600 transition">Trang Chủ</button>
-                    <a href="#sec-about" data-action="original-home" class="hover:text-brand-600 transition">Giới Thiệu</a>
-                    <a href="#sec-zones" data-action="original-home" class="hover:text-brand-600 transition">5 Phân Khu</a>
-                    <a href="#sec-process" data-action="original-home" class="hover:text-brand-600 transition">Quy Trình</a>
-                    <a href="#sec-nabc" data-action="original-home" class="hover:text-brand-600 transition">NABC & SDGs</a>
-                    <button data-action="original-packages" class="hover:text-brand-600 transition">Gói Vé Dưỡng Lão</button>
-                    <button data-action="original-trips" class="hover:text-brand-600 transition">Chuyến Đã Đăng Ký</button>
+                <nav class="public-nav text-sm font-semibold text-stone-600" aria-label="Điều hướng chính">
+                    <button data-action="original-section" data-section="sec-about">Giới thiệu</button>
+                    <button data-action="original-packages">Gói dưỡng lão</button>
+                    <button data-action="original-section" data-section="sec-process">Quy trình</button>
+                    <details class="project-nav-dropdown">
+                        <summary>Về dự án <span aria-hidden="true">▾</span></summary>
+                        <div class="project-nav-menu">
+                            <button data-action="original-section" data-section="sec-nabc">NABC & SDGs</button>
+                            <button data-action="original-section" data-section="sec-survey">Khảo sát</button>
+                            <button data-action="original-section" data-section="sec-zones">5 phân khu</button>
+                        </div>
+                    </details>
                 </nav>
 
                 <!-- Auth Buttons & Profile -->
@@ -56,26 +60,9 @@
                 </div>
             </div>
         </div>
-    <nav class="project-quick-menu" aria-label="Điều hướng trên màn hình nhỏ"><button data-action="original-home">Trang chủ</button><button data-action="original-packages">Gói dưỡng lão</button><button data-action="original-trips">Chuyến đã đăng ký</button><button data-action="original-dashboard">Không gian quản lý</button></nav></header>
+    </header>
 <main class="flex-grow" id="main"><section id="sec-home" class="py-10">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-                <!-- Author Header Banner -->
-                <div class="mb-8 p-4 rounded-2xl bg-gradient-to-r from-stone-900 via-brand-900 to-stone-900 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-brand-500/20 border border-brand-400/40 flex items-center justify-center text-brand-400">
-                            <i class="fa-solid fa-graduation-cap text-lg"></i>
-                        </div>
-                        <div>
-                            <span class="text-xs uppercase font-bold text-brand-300 tracking-wider">Thông Tin Tác Giả & Dự Án</span>
-                            <h2 class="text-base font-bold">Trương Huỳnh Phương Khanh — Lớp 25DATA1 — Nhóm 3</h2>
-                        </div>
-                    </div>
-                    <span class="text-xs bg-white/10 px-3 py-1.5 rounded-xl border border-white/10 font-mono text-emerald-300">
-                        Nông Trại Dưỡng Lão Kế Thừa Sinh Thái
-                    </span>
-                </div>
-
                 <!-- Hero Header -->
                 <div class="grid lg:grid-cols-2 gap-12 items-center mb-16">
                     <div>
@@ -107,10 +94,10 @@
 
                         <div class="flex flex-wrap gap-4">
                             <button data-action="original-packages" class="px-8 py-4 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl font-bold shadow-lg shadow-brand-600/30 transition transform hover:-translate-y-0.5">
-                                Đăng Ký Gói Khám Phá <i class="fa-solid fa-arrow-right ml-2"></i>
+                                Chọn gói <i class="fa-solid fa-arrow-right ml-2"></i>
                             </button>
                             <button data-action="login" class="px-6 py-4 bg-white hover:bg-stone-100 text-stone-800 border border-stone-200 rounded-2xl font-semibold transition">
-                                Đăng Nhập / Tạo Tài Khoản
+                                Đăng nhập
                             </button>
                         </div>
                     </div>
@@ -188,7 +175,7 @@
                 </div>
 
                 <!-- THỰC TRẠNG & VẤN ĐỀ (NEED/PROBLEMS) -->
-                <div class="mb-20 bg-stone-900 text-white rounded-3xl p-8 sm:p-12 shadow-xl">
+                <div id="sec-survey" class="mb-20 bg-stone-900 text-white rounded-3xl p-8 sm:p-12 shadow-xl">
                     <div class="max-w-3xl mb-10">
                         <span class="text-xs font-bold text-brand-400 uppercase tracking-widest bg-brand-900/50 px-3 py-1 rounded-full border border-brand-500/30">Thực Trạng Nhu Cầu</span>
                         <h2 class="text-3xl font-bold mt-3">4 Nguyên Nhân Cốt Lõi Cần Giải Quyết</h2>
@@ -480,15 +467,13 @@
                         <span class="text-xl font-bold text-white">Wellness Farm</span>
                     </div>
                     <p class="text-xs text-stone-400 leading-relaxed">
-                        Dự án Nông Trại Dưỡng Lão Kết Hợp Sinh Thái & Chăm Sóc Sức Khỏe Toàn Diện.
+                        Nền tảng học, thực hành và du lịch cộng đồng. Mọi trải nghiệm đều miễn phí.
                     </p>
                 </div>
                 <div>
-                    <h4 class="text-white font-bold text-sm mb-3">Tác Giả & Lớp Học</h4>
+                    <h4 class="text-white font-bold text-sm mb-3">Tác giả</h4>
                     <ul class="text-xs space-y-2">
-                        <li>Họ và Tên: <strong class="text-stone-200">Trương Huỳnh Phương Khanh</strong></li>
-                        <li>Lớp: <strong class="text-stone-200">25DATA1</strong> — <strong class="text-stone-200">Nhóm 3</strong></li>
-                        <li>Địa điểm nghiên cứu: Xã Bình Mỹ, TP.HCM</li>
+                        <li><strong class="text-stone-200">Malware</strong></li>
                     </ul>
                 </div>
                 <div>
@@ -499,7 +484,7 @@
                 </div>
             </div>
             <div class="border-t border-stone-800 pt-6 text-center text-xs text-stone-500">
-                © 2026 Wellness Farm. Tất cả quyền được bảo lưu | Thiết kế bởi Trương Huỳnh Phương Khanh (Lớp 25DATA1 - Nhóm 3).
+                © 2026 Wellness Farm. Tất cả quyền được bảo lưu.
             </div>
         </div>
     </footer>

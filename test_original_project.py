@@ -32,7 +32,7 @@ class OriginalProjectTests(unittest.TestCase):
         self.assertNotIn('admin123',source)
         self.assertNotIn('wf_users',source)
         self.assertNotIn('cdn.tailwindcss.com',source)
-        for action in ['original-home','original-packages','original-trips','original-book']:
+        for action in ['original-home','original-packages','original-section','original-book']:
             self.assertIn(action,parsed.actions)
 
 if __name__=='__main__':unittest.main(verbosity=2)

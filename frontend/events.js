@@ -4,10 +4,18 @@ document.addEventListener("click", async (e) => {
   const id = button.dataset.id,
     action = button.dataset.action;
   try {
+    if (action?.startsWith("learning-")) return await learningAction(action, id);
     if (button.dataset.page) return navigate(button.dataset.page);
     if (action === "original-home") {
       landing("home");
       if (button.tagName !== "A") window.scrollTo(0, 0);
+      return;
+    }
+    if (action === "original-section") {
+      landing("home");
+      document.getElementById(button.dataset.section)?.scrollIntoView({
+        behavior: "smooth",
+      });
       return;
     }
     if (action === "original-packages") {
@@ -37,7 +45,18 @@ document.addEventListener("click", async (e) => {
     if (action === "close") return closeModal();
     if (action === "login" || action === "register")
       return authForm(action === "register");
-    if (action === "menu") return $("#sidebar").classList.toggle("open");
+    if (action === "project") return navigate("project");
+    if (action === "menu") {
+      const sidebar = $("#sidebar");
+      const open = sidebar.classList.toggle("open");
+      const toggle = $(".admin-menu-toggle");
+      toggle?.setAttribute("aria-expanded", String(open));
+      if (toggle) {
+        if (open) $("[aria-current=page]", sidebar)?.focus();
+        else toggle.focus();
+      }
+      return;
+    }
     if (action === "font") {
       document.documentElement.classList.toggle("large-text");
       try {
@@ -48,6 +67,12 @@ document.addEventListener("click", async (e) => {
       } catch {}
       syncFontButtons();
       return;
+    }
+    if (action === "medication-view") {
+      state.medicationView = button.dataset.view;
+      state.query = "";
+      state.filter = "";
+      return renderPage();
     }
     if (action === "home") return landing();
     if (action === "public-packages")
@@ -103,7 +128,6 @@ document.addEventListener("click", async (e) => {
     if (action === "new-user") return userForm();
     if (action === "edit-user") return userForm(id);
     if (action === "password") return passwordForm();
-    if (action === "mfa") return mfaForm();
     if (action === "print-report") return printRecord(id, "reports");
     if (action === "print-booking") return printRecord(id, "bookings");
     if (action === "print") return window.print();
@@ -138,7 +162,6 @@ document.addEventListener("input", (e) => {
   }
 });
 document.addEventListener("change", (e) => {
-  if (e.target.id === "module-select") return navigate(e.target.value);
   if (e.target.id === "status-filter") {
     state.filter = e.target.value;
     renderPage();

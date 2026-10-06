@@ -13,5 +13,11 @@ with tempfile.TemporaryDirectory(prefix="wellness-e2e-") as directory:
     os.environ.pop("WF_DEMO", None)
     import server
 
+    server.init_db()
+    with server.connect() as db:
+        db.execute(
+            "INSERT INTO users VALUES(?,?,?,?,?,?,?,?)",
+            ("e2e-admin", "Test Administrator", "admin@e2e.test", "", server.password_hash("Admin-e2e-test-12345"), "ADMIN", 1, server.now()),
+        )
     sys.argv = ["server.py", "--port", "8123"]
     server.main()

@@ -19,7 +19,7 @@ module.exports = {
         },
         warm: { 50: "#fffbe1", 100: "#fef3c7", 500: "#f59e0b", 600: "#d97706" },
       },
-      fontFamily: { sans: ["Plus Jakarta Sans", "sans-serif"] },
+      fontFamily: { sans: ["Nunito Sans", "Plus Jakarta Sans", "sans-serif"] },
     },
   },
   plugins: [],

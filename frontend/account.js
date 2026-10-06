@@ -143,40 +143,38 @@ function timeline(id) {
       : empty("Chưa có lịch sử chăm sóc"),
   );
 }
-function authForm(register = false) {
+function authForm(register = false, accountType = "FAMILY") {
   modal(
-    register ? "Tạo tài khoản gia đình" : "Chào mừng trở lại",
-    `<p class="small muted">${register ? "Tạo tài khoản để quản lý hồ sơ và đặt lịch cho người thân." : "Đăng nhập để tiếp tục hành trình cùng Wellness Farm."}</p><form id="auth-form"><div class="form-grid">${register ? fieldHTML(F("name", "Họ tên", "text", { required: true }), {}) : ""}${fieldHTML(F("email", register ? "Email" : "Email hoặc số điện thoại", register ? "email" : "text", { required: true }), {})}${register ? fieldHTML(F("phone", "Số điện thoại", "tel", { required: true }), {}) : ""}<label class="field ${register ? "" : "wide"}">Mật khẩu *<input name="password" type="password" required ${register ? 'minlength="12"' : ""} maxlength="128" autocomplete="${register ? "new-password" : "current-password"}"><small>${register ? "Tối thiểu 12 ký tự." : "Nếu quên mật khẩu, liên hệ quản trị viên; email khôi phục chưa kết nối."}</small></label></div><p id="auth-error" class="error-text" role="alert"></p><div class="form-actions">${actionButton(register ? "Đã có tài khoản" : "Tạo tài khoản", register ? "login" : "register")}<button class="btn" type="submit">${register ? "Đăng ký" : "Đăng nhập"}</button></div></form>`,
+    register ? (accountType === "SENIOR" ? "Tạo tài khoản học viên cao tuổi" : "Tạo tài khoản gia đình") : "Chào mừng trở lại",
+    `<p class="small muted">${register ? (accountType === "SENIOR" ? "Đăng ký để học, thực hành và ghi lại hành trình của bạn. Mọi trải nghiệm đều miễn phí." : "Tạo tài khoản để quản lý hồ sơ và đặt lịch cho người thân.") : "Đăng nhập để tiếp tục hành trình cùng Wellness Farm."}</p><form id="auth-form"><div class="form-grid">${register ? fieldHTML(F("name", "Họ tên", "text", { required: true }), {}) : ""}${fieldHTML(F("email", "Email", "email", { required: true }), {})}<label class="field ${register ? "" : "wide"}">Mật khẩu *<input name="password" type="password" required ${register ? 'minlength="12"' : ""} maxlength="128" autocomplete="${register ? "new-password" : "current-password"}"><small>${register ? "Tối thiểu 12 ký tự." : "Nếu quên mật khẩu, liên hệ quản trị viên; email khôi phục chưa kết nối."}</small></label></div><p id="auth-error" class="error-text" role="alert"></p><div class="form-actions">${actionButton(register ? "Đã có tài khoản" : "Tạo tài khoản", register ? "login" : "register")}<button class="btn" type="submit">${register ? "Đăng ký" : "Đăng nhập"}</button></div></form>`,
   );
-  if (!register)
-    $(".form-grid", $("#auth-form")).insertAdjacentHTML(
-      "beforeend",
-      fieldHTML(
-        F("otp", "Mã MFA (nếu đã bật)", "text", {
-          wide: true,
-          placeholder: "6 chữ số trong ứng dụng xác thực",
-        }),
-        {},
-      ),
-    );
+  $("#auth-form").addEventListener("input", () => {
+    $("#auth-error").textContent = "";
+  });
   $("#auth-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const form = e.currentTarget,
       button = $('button[type="submit"]', form);
+    $("#auth-error").textContent = "";
     button.disabled = true;
     try {
       const result = await api(
-        register ? "register" : "login",
-        "POST",
-        Object.fromEntries(new FormData(form)),
+        register ? "register" : "login", "POST",
+        { ...Object.fromEntries(new FormData(form)), ...(register ? { account_type: accountType } : {}) },
       );
       state.user = result.user;
       state.csrf = result.csrf;
       state.page = state.afterLogin || "dashboard";
       state.afterLogin = "";
-      closeModal();
       await refresh();
+      closeModal();
       shell();
+      if (state.learningIntent) {
+        const intent = state.learningIntent;
+        state.learningIntent = null;
+        await learningIntent(intent.action, intent.id);
+        return;
+      }
       if (state.pendingPackage) {
         const packageId = state.pendingPackage;
         state.pendingPackage = "";
@@ -199,7 +197,7 @@ function userForm(id = "") {
     : [
         F("name", "Họ tên", "text", { required: true }),
         F("email", "Email", "email", { required: true }),
-        F("phone", "Số điện thoại", "tel", { required: true }),
+        F("phone", "Số điện thoại (tùy chọn)", "tel"),
         F("password", "Mật khẩu ban đầu", "password", { required: true }),
         F("role", "Vai trò", "select", { options: Object.entries(roleNames) }),
       ];
@@ -216,8 +214,8 @@ function userForm(id = "") {
     button.disabled = true;
     try {
       await api("users" + (id ? "/" + id : ""), id ? "PATCH" : "POST", values);
-      closeModal();
       await refresh();
+      closeModal();
       shell();
       toast("Đã lưu tài khoản.");
     } catch (error) {
@@ -249,44 +247,6 @@ function passwordForm() {
     }
   });
 }
-function mfaForm() {
-  modal(
-    "Bật xác thực hai bước",
-    `<form id="mfa-form"><div class="stack"><label class="field">Mật khẩu hiện tại<input type="password" name="password" required autocomplete="current-password"></label><div id="mfa-secret" class="notice">Dùng ứng dụng xác thực hỗ trợ TOTP. Sau khi tạo khóa, thêm tài khoản bằng khóa thiết lập thủ công.</div><label class="field" id="mfa-code-field" hidden>Mã xác thực<input name="otp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6"></label></div><p id="form-error" class="error-text" role="alert"></p><div class="form-actions">${actionButton("Đóng", "close")}<button type="submit" class="btn">Tạo khóa thiết lập</button></div></form>`,
-  );
-  let setup = false;
-  $("#mfa-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const form = e.currentTarget,
-      button = $('button[type="submit"]', form);
-    button.disabled = true;
-    try {
-      if (!setup) {
-        const result = await api("mfa/setup", "POST", {
-          password: form.elements.password.value,
-        });
-        $("#mfa-secret").textContent =
-          "Khóa thiết lập: " +
-          result.secret +
-          ". Nhập vào ứng dụng xác thực, rồi nhập mã 6 chữ số bên dưới. Lưu khóa ở nơi an toàn để khôi phục.";
-        $("#mfa-code-field").hidden = false;
-        form.elements.otp.required = true;
-        button.textContent = "Xác nhận bật MFA";
-        setup = true;
-        button.disabled = false;
-      } else {
-        await api("mfa/enable", "POST", Object.fromEntries(new FormData(form)));
-        state.user.mfa = true;
-        closeModal();
-        shell();
-        toast("Đã bật xác thực hai bước.");
-      }
-    } catch (error) {
-      $("#form-error").textContent = error.message;
-      button.disabled = false;
-    }
-  });
-}
 function printRecord(id, kind) {
   const item = lookup(kind, id);
   if (!item) return;
@@ -308,6 +268,7 @@ function printRecord(id, kind) {
 async function publicLoad() {
   const result = await api("public");
   state.data = result;
+  state.public = result;
   landing();
 }
 async function navigate(page) {

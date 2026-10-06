@@ -8,21 +8,26 @@ from datetime import date, timedelta
 from .policy import ROLES, OPS, CLINICAL, FINANCE, STATES
 from .security import APIError, require, text_field, integer, iso_date
 from .records import get_record, rows, now, uid
+from .learning import LEARNERS, LEARNING_KINDS, LEARNING_MANAGERS, TOPICS, expert_access, validate_learning
 
 
 def resident_access(db, user, resident_id, clinical=False):
     resident = get_record(db, resident_id, "residents")
     role = user["role"]
-    if role == "FAMILY":
+    if role in LEARNERS:
         linked = user["id"] in resident.get("family_ids", [])
         if resident["owner"] != user["id"] and not linked:
             raise APIError(403, "Bạn không được truy cập hồ sơ này.")
         if clinical and not resident.get("consent", False):
             raise APIError(403, "Chưa có đồng ý chia sẻ báo cáo sức khỏe.")
+    elif role == "EXPERT":
+        if clinical:
+            raise APIError(403, "Chuyên gia workshop không có quyền xem hồ sơ y tế.")
+        expert_access(db, user, resident_id)
     elif role in ["NURSE", "DOCTOR"]:
         if user["id"] not in resident.get("staff_ids", []):
             raise APIError(403, "Hồ sơ chưa được phân công cho bạn.")
-    elif role == "ADMIN" or (clinical and role not in CLINICAL):
+    elif clinical and role not in CLINICAL:
         raise APIError(403, "Không có quyền xem thông tin chăm sóc.")
     return resident
 
@@ -34,7 +39,7 @@ POLICY = {
     "rooms": OPS,
     "care": CLINICAL,
     "vitals": CLINICAL,
-    "medications": ["DOCTOR", "MANAGER"],
+    "medications": ["DOCTOR", "MANAGER", "ADMIN"],
     "doses": CLINICAL,
     "meals": CLINICAL,
     "incidents": CLINICAL,
@@ -42,12 +47,18 @@ POLICY = {
     "visits": ["FAMILY"] + OPS,
     "activities": OPS + CLINICAL,
     "enrollments": ["FAMILY"] + OPS + CLINICAL,
-    "shifts": ["MANAGER"],
+    "shifts": ["MANAGER", "ADMIN"],
     "handoffs": CLINICAL,
     "reports": CLINICAL,
     "payments": FINANCE,
     "attachments": CLINICAL + OPS + ["FAMILY"],
 }
+for kind in ["residents", "bookings", "requests", "visits", "enrollments", "attachments"]:
+    POLICY[kind] = list(dict.fromkeys(POLICY[kind] + ["SENIOR"]))
+POLICY["activities"] += ["EXPERT"]
+POLICY["enrollments"] += ["EXPERT"]
+for kind in ["gardens", "products", "practice", "skills", "tour_bookings", "expert_applications"]:
+    POLICY[kind] = LEARNERS + ["EXPERT"] + LEARNING_MANAGERS
 CLINICAL_KINDS = [
     "care",
     "vitals",
@@ -62,15 +73,22 @@ CLINICAL_KINDS = [
 
 def visible(db, user, kind, item):
     role = user["role"]
+    if role == "ADMIN":
+        return True
+    if kind in ["expert_applications", "tour_bookings"]:
+        return role in LEARNING_MANAGERS or item["owner"] == user["id"]
+    if role == "EXPERT" and kind not in ["residents", "activities", "enrollments"] + LEARNING_KINDS:
+        return False
+    if role == "EXPERT" and kind == "enrollments":
+        if get_record(db, item["activity_id"], "activities").get("expert_id") != user["id"]:
+            return False
     if kind in ["packages", "rooms", "activities"]:
         return True
     if kind == "shifts":
         return role in ["MANAGER", "NURSE", "DOCTOR", "RECEPTION"]
-    if role == "ADMIN":
-        return False
     if kind in ["bookings", "payments"] and role in FINANCE + OPS:
         return True
-    if kind == "payments" and role == "FAMILY":
+    if kind == "payments" and role in LEARNERS:
         try:
             resident_access(db, user, item["resident"])
             return True
@@ -101,14 +119,14 @@ def visible(db, user, kind, item):
             )
             if (
                 kind == "attachments"
-                and role == "FAMILY"
+                and role in LEARNERS
                 and item["owner"] != user["id"]
                 and not item.get("shared")
             ):
                 return False
-            if role == "FAMILY" and kind in ["handoffs", "incidents"]:
+            if role in LEARNERS and kind in ["handoffs", "incidents"]:
                 return False
-            if role == "FAMILY" and kind == "reports":
+            if role in LEARNERS and kind == "reports":
                 return item.get("shared", False)
             return True
         except APIError:
@@ -119,12 +137,14 @@ def visible(db, user, kind, item):
 def project(user, kind, item):
     item = dict(item)
     item.pop("content", None)
+    if kind == "residents" and user["role"] == "EXPERT":
+        return {k: item[k] for k in ["id", "name", "owner", "resident", "created_at", "updated_at"]}
     if kind == "residents" and user["role"] == "RECEPTION":
         for key in ["health", "allergies", "diet", "medication_notes"]:
             item.pop(key, None)
     if (
         kind == "residents"
-        and user["role"] == "FAMILY"
+        and user["role"] in LEARNERS
         and item["owner"] != user["id"]
         and not item.get("consent")
     ):
@@ -184,15 +204,17 @@ def validate(db, user, kind, body, old=None):
             and not (kind == "attachments" and key == "content")
         ):
             raise APIError(400, "Nội dung quá dài.")
+    if kind in LEARNING_KINDS:
+        return validate_learning(db, user, kind, body, old)
     if kind == "residents":
         body["name"] = text_field(body, "name", True, 120)
         birthday = iso_date(body.get("dob"))
         if birthday > date.today():
             raise APIError(400, "Ngày sinh phải ở quá khứ.")
-        body["phone"] = text_field(body, "phone", True, 30)
-        if not re.fullmatch(r"[+\d ()-]{8,30}", body["phone"]):
+        body["phone"] = text_field(body, "phone", False, 30)
+        if body["phone"] and not re.fullmatch(r"[+\d ()-]{8,30}", body["phone"]):
             raise APIError(400, "Số điện thoại không hợp lệ.")
-        if user["role"] != "MANAGER":
+        if user["role"] not in ["MANAGER", "ADMIN"]:
             body["staff_ids"] = old.get("staff_ids", []) if old else []
             body["family_ids"] = old.get("family_ids", []) if old else []
         for staff_id in body.get("staff_ids", []):
@@ -205,7 +227,7 @@ def validate(db, user, kind, body, old=None):
             row = db.execute(
                 "SELECT role,active FROM users WHERE id=?", (family_id,)
             ).fetchone()
-            if not row or not row["active"] or row["role"] != "FAMILY":
+            if not row or not row["active"] or row["role"] not in LEARNERS:
                 raise APIError(400, "Thành viên gia đình không hợp lệ.")
         body["consent"] = body.get("consent") is True
         if user["role"] in ["NURSE", "DOCTOR", "RECEPTION"]:
@@ -214,12 +236,30 @@ def validate(db, user, kind, body, old=None):
         body["name"] = text_field(body, "name", True, 150)
         body["active"] = body.get("active") is True
         if kind == "packages":
-            body["price"] = integer(body, "price", 1000, 1000000000)
+            body["price"] = 0
             body["days"] = integer(body, "days", 1, 365)
         if kind in ["rooms", "activities"]:
             body["capacity"] = integer(body, "capacity", 1, 1000)
         if kind == "activities":
             iso_date(body.get("date"))
+            if user["role"] == "EXPERT":
+                if old and old.get("expert_id") != user["id"]:
+                    raise APIError(403, "Bạn chỉ được sửa workshop do mình phụ trách.")
+                body["expert_id"] = user["id"]
+            expert_id = body.get("expert_id", "")
+            if expert_id:
+                expert = db.execute("SELECT role,active FROM users WHERE id=?", (expert_id,)).fetchone()
+                if not expert or not expert["active"] or expert["role"] != "EXPERT":
+                    raise APIError(400, "Cần chọn tài khoản chuyên gia đang hoạt động.")
+            body["expert_id"] = expert_id
+            body["topic"] = body.get("topic", "Nông nghiệp")
+            body["format"] = body.get("format", "Workshop")
+            body["fitness"] = body.get("fitness", "Nhẹ nhàng")
+            if body["topic"] not in TOPICS or body["format"] not in ["Workshop", "Talkshow"] or body["fitness"] not in ["Nhẹ nhàng", "Vừa sức", "Cần hỗ trợ"]:
+                raise APIError(400, "Thông tin chủ đề, hình thức hoặc mức vận động không hợp lệ.")
+            body["time"] = text_field(body, "time", False, 50)
+            body["description"] = text_field(body, "description", False, 3000)
+            body["location"] = text_field(body, "location", False, 200)
     elif kind == "bookings":
         if old:
             # Dates and financial quotation remain immutable once submitted.
@@ -234,7 +274,7 @@ def validate(db, user, kind, body, old=None):
             ]:
                 body[key] = old[key]
             target = body.get("status", old["status"])
-            if user["role"] == "FAMILY":
+            if user["role"] in LEARNERS:
                 if (
                     old["owner"] != user["id"]
                     or target != "Đã hủy"
@@ -323,19 +363,28 @@ def validate(db, user, kind, body, old=None):
             raise APIError(400, "Trạng thái dùng thuốc không hợp lệ.")
         body["recorded_by"] = user["name"]
     elif kind == "enrollments":
+        activity = get_record(db, old["activity_id"] if old else body.get("activity_id"), "activities")
+        if user["role"] == "EXPERT" and activity.get("expert_id") != user["id"]:
+            raise APIError(403, "Bạn chỉ quản lý đăng ký workshop do mình phụ trách.")
         if old:
             body["activity_id"] = old["activity_id"]
-            if user["role"] == "FAMILY" and (
+            if user["role"] in LEARNERS and (
                 old["owner"] != user["id"] or body.get("status") != "Đã hủy"
             ):
                 raise APIError(403, "Gia đình chỉ được hủy đăng ký của mình.")
             if body.get("status") not in [
                 "Đã đăng ký",
+                "Danh sách chờ",
                 "Đã tham gia",
                 "Vắng mặt",
                 "Đã hủy",
             ]:
                 raise APIError(400, "Trạng thái tham gia không hợp lệ.")
+            if body.get("status") in ["Đã đăng ký", "Đã tham gia"] and old.get("status") in ["Danh sách chờ", "Vắng mặt"]:
+                activity = get_record(db, old["activity_id"], "activities")
+                occupied = sum(e["id"] != old["id"] and e["activity_id"] == activity["id"] and e.get("status") not in ["Đã hủy", "Danh sách chờ"] for e in rows(db, "enrollments"))
+                if occupied >= activity["capacity"]:
+                    raise APIError(409, "Workshop đã đủ chỗ. Chưa thể xác nhận học viên này.")
             if old.get("status") == "Đã hủy":
                 raise APIError(
                     400, "Đăng ký đã hủy không thể phục hồi; hãy tạo đăng ký mới."
@@ -351,9 +400,11 @@ def validate(db, user, kind, body, old=None):
         ]
         if any(e["resident"] == body.get("resident") for e in enrolled):
             raise APIError(409, "Người lưu trú đã đăng ký hoạt động này.")
-        if len(enrolled) >= activity["capacity"]:
-            raise APIError(409, "Hoạt động đã đủ số lượng.")
-        body["status"] = "Đã đăng ký"
+        occupied = sum(e.get("status") != "Danh sách chờ" for e in enrolled)
+        if occupied >= activity["capacity"] and body.get("waitlist") is not True:
+            raise APIError(409, "Workshop đã đủ chỗ. Bạn có thể đăng ký danh sách chờ.")
+        body["status"] = "Danh sách chờ" if occupied >= activity["capacity"] else "Đã đăng ký"
+        body.pop("waitlist", None)
     elif kind in ["visits", "shifts"]:
         iso_date(body.get("date"))
         if kind == "visits" and iso_date(body["date"]) < date.today():
@@ -375,7 +426,7 @@ def validate(db, user, kind, body, old=None):
     if kind == "reports":
         body["shared"] = body.get("shared") is True
     if kind in ["care", "incidents", "requests"]:
-        if kind == "requests" and user["role"] == "FAMILY":
+        if kind == "requests" and user["role"] in LEARNERS:
             if old and old["owner"] != user["id"]:
                 raise APIError(403, "Chỉ người gửi được sửa yêu cầu.")
             for key in ["status", "response", "assignee"]:
@@ -388,7 +439,7 @@ def validate(db, user, kind, body, old=None):
             raise APIError(400, "Trạng thái công việc không hợp lệ.")
         if kind == "care":
             iso_date(body.get("due"))
-    if kind == "visits" and user["role"] == "FAMILY":
+    if kind == "visits" and user["role"] in LEARNERS:
         if old and old["owner"] != user["id"]:
             raise APIError(403, "Chỉ người đặt được sửa lịch thăm.")
         body["status"] = old.get("status", "Chờ duyệt") if old else "Chờ duyệt"

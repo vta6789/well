@@ -4,12 +4,13 @@
   --green-light: #f0fdf4;
   --ink: #292524;
   --muted: #78716c;
-  --paper: #fafaf9;
+  --paper: #faf8f2;
   --border: #e7e5e4;
   --gold: #bf9052;
   --red: #a44639;
   --shadow: 0 14px 45px #243e3309;
-  --font-body: "Plus Jakarta Sans", Arial, sans-serif;
+  --font-body: "Nunito Sans", "Plus Jakarta Sans", Arial, sans-serif;
+  --font-display: "Lora", Georgia, serif;
   --radius-button: 12px;
   --radius-card: 24px;
 }

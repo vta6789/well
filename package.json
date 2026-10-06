@@ -10,6 +10,8 @@
     "vendor:fonts": "python tools/vendor_fonts.py"
   },
   "devDependencies": {
+    "@fontsource/lora": "^5.3.0",
+    "@fontsource/nunito-sans": "^5.3.0",
     "@fontsource/plus-jakarta-sans": "^5.3.0",
     "@fortawesome/fontawesome-free": "6.4.0",
     "@playwright/test": "^1.63.0",

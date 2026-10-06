@@ -1,10 +1,20 @@
-# Wellness Farm — phát triển tiếp dự án HTML gốc
+# Wellness Farm — học, thực hành và trải nghiệm miễn phí
 
-Phát triển tiếp từ `wellness_farm_web_app (1).html` của người dùng: giữ nguyên trang chủ, ảnh nông trại, banner tác giả, giới thiệu, khảo sát 278+, bốn nhóm đối tượng, năm phân khu, quy trình tám bước, NABC/SDGs, giao diện ba gói dưỡng lão và footer. Các module quản lý được tích hợp vào thanh điều hướng gốc, cùng màu xanh và kiểu chữ của dự án.
+Phát triển tiếp từ `wellness_farm_web_app (1).html` theo hướng **học → tạo giá trị → du lịch**, với thông điệp “Đến để học. Ở lại để tạo giá trị.” Trang chủ, lịch workshop, Nghệ nhân bạc và đăng ký trải nghiệm dùng cùng màu xanh, font và ảnh nông trại của dự án. Trang quản trị riêng giữ menu bên trái và quyền quản lý dữ liệu cũ.
+
+## Học – làm – du lịch
+
+- **Trải nghiệm / Học nghề / Nghệ nhân bạc** đều miễn phí. Máy chủ luôn đặt giá gói bằng 0, không yêu cầu thanh toán để tham gia. Khi khởi động, danh mục gói cũ được chuyển sang miễn phí; giá đã chốt trên đơn và giao dịch lịch sử được giữ lại.
+- **SENIOR** là học viên cao tuổi; **FAMILY** hỗ trợ người thân. **EXPERT** tổ chức workshop, theo dõi thực hành và xác nhận kỹ năng cho học viên trong workshop phụ trách, không được xem hồ sơ y tế. Người dùng gửi hồ sơ chuyên gia để admin/manager duyệt; duyệt xong cần đăng nhập lại.
+- Workshop có chủ đề, hình thức workshop/talkshow, chuyên gia phụ trách, mức vận động, lịch và số chỗ còn lại. Khi đủ chỗ, người dùng có thể đăng ký danh sách chờ; xác nhận từ danh sách chờ vẫn kiểm tra sức chứa.
+- Hành trình từng người gồm vườn riêng, kỹ năng đã học, nhật ký thực hành và sản phẩm. Kỹ năng do học viên ghi nhận cần chuyên gia hoặc quản lý xác nhận.
+- Trang **Nghệ nhân bạc** chỉ hiển thị câu chuyện và sản phẩm khi có đồng ý công khai và được duyệt. Thay đổi nội dung cần duyệt lại. Không công khai thông tin liên hệ hoặc sức khỏe. Khách gửi yêu cầu tham quan để admin xác nhận; lượt khách chỉ tính sau khi đã tham quan.
+- Bảng tác động dùng số liệu thật: workshop trong tháng, số hồ sơ học viên đã đăng ký/tham gia, bản ghi sản phẩm và lượt khách đã tham quan. Không thêm số liệu minh họa vào dữ liệu vận hành.
+- **Sức khỏe cơ bản** là phần tùy chọn thu gọn. Dữ liệu và chức năng chăm sóc cũ vẫn được giữ cho vai trò có quyền.
 
 File phát triển chính là `index.html`. URL `/wellness_farm_web_app.html` được server phục vụ từ cùng file; file HTML cũ chỉ còn là trang chuyển hướng. Backend thay thế cơ chế tài khoản/chuyến trong localStorage. Chỉ cần Python 3.12 trở lên để chạy. CSS, ảnh nông trại, font chữ và icon đều nằm trong `assets/`, không tải tài nguyên bên ngoài khi mở trang.
 
-Trang `/` luôn mở giao diện gốc, kể cả khi đã đăng nhập. “Trang quản lý” / “Không gian gia đình” mở các module mới. “Chuyến Đã Đăng Ký” mở danh sách lưu trú. Dropdown “Tất cả chức năng” cho phép chọn module theo quyền. Không dùng sidebar hay nhận diện “Sống an yên” của bản dựng trước.
+ADMIN dùng trang quản trị riêng với menu bên trái và bảng tổng quan. Các vai trò khác dùng menu nhóm trên thanh điều hướng để mở chức năng theo quyền.
 
 Nếu thay đổi CSS hoặc muốn lấy lại nội dung từ bản nguồn, dùng Node.js và các công cụ phát triển:
 
@@ -28,23 +38,23 @@ Mở http://127.0.0.1:8000. Không mở `index.html` trực tiếp bằng file:/
 
 ## Tài khoản
 
-Khách tự đăng ký sẽ luôn nhận vai trò FAMILY. Tạo tài khoản kỹ thuật và quản lý từ terminal:
+Khách tự đăng ký nhận vai trò FAMILY; nút “Đăng ký học viên cao tuổi” tạo tài khoản SENIOR. Đăng ký công khai không cấp quyền quản trị hoặc chuyên gia. Tạo tài khoản kỹ thuật và quản lý từ terminal:
 
 ```powershell
 python server.py --create-user
 ```
 
-Chọn ADMIN để quản lý tài khoản/quyền; chọn MANAGER để quản lý vận hành và chăm sóc. Nhập mật khẩu tối thiểu 12 ký tự tại lời nhắc ẩn. ADMIN không tự động có quyền xem hồ sơ y tế.
+Chọn ADMIN để quản lý tài khoản/quyền, tiếp nhận yêu cầu gia đình và quản lý toàn bộ hồ sơ, lưu trú, chăm sóc, tài chính. Chọn MANAGER để quản lý vận hành và chăm sóc. Nhập mật khẩu tối thiểu 12 ký tự tại lời nhắc ẩn.
 
-ADMIN có thể tạo thêm RECEPTION, NURSE, DOCTOR, ACCOUNTANT, MANAGER và FAMILY trong giao diện. MANAGER vào hồ sơ người lưu trú để phân công bác sĩ/điều dưỡng và liên kết gia đình. Nhân viên y tế chỉ thấy hồ sơ được phân công; gia đình chỉ thấy hồ sơ được liên kết.
+ADMIN có trang quản trị riêng với menu bên trái và bảng tổng quan người dùng, đơn lưu trú chờ duyệt, yêu cầu gia đình cần xử lý. Trên điện thoại, mở nút menu để chọn chức năng. Nút Làm mới cập nhật thông tin từ người dùng. ADMIN có thể tạo thêm RECEPTION, NURSE, DOCTOR, ACCOUNTANT, MANAGER và FAMILY trong giao diện. ADMIN hoặc MANAGER vào hồ sơ người lưu trú để phân công bác sĩ/điều dưỡng và liên kết gia đình. Nhân viên y tế chỉ thấy hồ sơ được phân công; gia đình chỉ thấy hồ sơ được liên kết.
 
-Bật MFA trong Cài đặt & bảo mật: nhập mật khẩu, thêm khóa TOTP vào ứng dụng xác thực, xác nhận mã. Mã đã dùng không được sử dụng lại để đăng nhập. Nếu mất ứng dụng xác thực, người quản trị máy có thể khôi phục tài khoản qua lệnh bên dưới, sau khi xác minh người yêu cầu:
+Đăng ký bằng họ tên, email và mật khẩu (tối thiểu 12 ký tự). Đăng nhập bằng email và mật khẩu, không cần số điện thoại hoặc mã xác thực. Người quản trị máy có thể khôi phục mật khẩu qua lệnh bên dưới, sau khi xác minh người yêu cầu:
 
 ```powershell
 python server.py --reset-password
 ```
 
-Lệnh này đặt lại mật khẩu, xóa MFA và thu hồi phiên; ghi nhật ký thao tác. Email đặt lại mật khẩu/xác minh email chưa được tích hợp.
+Lệnh này đặt lại mật khẩu và thu hồi phiên; ghi nhật ký thao tác. Email đặt lại mật khẩu/xác minh email chưa được tích hợp.
 
 ## Dữ liệu mẫu
 
@@ -77,15 +87,15 @@ Lệnh tạo dữ liệu hoàn toàn giả và in mật khẩu ngẫu nhiên cho
 | Tài chính | Thu sau đối soát, mã giao dịch duy nhất, hoàn tiền không vượt số đã thu, công nợ, biên nhận nội bộ và CSV |
 | Báo cáo | Báo cáo chăm sóc có tùy chọn chia sẻ, bản in/lưu PDF qua trình duyệt, doanh thu thực thu và công suất |
 | Tệp riêng tư | PDF/PNG/JPEG tối đa 5 MB, kiểm tra chữ ký tệp, tải qua API kiểm tra quyền, không phục vụ từ thư mục công khai |
-| Bảo mật | Mật khẩu scrypt, MFA TOTP, phiên 8 giờ, cookie HttpOnly/SameSite, CSRF/Origin/Host, giới hạn thử đăng nhập, nhật ký đọc/sửa, khóa tài khoản thu hồi phiên |
+| Bảo mật | Mật khẩu scrypt, phiên 8 giờ, cookie HttpOnly/SameSite, CSRF/Origin/Host, giới hạn thử đăng nhập, nhật ký đọc/sửa, khóa tài khoản thu hồi phiên |
 | Giao diện | Desktop/mobile, menu thu gọn, tăng cỡ chữ, bàn phím, trường có nhãn, thông báo và trạng thái trống |
 
 ## Quy trình sử dụng
 
 1. Gia đình đăng ký tài khoản và tạo hồ sơ người thân.
-2. Đặt gói với ngày đến và thời lượng. Giá được tính lại tại máy chủ.
+2. Chọn workshop hoặc hành trình miễn phí; nếu cần lưu trú, chọn ngày đến và thời lượng để quản lý xác nhận.
 3. Lễ tân/quản lý xem hồ sơ, đánh giá tiếp nhận, chọn phòng và xác nhận; có thể chuyển vào danh sách chờ.
-4. Kế toán ghi nhận giao dịch sau khi đối soát thật. Đơn lưu trú và trạng thái tiền là hai nghiệp vụ độc lập.
+4. Người dùng không phải thanh toán cho các trải nghiệm mới. Kế toán chỉ dùng phần tài chính để đối soát giao dịch lịch sử khi cần.
 5. Quản lý phân công nhân viên chăm sóc vào hồ sơ.
 6. Nhân viên ghi công việc, chỉ số, bữa ăn, bàn giao và báo cáo. Chỉ định thuốc do bác sĩ hoặc quản lý được cấp quyền nhập.
 7. Báo cáo chia sẻ chỉ xuất hiện cho gia đình khi báo cáo được chọn chia sẻ và hồ sơ có sự đồng ý. Gia đình có thể thu hồi sự đồng ý.
@@ -115,7 +125,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Test dùng database tạm riêng: giá/trạng thái ở server, giả mạo vai trò, truy cập gia đình khác, phân công nhân viên, CSRF/Origin, xác nhận phòng đồng thời, giao dịch trùng/hoàn tiền, sự đồng ý chia sẻ, tệp riêng tư, khóa phiên, mật khẩu, sức chứa hoạt động và TOTP/chống dùng lại mã.
+Test dùng database tạm riêng: giá/trạng thái ở server, giả mạo vai trò, truy cập gia đình khác, phân công nhân viên, CSRF/Origin, xác nhận phòng đồng thời, giao dịch trùng/hoàn tiền, sự đồng ý chia sẻ, tệp riêng tư, khóa phiên, mật khẩu, sức chứa hoạt động và đăng ký không cần số điện thoại.
 
 ## Giới hạn cần xử lý trước triển khai công khai
 
@@ -123,8 +133,8 @@ Test dùng database tạm riêng: giá/trạng thái ở server, giả mạo vai
 
 - Thanh toán ngân hàng tự động, VietQR, email/Zalo/SMS, xác minh liên hệ và thiết bị y tế chưa kết nối; màn hình thể hiện trạng thái này. Không tạo giao dịch tiền thật. Thông báo hiện được tổng hợp khi tải/làm mới, chưa có push thời gian thực.
 - Server HTTP chuẩn của Python được giới hạn loopback. Khi triển khai cần application server phù hợp, HTTPS, bật `WF_COOKIE_SECURE=1`, cấu hình Host/Origin tin cậy, rate limit dùng chung và quản lý session phù hợp. Không mở trực tiếp server này ra Internet.
-- Database, tệp và khóa TOTP chưa mã hóa riêng ở lớp ứng dụng. Cần mã hóa ổ đĩa/backup, quản lý khóa và quyền filesystem; tệp chỉ kiểm tra định dạng, chưa quét malware.
-- MFA hiện do người dùng bật; chưa ép chính sách bắt buộc cho từng vai trò. Tài khoản có quyền truy cập máy/database có thể khôi phục mật khẩu; cần quy trình xác minh và bảo vệ truy cập máy.
+- Database và tệp chưa mã hóa riêng ở lớp ứng dụng. Cần mã hóa ổ đĩa/backup, quản lý khóa và quyền filesystem; tệp chỉ kiểm tra định dạng, chưa quét malware.
+- Tài khoản có quyền truy cập máy/database có thể khôi phục mật khẩu; cần quy trình xác minh và bảo vệ truy cập máy.
 - Nhật ký nằm trong cùng database, không chống chỉnh sửa bởi người quản trị máy. Cần kho nhật ký riêng, giám sát, thời hạn lưu trữ và diễn tập khôi phục.
 - Chưa có tự động xóa/ẩn danh theo thời hạn, xuất toàn bộ hồ sơ theo yêu cầu quyền riêng tư hoặc quản lý đồng ý pháp lý theo từng mục đích.
 - Cơ sở hiện là trường thông tin trên phòng/ca; chưa có phân quyền tách dữ liệu theo cơ sở. Chưa có giữ chỗ tự hết hạn, dịch vụ cộng thêm/khuyến mãi hoặc bộ tối ưu tự động phân ca.
@@ -140,11 +150,14 @@ Các tích hợp cần thông tin nhà cung cấp, tài khoản và yêu cầu t
 - `frontend/components.js`: modal, focus, thông báo và component dùng lại.
 - `frontend/navigation.js`, `pages.js`: điều hướng và các trang nghiệp vụ.
 - `frontend/forms.js`, `account.js`: biểu mẫu và tài khoản; `events.js`, `bootstrap.js`: sự kiện và khởi động.
+- `frontend/learning.js`, `backend/learning.py`: workshop, hành trình học, công khai nghệ nhân, tham quan và bảng tác động.
 - `backend/security.py`, `policy.py`, `records.py`, `domain.py`: xác thực, vai trò, truy vấn và quy tắc nghiệp vụ. `server.py` giữ HTTP và CLI.
 - `design-tokens.css`: màu, font và bán kính chung; `style.css` là CSS component dễ đọc, `original-input.css` là nguồn Tailwind. Không sửa trực tiếp `original-theme.css` được sinh bởi build.
 - `tests/e2e/mock-api.js`: fixture mô phỏng lỗi mạng; các luồng đăng ký/đăng xuất dùng API thật và database tạm.
 
-Nút **Cỡ chữ Aᴀ** có ngay trên thanh điều hướng; **Đổi cỡ chữ Aᴀ** cũng có trong Cài đặt. Trạng thái được lưu sau khi tải lại. Modal có nhãn, focus ban đầu, vòng Tab/Shift+Tab, đóng bằng Esc và trả focus về nút mở.
+Thanh điều hướng ứng dụng có tối đa bốn nhóm: **Tổng quan**, **Lưu trú**, **Chăm sóc** và **Vận hành** (gia đình thấy **Tiện ích**). Mỗi nhóm mở danh sách chức năng theo vai trò và đánh dấu trang đang xem. Trên màn hình hẹp, một nút **Chức năng** mở danh sách có tiêu đề nhóm, không cần kéo thanh điều hướng ngang. Menu đóng khi chọn mục, bấm ngoài hoặc nhấn Esc.
+
+Nút **Cỡ chữ Aᴀ** nằm trong menu tài khoản ở góc phải. Trạng thái được lưu sau khi tải lại. Modal có nhãn, focus ban đầu, vòng Tab/Shift+Tab, đóng bằng Esc và trả focus về nút mở.
 
 CI ở `.github/workflows/ci.yml` chạy unittest, kiểm tra cú pháp JavaScript, tái tạo CSS và E2E Chromium trên hai kích thước desktop/mobile. CI sẽ chạy khi repository được đẩy lên GitHub; kiểm thử cục bộ dùng cùng lệnh.
 
@@ -160,6 +173,8 @@ python server.py
 Cookie đăng nhập và xóa phiên đều có `Secure` khi bật chế độ này. Origin yêu cầu HTTPS; proxy phải giữ Host localhost đúng cổng backend. Không tin `X-Forwarded-Proto` do client tự gửi. Đây là cấu hình hỗ trợ HTTPS, không phải cài đặt HTTPS proxy tự động.
 
 Font Plus Jakarta Sans được phân phối cùng giấy phép trong `assets/fonts/LICENSE.txt`; dùng `npm run vendor:fonts` nếu cần lấy lại font từ package Fontsource. Ảnh nông trại được lưu từ URL Unsplash đã có trong dự án.
+
+Giao diện dùng **Lora** cho tiêu đề và **Nunito Sans** cho nội dung, có bộ ký tự tiếng Việt và được lưu trong `assets/fonts/` cùng giấy phép. `npm run vendor:fonts` tái tạo cả ba bộ font từ các package Fontsource. Nền kem/xanh lá, khung ảnh vòm, thẻ nổi và các họa tiết cây lá được khai báo trong `original-input.css`. Hiệu ứng chuyển trang, xuất hiện khi cuộn và số liệu tổng quan nằm trong `frontend/bootstrap.js`; tự tắt khi thiết bị bật giảm chuyển động. Điều hướng bằng bàn phím và bản in luôn hiển thị nội dung ngay.
 
 ### Cảnh báo dependency của công cụ build
 
