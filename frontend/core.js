@@ -9,11 +9,11 @@ const esc = (v) =>
         c
       ],
   );
-const money = (v) => Number(v || 0).toLocaleString("vi-VN") + " ₫";
+const money = (v) => new Intl.NumberFormat(uiLocale(), { style: "currency", currency: "VND", currencyDisplay: language === "en" ? "code" : "symbol", maximumFractionDigits: 0 }).format(Number(v || 0));
 const day = (v) =>
   v
     ? new Date(v.length === 10 ? v + "T12:00:00" : v).toLocaleDateString(
-        "vi-VN",
+        uiLocale(),
       )
     : "—";
 const today = () => {
@@ -122,11 +122,11 @@ const lookup = (kind, id) => data(kind).find((x) => x.id === id);
 const residentName = (id) =>
   lookup("residents", id)?.name || "Hồ sơ được liên kết";
 const tag = (value) =>
-  `<span class="tag ${["Đã hủy", "Khẩn cấp", "Bỏ lỡ", "Từ chối"].includes(value) ? "danger" : ["Chờ duyệt", "Chờ xử lý", "Đang xử lý", "Cần theo dõi"].includes(value) ? "warn" : ""}">${esc(value || "—")}</span>`;
+  `<span class="tag ${["Đã hủy", "Khẩn cấp", "Bỏ lỡ", "Từ chối"].includes(value) ? "danger" : ["Chờ duyệt", "Chờ xử lý", "Đang xử lý", "Cần theo dõi"].includes(value) ? "warn" : ""}">${esc(t(value || "—"))}</span>`;
 let toastTimer;
 function toast(message, error = false) {
   const el = $("#toast");
-  el.textContent = message;
+  el.textContent = t(message);
   el.className = "show" + (error ? " error" : "");
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => (el.className = ""), 4500);
@@ -142,7 +142,7 @@ async function api(path, method = "GET", body) {
   });
   const result = await response.json();
   if (!response.ok)
-    throw new Error(result.error || "Không thể kết nối máy chủ.");
+    throw new Error(t(result.error || "Không thể kết nối máy chủ."));
   return result;
 }
 async function refresh() {

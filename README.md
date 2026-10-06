@@ -4,7 +4,9 @@ Phát triển tiếp từ `wellness_farm_web_app (1).html` theo hướng **học
 
 ## Học – làm – du lịch
 
-- **Trải nghiệm / Học nghề / Nghệ nhân bạc** đều miễn phí. Máy chủ luôn đặt giá gói bằng 0, không yêu cầu thanh toán để tham gia. Khi khởi động, danh mục gói cũ được chuyển sang miễn phí; giá đã chốt trên đơn và giao dịch lịch sử được giữ lại.
+- **Đăng ký online** có ba gói: Ngày **450.000đ/1 ngày**, Tuần **2.000.000đ/7 ngày**, Tháng **9.000.000đ/30 ngày**. Cả ba cùng có trải nghiệm, workshop và talkshow. Gói Ngày gồm sàng lọc huyết áp, nhịp tim, đồ ăn và nước uống. Gói Tuần thêm theo dõi hai lần/ngày trong 7 ngày, tư vấn dinh dưỡng và ưu tiên đặt lịch. Gói Tháng thêm chuyên gia khám định kỳ, tư vấn dinh dưỡng mỗi tuần, ưu tiên đặt lịch và xử lý hồ sơ cao nhất. Đội ngũ xác nhận lịch chăm sóc khi tiếp nhận.
+- Danh mục cũ được nâng cấp một lần; giữ nguyên mã gói, hồ sơ, giá và quyền lợi đã chốt của đơn lịch sử. Các lần khởi động sau không ghi đè giá admin đã sửa. Máy chủ tính giá và quyền lợi khi tạo đơn; người dùng không tự nâng mức ưu tiên. Admin xem đơn theo ưu tiên gói; ưu tiên hồ sơ dựa trên gói Tháng đã xác nhận và chưa hết hạn, sau mức khẩn cấp của yêu cầu.
+- Nút **VI / EN** trên thanh đầu trang lưu lựa chọn ngôn ngữ trong trình duyệt. Trang công khai, đăng ký, tài khoản và luồng người học có bản tiếng Anh; tiền tệ vẫn là VND. Workshop, câu chuyện và sản phẩm có trường tiếng Anh tùy chọn. Nội dung chưa có bản tiếng Anh giữ nguyên bản gốc, không tự dịch thông tin người dùng.
 - **SENIOR** là học viên cao tuổi; **FAMILY** hỗ trợ người thân. **EXPERT** tổ chức workshop, theo dõi thực hành và xác nhận kỹ năng cho học viên trong workshop phụ trách, không được xem hồ sơ y tế. Người dùng gửi hồ sơ chuyên gia để admin/manager duyệt; duyệt xong cần đăng nhập lại.
 - Workshop có chủ đề, hình thức workshop/talkshow, chuyên gia phụ trách, mức vận động, lịch và số chỗ còn lại. Khi đủ chỗ, người dùng có thể đăng ký danh sách chờ; xác nhận từ danh sách chờ vẫn kiểm tra sức chứa.
 - Hành trình từng người gồm vườn riêng, kỹ năng đã học, nhật ký thực hành và sản phẩm. Kỹ năng do học viên ghi nhận cần chuyên gia hoặc quản lý xác nhận.

@@ -48,7 +48,8 @@ COOKIE_SECURE = os.environ.get("WF_COOKIE_SECURE") == "1"
 DB = DATA / "wellness.sqlite3"
 LOCK = threading.RLock()
 from backend.policy import ROLES, OPS, CLINICAL, FINANCE, STATES
-from backend.learning import LEARNERS, LEARNING_KINDS, public_learning, migrate_packages
+from backend.learning import LEARNERS, LEARNING_KINDS, public_learning
+from backend.packages import migrate_packages
 
 ATTEMPTS = {}
 
@@ -256,7 +257,7 @@ class Handler(BaseHTTPRequestHandler):
                 if path == "/index.html":
                     assets[path] = ("index.html", "text/html; charset=utf-8")
                 elif re.fullmatch(
-                    r"/frontend/(core|components|navigation|pages|forms|account|learning|events|bootstrap)\.js",
+                    r"/frontend/(i18n|core|components|navigation|pages|forms|account|learning|events|bootstrap)\.js",
                     path,
                 ):
                     assets[path] = (path[1:], "application/javascript; charset=utf-8")
@@ -482,7 +483,7 @@ class Handler(BaseHTTPRequestHandler):
                 kind = parts[1]
                 if method == "GET":
                     result = [
-                        project(user, kind, item)
+                        project(user, kind, item, db)
                         for item in rows(db, kind)
                         if visible(db, user, kind, item)
                     ]
@@ -556,7 +557,7 @@ class Handler(BaseHTTPRequestHandler):
                     }
                     record = insert(db, kind, owner, resident_id, clean)
                 audit(db, user, "Cập nhật" if old else "Tạo mới", kind, record)
-                return self.send(200, project(user, kind, get_record(db, record, kind)))
+                return self.send(200, project(user, kind, get_record(db, record, kind), db))
         except APIError as e:
             self.send(e.status, {"error": e.message})
         except (ValueError, TypeError, KeyError, json.JSONDecodeError):

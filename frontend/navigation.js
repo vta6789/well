@@ -174,7 +174,7 @@ function navigationGroups() {
   return result;
 }
 function navigationLink(link) {
-  return `<button type="button" data-page="${link.id}" ${state.page === link.id ? 'aria-current="page"' : ""}><span class="project-link-icon" aria-hidden="true">${link.icon}</span><span>${esc(link.label)}</span>${state.page === link.id ? '<span class="project-current-mark" aria-hidden="true">✓</span>' : ""}</button>`;
+  return `<button type="button" data-page="${link.id}" ${state.page === link.id ? 'aria-current="page"' : ""}><span class="project-link-icon" aria-hidden="true">${link.icon}</span><span>${esc(t(link.label))}</span>${state.page === link.id ? '<span class="project-current-mark" aria-hidden="true">✓</span>' : ""}</button>`;
 }
 function adminShell() {
   const groups = navigationGroups();
@@ -183,13 +183,13 @@ function adminShell() {
   $("#app").innerHTML = `<div class="original-site admin-portal">
     <aside id="sidebar" class="admin-sidebar" aria-label="Menu quản trị">
       <button class="admin-brand" data-page="dashboard"><span class="admin-brand-icon" aria-hidden="true">❧</span><span>Wellness Farm<small>TRANG QUẢN TRỊ</small></span></button>
-      <div class="admin-access-label">Quản trị viên <span>ADMIN</span></div>
-      <nav aria-label="Chức năng quản trị">${groups.map((group) => `<section class="admin-nav-group"><h2>${esc(group.title)}</h2>${group.links.map(navigationLink).join("")}</section>`).join("")}</nav>
+      <div class="admin-access-label">${esc(t("Quản trị viên"))}<span>ADMIN</span></div>
+      <nav aria-label="Chức năng quản trị">${groups.map((group) => `<section class="admin-nav-group"><h2>${esc(t(group.title))}</h2>${group.links.map(navigationLink).join("")}</section>`).join("")}</nav>
       <div class="admin-sidebar-bottom"><button data-page="settings">⚙ Cài đặt & bảo mật</button><button data-action="logout">↪ Đăng xuất</button></div>
     </aside>
     <button class="admin-menu-backdrop" data-action="menu" aria-label="Đóng menu quản trị"></button>
-    <div class="admin-workspace"><header class="admin-header"><div class="admin-header-title"><button class="admin-menu-toggle" data-action="menu" aria-label="Mở menu quản trị" aria-controls="sidebar" aria-expanded="false">☰</button><div><small>Quản trị & quản lý</small><strong>${esc(pageTitle)}</strong></div></div>
-      <div class="admin-header-actions">${actionButton("Làm mới", "refresh", "", "secondary compact")}<details class="project-user-menu"><summary><span class="project-user-avatar" aria-hidden="true">${esc(state.user.name.trim().charAt(0).toUpperCase())}</span><span class="project-user-name">${esc(state.user.name)}</span><span aria-hidden="true">⌄</span><span class="project-sr-only">Tài khoản</span></summary><div class="project-user-menu-items"><div class="project-account-label">${esc(state.user.email)}<small>Quản trị viên</small></div>${actionButton("Cỡ chữ Aᴀ", "font", "", "project-font-toggle")}<button data-page="settings">Cài đặt & bảo mật</button><button class="project-logout" data-action="logout">Đăng xuất</button></div></details></div>
+    <div class="admin-workspace"><header class="admin-header"><div class="admin-header-title"><button class="admin-menu-toggle" data-action="menu" aria-label="Mở menu quản trị" aria-controls="sidebar" aria-expanded="false">☰</button><div><small>Quản trị & quản lý</small><strong>${esc(t(pageTitle))}</strong></div></div>
+      <div class="admin-header-actions">${languageSwitch()}${actionButton("Làm mới", "refresh", "", "secondary compact")}<details class="project-user-menu"><summary><span class="project-user-avatar" aria-hidden="true">${esc(state.user.name.trim().charAt(0).toUpperCase())}</span><span class="project-user-name">${esc(state.user.name)}</span><span aria-hidden="true">⌄</span><span class="project-sr-only">${esc(t("Tài khoản"))}</span></summary><div class="project-user-menu-items"><div class="project-account-label">${esc(state.user.email)}<small>${esc(t("Quản trị viên"))}</small></div>${actionButton("Cỡ chữ Aᴀ", "font", "", "project-font-toggle")}<button data-page="settings">${esc(t("Cài đặt & bảo mật"))}</button><button class="project-logout" data-action="logout">${esc(t("Đăng xuất"))}</button></div></details></div>
     </header><main class="main admin-main" id="main" tabindex="-1"></main></div>
   </div>`;
   if (state.data.demo) $("#main").insertAdjacentHTML("beforebegin", '<div class="notice" role="status">DỮ LIỆU DEMO · Tài khoản, hồ sơ và giao dịch hoàn toàn giả.</div>');
@@ -202,16 +202,17 @@ function shell() {
   const desktopNav = groups
     .map(
       (group) =>
-        `<details class="project-function-menu"><summary class="${group.links.some((link) => link.id === state.page) ? "active" : ""}">${esc(group.title)}<span aria-hidden="true">⌄</span></summary><div class="project-function-items">${group.links.map(navigationLink).join("")}</div></details>`,
+        `<details class="project-function-menu"><summary class="${group.links.some((link) => link.id === state.page) ? "active" : ""}">${esc(t(group.title))}<span aria-hidden="true">⌄</span></summary><div class="project-function-items">${group.links.map(navigationLink).join("")}</div></details>`,
     )
     .join("");
-  const mobileNav = `<details class="project-mobile-nav"><summary>Chức năng <span aria-hidden="true">⌄</span></summary><div class="project-mobile-panel">${groups.map((group) => `<section><h2>${esc(group.title)}</h2>${group.links.map(navigationLink).join("")}</section>`).join("")}</div></details>`;
+  const mobileNav = `<details class="project-mobile-nav"><summary>${esc(t("Chức năng"))}<span aria-hidden="true">⌄</span></summary><div class="project-mobile-panel">${groups.map((group) => `<section><h2>${esc(t(group.title))}</h2>${group.links.map(navigationLink).join("")}</section>`).join("")}</div></details>`;
+  translateStatic($("footer", original));
   const logo = $(
     ".flex.items-center.gap-3.cursor-pointer",
     original,
   ).outerHTML.replace('data-action="original-home"', 'data-page="dashboard"');
   $("#app").innerHTML =
-    `<div class="original-site"><header class="project-app-header sticky top-0 z-40"><div class="project-app-header-inner">${logo}<nav class="project-desktop-nav" aria-label="Chức năng theo vai trò">${desktopNav}</nav><div class="project-user-controls">${mobileNav}<details class="project-user-menu"><summary><span class="project-user-avatar" aria-hidden="true">${esc(state.user.name.trim().charAt(0).toUpperCase())}</span><span class="project-user-name">${esc(state.user.name)}</span><span class="project-user-chevron" aria-hidden="true">⌄</span><span class="project-sr-only">Tài khoản</span></summary><div class="project-user-menu-items"><div class="project-account-label">${esc(state.user.name)}<small>${esc(roleNames[state.user.role])}</small></div>${actionButton("Cỡ chữ Aᴀ", "font", "", "project-font-toggle")}<button data-page="settings">Cài đặt & bảo mật</button><button data-action="project">Về dự án</button><button class="project-logout" data-action="logout">Đăng xuất</button></div></details></div></div></header><div class="project-workspace"><main class="main upgraded-module" id="main" tabindex="-1"></main></div>${$("footer", original).outerHTML}</div>`;
+    `<div class="original-site"><header class="project-app-header sticky top-0 z-40"><div class="project-app-header-inner">${logo}<nav class="project-desktop-nav" aria-label="Chức năng theo vai trò">${desktopNav}</nav><div class="project-user-controls">${languageSwitch()}${mobileNav}<details class="project-user-menu"><summary><span class="project-user-avatar" aria-hidden="true">${esc(state.user.name.trim().charAt(0).toUpperCase())}</span><span class="project-user-name">${esc(state.user.name)}</span><span class="project-user-chevron" aria-hidden="true">⌄</span><span class="project-sr-only">${esc(t("Tài khoản"))}</span></summary><div class="project-user-menu-items"><div class="project-account-label">${esc(state.user.name)}<small>${esc(t(roleNames[state.user.role]))}</small></div>${actionButton("Cỡ chữ Aᴀ", "font", "", "project-font-toggle")}<button data-page="settings">${esc(t("Cài đặt & bảo mật"))}</button><button data-action="project">${esc(t("Về dự án"))}</button><button class="project-logout" data-action="logout">${esc(t("Đăng xuất"))}</button></div></details></div></div></header><div class="project-workspace"><main class="main upgraded-module" id="main" tabindex="-1"></main></div>${$("footer", original).outerHTML}</div>`;
   if (state.data.demo)
     $("#app").insertAdjacentHTML(
       "afterbegin",

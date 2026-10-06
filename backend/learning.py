@@ -64,11 +64,12 @@ def validate_learning(db, user, kind, body, old=None):
         if not old and any(r["resident"] == resident_id for r in rows(db, kind)):
             raise APIError(409, "Học viên đã có hồ sơ vườn riêng.")
         body = {"name": text_field(body, "name", True, 150), "story": text_field(body, "story", False, 3000),
+                "story_en": text_field(body, "story_en", False, 3000), "focus_en": text_field(body, "focus_en", False, 200),
                 "focus": text_field(body, "focus", True, 200), "location": text_field(body, "location", False, 200),
                 "public_consent": body.get("public_consent") is True,
                 "publication": body.get("publication", "Chờ duyệt")}
         if not manager:
-            body["publication"] = "Chờ duyệt" if not old or any(body[k] != old.get(k) for k in ["name", "story", "focus", "location"]) else old.get("publication", "Chờ duyệt")
+            body["publication"] = "Chờ duyệt" if not old or any(body[k] != old.get(k, "") for k in ["name", "story", "focus", "location", "story_en", "focus_en"]) else old.get("publication", "Chờ duyệt")
         if body["publication"] not in ["Chờ duyệt", "Đã duyệt", "Ẩn"]:
             raise APIError(400, "Trạng thái công khai không hợp lệ.")
     elif kind == "skills":
@@ -89,10 +90,11 @@ def validate_learning(db, user, kind, body, old=None):
                 "notes": text_field(body, "notes", True, 5000), "result": text_field(body, "result", False, 3000)}
     elif kind == "products":
         body = {"name": text_field(body, "name", True, 150), "description": text_field(body, "description", True, 3000),
+                "name_en": text_field(body, "name_en", False, 150), "description_en": text_field(body, "description_en", False, 3000),
                 "quantity": integer(body, "quantity", 1, 100000), "unit": text_field(body, "unit", True, 50),
                 "public_consent": body.get("public_consent") is True, "publication": body.get("publication", "Chờ duyệt")}
         if not manager:
-            body["publication"] = "Chờ duyệt" if not old or any(body[k] != old.get(k) for k in ["name", "description", "quantity", "unit"]) else old.get("publication", "Chờ duyệt")
+            body["publication"] = "Chờ duyệt" if not old or any(body[k] != old.get(k, "") for k in ["name", "description", "quantity", "unit", "name_en", "description_en"]) else old.get("publication", "Chờ duyệt")
         if body["publication"] not in ["Chờ duyệt", "Đã duyệt", "Ẩn"]:
             raise APIError(400, "Trạng thái công khai không hợp lệ.")
     if kind in ["gardens", "products"] and role == "EXPERT":
@@ -104,11 +106,12 @@ def public_learning(db):
     gardens = [g for g in rows(db, "gardens") if g.get("public_consent") and g.get("publication") == "Đã duyệt"]
     garden_by_resident = {g["resident"]: g for g in gardens}
     products = [{"id": p["id"], "name": p["name"], "description": p["description"], "quantity": p["quantity"],
+                 "name_en": p.get("name_en", ""), "description_en": p.get("description_en", ""),
                  "unit": p["unit"], "artisan_id": garden_by_resident[p["resident"]]["id"]}
                 for p in rows(db, "products") if p["resident"] in garden_by_resident and p.get("public_consent") and p.get("publication") == "Đã duyệt"]
     skills = rows(db, "skills")
     artisans = [{"id": g["id"], "name": g["name"], "story": g.get("story", ""), "focus": g["focus"],
-                 "location": g.get("location", ""),
+                 "location": g.get("location", ""), "focus_en": g.get("focus_en", ""), "story_en": g.get("story_en", ""),
                  "skills_count": sum(s["resident"] == g["resident"] and s.get("status") == "Đã học" for s in skills),
                  "products": [p for p in products if p["artisan_id"] == g["id"]]} for g in gardens]
     enrollment = rows(db, "enrollments")
@@ -119,7 +122,7 @@ def public_learning(db):
             continue
         expert = users.get(activity.get("expert_id"))
         count = sum(e["activity_id"] == activity["id"] and e.get("status") not in ["Đã hủy", "Danh sách chờ"] for e in enrollment)
-        workshops.append({k: activity.get(k, "") for k in ["id", "name", "description", "date", "time", "location", "topic", "format", "fitness", "capacity"]} | {
+        workshops.append({k: activity.get(k, "") for k in ["id", "name", "name_en", "description", "description_en", "date", "time", "location", "topic", "format", "fitness", "capacity"]} | {
             "remaining": max(0, activity["capacity"] - count), "expert_name": expert["name"] if expert and expert["active"] else activity.get("assignee", "Chưa phân công")})
     today = date.today().isoformat()
     completed_tours = [t for t in rows(db, "tour_bookings") if t.get("status") == "Đã tham quan"]
@@ -129,20 +132,3 @@ def public_learning(db):
     return {"workshops": sorted(workshops, key=lambda a: (a["date"], a.get("time", ""))), "artisans": artisans,
             "products": products, "impact": impact,
             "experts": [{"id": u["id"], "name": u["name"]} for u in users.values() if u["role"] == "EXPERT" and u["active"]]}
-
-
-def migrate_packages(db):
-    defaults = {
-        "Gói theo ngày": ("Trải nghiệm", "Một ngày khám phá vườn, tham gia workshop và kết nối cộng đồng."),
-        "Gói theo tuần": ("Học nghề", "Học cùng chuyên gia, thực hành tại vườn riêng và tạo sản phẩm đầu tiên."),
-        "Gói theo tháng": ("Nghệ nhân bạc", "Phát triển kỹ năng, chăm sóc vườn và chia sẻ sản phẩm, câu chuyện với du khách."),
-    }
-    from .records import update
-    for package in rows(db, "packages"):
-        changed = package.get("price") != 0
-        package["price"] = 0
-        if package["name"] in defaults:
-            package["name"], package["description"] = defaults[package["name"]]
-            changed = True
-        if changed:
-            update(db, package["id"], package)

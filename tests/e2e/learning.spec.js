@@ -1,6 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
-test("senior learns for free, shares an approved portfolio and books a garden visit", async ({ page, playwright }, info) => {
+test("senior joins workshops, shares an approved portfolio and books a garden visit", async ({ page, playwright }, info) => {
   const origin = "http://127.0.0.1:8123";
   const admin = await playwright.request.newContext({ baseURL: origin });
   try {
@@ -25,7 +25,7 @@ test("senior learns for free, shares an approved portfolio and books a garden vi
     await page.locator('nav [data-id="workshops"]').click();
     await page.screenshot({ path: `screenshots/learning-workshops-${info.project.name}.png`, fullPage: true });
     const card = page.locator(".learning-workshop").filter({ hasText: workshop.name });
-    await card.getByRole("button", { name: "Đăng ký miễn phí", exact: true }).click();
+    await card.getByRole("button", { name: "Đăng ký tham gia", exact: true }).click();
     await page.locator('#record-form input[name="name"]').fill("Học viên vườn rau");
     await page.locator('#record-form input[name="dob"]').fill("1955-01-01");
     await expect(page.locator(".learning-health-fields")).not.toHaveAttribute("open", "");

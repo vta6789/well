@@ -89,9 +89,10 @@ test("local assets and public navigation", async ({ page }) => {
   await page.locator('nav [data-id="artisans"]').click();
   await expect(page.getByRole("heading", { name: "Nghệ nhân bạc và sản phẩm của họ" })).toBeVisible();
   await page.locator('nav [data-id="packages"]').click();
-  await expect(page.getByRole("heading", { name: "Chọn hành trình trải nghiệm của bạn" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Đăng ký online tại Wellness Farm" })).toBeVisible();
   await expect(page.locator(".learning-package")).toHaveCount(3);
-  await expect(page.getByText("Miễn phí", { exact: true })).toHaveCount(3);
+  await expect(page.locator(".registration-price")).toHaveCount(3);
+  await expect(page.locator(".learning-package").filter({ hasText: "Gói Ngày" })).toContainText("450.000");
   expect(external).toEqual([]);
   expect(errors).toEqual([]);
 });

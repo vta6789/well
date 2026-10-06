@@ -65,7 +65,7 @@ function schema(kind, old = {}, preset = {}) {
           F("package_id", "Gói dịch vụ", "select", {
             options: data("packages")
               .filter((p) => p.active)
-              .map((p) => [p.id, p.name + " · " + money(p.price)]),
+              .map((p) => [p.id, localized(p) + " · " + money(p.price)]),
             required: true,
           }),
           F("start", "Ngày đến", "date", {
@@ -83,12 +83,11 @@ function schema(kind, old = {}, preset = {}) {
         ],
     packages: [
       F("name", "Tên gói", "text", { required: true }),
-      F("days", "Số ngày / đơn vị", "number", {
-        min: 1,
-        max: 365,
-        required: true,
-      }),
+      F("health_tier", "Loại gói", "select", { required: true, options: [["day", "Gói Ngày"], ["week", "Gói Tuần"], ["month", "Gói Tháng"]] }),
+      F("price", "Giá gói (VNĐ)", "number", { min: 1, max: 1000000000, required: true }),
+      F("name_en", "Tên tiếng Anh", "text"),
       F("description", "Quyền lợi và mô tả", "textarea", { wide: true }),
+      F("description_en", "Mô tả tiếng Anh", "textarea", { wide: true }),
       F("active", "Đang nhận đăng ký", "checkbox", { value: true }),
     ],
     rooms: [
@@ -223,7 +222,7 @@ function schema(kind, old = {}, preset = {}) {
       notes,
     ],
     activities: [
-      F("name", "Tên hoạt động", "text", { required: true }),
+      F("name_en", "Tên tiếng Anh (tùy chọn)"), F("description_en", "Mô tả tiếng Anh (tùy chọn)", "textarea", { wide: true }), F("name", "Tên hoạt động", "text", { required: true }),
       F("topic", "Chủ đề", "select", { options: ["Nông nghiệp", "Sức khỏe", "Số hóa", "Thủ công"] }),
       F("format", "Hình thức", "select", { options: ["Workshop", "Talkshow"] }),
       F("fitness", "Mức vận động phù hợp", "select", { options: ["Nhẹ nhàng", "Vừa sức", "Cần hỗ trợ"] }),
@@ -375,11 +374,11 @@ function schema(kind, old = {}, preset = {}) {
 }
 function fieldHTML(f, values) {
   const value = values[f.key] ?? f.value ?? "",
-    attr = `name="${f.key}" id="field-${f.key}" ${f.required ? "required" : ""} ${f.min !== undefined ? `min="${esc(f.min)}"` : ""} ${f.max !== undefined ? `max="${esc(f.max)}"` : ""} ${f.placeholder ? `placeholder="${esc(f.placeholder)}"` : ""}`;
+    attr = `name="${f.key}" id="field-${f.key}" ${f.required ? "required" : ""} ${f.min !== undefined ? `min="${esc(f.min)}"` : ""} ${f.max !== undefined ? `max="${esc(f.max)}"` : ""} ${f.placeholder ? `placeholder="${esc(t(f.placeholder))}"` : ""}`;
   if (f.type === "checkbox")
-    return `<label class="check-field ${f.wide ? "wide" : ""}"><input type="checkbox" ${attr} ${value ? "checked" : ""}><span>${esc(f.label)}</span></label>`;
+    return `<label class="check-field ${f.wide ? "wide" : ""}"><input type="checkbox" ${attr} ${value ? "checked" : ""}><span>${esc(t(f.label))}</span></label>`;
   if (f.type === "multi")
-    return `<fieldset class="wide card"><legend class="small">${esc(f.label)}</legend>${f.options.length ? f.options.map(([id, label]) => `<label class="check-field"><input name="${f.key}" type="checkbox" value="${id}" ${(Array.isArray(value) ? value : []).includes(id) ? "checked" : ""}>${esc(label)}</label>`).join("") : '<p class="muted small">Chưa có tài khoản phù hợp. Quản trị kỹ thuật cần tạo tài khoản trước.</p>'}</fieldset>`;
+    return `<fieldset class="wide card"><legend class="small">${esc(t(f.label))}</legend>${f.options.length ? f.options.map(([id, label]) => `<label class="check-field"><input name="${f.key}" type="checkbox" value="${id}" ${(Array.isArray(value) ? value : []).includes(id) ? "checked" : ""}>${esc(t(label))}</label>`).join("") : '<p class="muted small">Chưa có tài khoản phù hợp. Quản trị kỹ thuật cần tạo tài khoản trước.</p>'}</fieldset>`;
   let input;
   if (f.type === "textarea")
     input = `<textarea ${attr} rows="4" maxlength="10000">${esc(value)}</textarea>`;
@@ -387,12 +386,12 @@ function fieldHTML(f, values) {
     input = `<select ${attr}>${(f.options || [])
       .map((option) => {
         const [id, label] = Array.isArray(option) ? option : [option, option];
-        return `<option value="${esc(id)}" ${String(value) === String(id) ? "selected" : ""}>${esc(label)}</option>`;
+        return `<option value="${esc(id)}" ${String(value) === String(id) ? "selected" : ""}>${esc(t(label))}</option>`;
       })
       .join("")}</select>`;
   else
     input = `<input type="${f.type}" ${attr} ${f.type === "file" ? 'accept="application/pdf,image/png,image/jpeg"' : `value="${esc(value)}"`} ${f.type === "number" ? 'step="1"' : ""} ${f.type === "text" ? 'maxlength="500"' : ""}>`;
-  return `<label class="field ${f.wide ? "wide" : ""}" for="field-${f.key}">${esc(f.label)}${f.required ? " *" : ""}${input}${f.help ? `<small>${esc(f.help)}</small>` : ""}</label>`;
+  return `<label class="field ${f.wide ? "wide" : ""}" for="field-${f.key}">${esc(t(f.label))}${f.required ? " *" : ""}${input}${f.help ? `<small>${esc(t(f.help))}</small>` : ""}</label>`;
 }
 function editForm(kind, id = "", preset = {}) {
   const old = id ? lookup(kind, id) : {},
@@ -416,10 +415,10 @@ function editForm(kind, id = "", preset = {}) {
       "tour_bookings",
     ].includes(kind);
   modal(
-    (id ? "Cập nhật · " : "Tạo mới · ") + names[kind],
+    t(id ? "Cập nhật · " : "Tạo mới · ") + t(names[kind]),
     noResidents
-      ? `<div class="notice">Cần tạo hồ sơ người lưu trú trước.</div><div class="form-actions">${actionButton("Tạo hồ sơ", "new", "residents", "")}</div>`
-      : `${kind === "bookings" && id ? `<div class="notice section-title">${esc(old.code)} · ${day(old.start)} → ${day(old.end)} · ${money(old.total)}. Máy chủ kiểm tra sức chứa trước khi xác nhận phòng.</div>` : ""}${kind === "medications" ? '<div class="notice warn section-title">Nhập đúng chỉ định đã được chuyên môn duyệt. Hệ thống không tự đề xuất thuốc hoặc liều.</div>' : ""}<form id="record-form" data-kind="${kind}" data-id="${id}"><div class="form-grid">${renderRecordFields(fields, values, kind)}</div>${kind === "bookings" && !id ? '<div id="quote" class="notice section-title"></div>' : ""}${kind === "payments" ? '<div id="payment-balance" class="notice section-title"></div>' : ""}${kind === "meals" ? '<div id="diet-notice" class="notice section-title"></div>' : ""}<p id="form-error" class="error-text" role="alert"></p><div class="form-actions">${actionButton("Đóng", "close")}<button class="btn" type="submit">${id ? "Lưu thay đổi" : "Xác nhận tạo"}</button></div></form>`,
+      ? `<div class="notice">${esc(t("Cần tạo hồ sơ người lưu trú trước."))}</div><div class="form-actions">${actionButton("Tạo hồ sơ", "new", "residents", "")}</div>`
+      : `${kind === "bookings" && id ? `<div class="notice section-title">${esc(old.code)} · ${day(old.start)} → ${day(old.end)} · ${money(old.total)}. Máy chủ kiểm tra sức chứa trước khi xác nhận phòng.</div>` : ""}${kind === "medications" ? '<div class="notice warn section-title">Nhập đúng chỉ định đã được chuyên môn duyệt. Hệ thống không tự đề xuất thuốc hoặc liều.</div>' : ""}<form id="record-form" data-kind="${kind}" data-id="${id}"><div class="form-grid">${renderRecordFields(fields, values, kind)}</div>${kind === "bookings" && !id ? '<div id="quote" class="notice section-title"></div>' : ""}${kind === "payments" ? '<div id="payment-balance" class="notice section-title"></div>' : ""}${kind === "meals" ? '<div id="diet-notice" class="notice section-title"></div>' : ""}<p id="form-error" class="error-text" role="alert"></p><div class="form-actions">${actionButton("Đóng", "close")}<button class="btn" type="submit">${esc(t(id ? "Lưu thay đổi" : "Xác nhận tạo"))}</button></div></form>`,
   );
   if (!noResidents) {
     $("#record-form").addEventListener("submit", saveForm);
@@ -445,7 +444,7 @@ function quote() {
   const end = new Date(start + "T12:00:00");
   end.setDate(end.getDate() + duration * p.days);
   $("#quote").textContent =
-    `Dự kiến ${duration * p.days} ngày · Ngày về ${end.toLocaleDateString("vi-VN")} · Miễn phí. Lịch cần được quản trị viên xác nhận theo sức chứa.`;
+    t("Dự kiến {days} ngày · Ngày về {end} · Tổng phí {price}. Lịch cần được đội ngũ xác nhận theo sức chứa.", { days: duration * p.days, end: end.toLocaleDateString(uiLocale()), price: money(p.price * duration) });
 }
 function paymentBalance() {
   const b = lookup("bookings", $("#field-booking_id")?.value);
@@ -509,6 +508,11 @@ async function saveForm(e) {
       const workshopId = state.pendingWorkshop;
       state.pendingWorkshop = "";
       await learningIntent("learning-enroll", workshopId);
+    }
+    if (kind === "residents" && state.pendingBookingPackage) {
+      const packageId = state.pendingBookingPackage;
+      state.pendingBookingPackage = "";
+      editForm("bookings", "", { package_id: packageId });
     }
     toast("Đã lưu thành công.");
   } catch (error) {

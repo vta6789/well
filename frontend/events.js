@@ -4,6 +4,7 @@ document.addEventListener("click", async (e) => {
   const id = button.dataset.id,
     action = button.dataset.action;
   try {
+    if (action === "language") return await setLanguage(id);
     if (action?.startsWith("learning-")) return await learningAction(action, id);
     if (button.dataset.page) return navigate(button.dataset.page);
     if (action === "original-home") {

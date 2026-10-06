@@ -605,6 +605,40 @@ html.large-text .original-site {
 .learning-package h2 { margin-top: 18px; }
 .learning-package p { min-height: 72px; }
 .learning-package p.small { min-height: 0; }
+.language-switch { display: inline-flex; align-items: center; padding: 3px; gap: 2px; border: 1px solid #cbd9cc; border-radius: 99px; background: #fafaf2; flex-shrink: 0; }
+.language-switch button { padding: 6px 9px; min-height: 32px; font: 700 12px/1.2 var(--font-body); color: #47664d; border-radius: 99px; cursor: pointer; }
+.language-switch button[aria-pressed="true"] { color: #fff; background: #2d684a; }
+.language-switch button:focus-visible { outline: 2px solid #2d684a; outline-offset: 2px; }
+.online-registration .registration-intro { max-width: 850px; margin-bottom: 28px; }
+.registration-shared { padding: 28px; margin: 30px 0; border: 1px solid #d6e3cd; border-radius: 24px; background: linear-gradient(120deg, #edf3e3, #fbf6e7); }
+.learning-public .registration-shared h2 { font-size: 26px; margin: 0 0 18px; }
+.registration-shared > div { display: flex; flex-wrap: wrap; gap: 18px 36px; }
+.registration-shared span { display: flex; gap: 12px; align-items: center; color: #355d42; }
+.registration-price { margin: 22px 0 16px; color: #28573d; font-weight: 800; font-size: clamp(25px, 2.6vw, 34px); }
+.registration-price > span { display: block; font-size: 14px; font-weight: 500; color: #657162; margin-top: 4px; }
+.online-registration .learning-package { display: flex; flex-direction: column; min-width: 0; }
+.online-registration .learning-package > p { flex-grow: 1; }
+.registration-benefits { padding: 0; margin: 20px 0 26px; list-style: none; display: grid; gap: 12px; }
+.registration-benefits li { display: flex; align-items: baseline; gap: 10px; line-height: 1.6; font-size: 15px; }
+.registration-benefits i { color: #34734b; flex-shrink: 0; }
+.online-registration .learning-package > .btn { width: 100%; margin-top: auto; }
+.package-recommended { border-color: #80a383 !important; box-shadow: 0 12px 30px #335e4214; }
+.registration-comparison { margin-top: 52px; }
+.registration-table-scroll { overflow-x: auto; border: 1px solid #d9e0d1; border-radius: 20px; margin: 22px 0 16px; background: #fffdf6; }
+.registration-table-scroll table { width: 100%; min-width: 690px; border-collapse: collapse; font-size: 15px; }
+.registration-table-scroll th, .registration-table-scroll td { padding: 18px 22px; text-align: left; border-bottom: 1px solid #e4e8db; line-height: 1.6; }
+.registration-table-scroll thead { color: #315e40; background: #eaf0e1; }
+.registration-table-scroll tbody th { font-weight: 650; width: 29%; }
+.registration-table-scroll tbody tr:last-child > * { border-bottom: 0; }
+.priority-badge { margin: 6px 0; font-size: 11px; }
+@media (max-width: 760px) {
+  .learning-public-header #navAuthArea { flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+  .learning-public-header .language-switch button { padding: 5px 8px; }
+  .registration-shared { padding: 22px; }
+  .registration-shared > div { flex-direction: column; gap: 14px; }
+  .registration-price { font-size: 30px; }
+  .registration-table-scroll th, .registration-table-scroll td { padding: 14px 16px; }
+}
 .learning-public-footer { border-top: 1px solid #e2e8e4; padding: 36px 24px; text-align: center; color: #64746a; }
 .learning-public-footer strong { color: #15803d; }
 .learning-public-footer p { font-size: 13px; margin: 12px 0; }

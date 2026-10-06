@@ -1,20 +1,20 @@
 function metric(label, value, note) {
-  return `<article class="card metric"><div class="eyebrow">${esc(label)}</div><strong>${esc(value)}</strong><span>${esc(note)}</span></article>`;
+  return `<article class="card metric"><div class="eyebrow">${esc(t(label))}</div><strong>${esc(value)}</strong><span>${esc(t(note))}</span></article>`;
 }
 function adminDashboard() {
-  const pendingBookings = data("bookings").filter((r) => r.status === "Chờ duyệt");
+  const pendingBookings = data("bookings").filter((r) => r.status === "Chờ duyệt").sort(priorityOrder);
   const openRequests = data("requests")
     .filter((r) => r.status !== "Hoàn tất")
-    .sort((a, b) => b.created_at.localeCompare(a.created_at));
+    .sort(requestPriorityOrder);
   const families = state.users
     .filter((u) => ["FAMILY", "SENIOR"].includes(u.role))
     .sort((a, b) => b.created_at.localeCompare(a.created_at));
   return header("Quản trị hệ thống", "Quản lý tài khoản, tiếp nhận thông tin người dùng và điều phối hoạt động Wellness Farm.") +
     `<div class="grid four">${metric("Người dùng", families.length, "Tài khoản gia đình đã đăng ký")}${metric("Chờ duyệt lưu trú", pendingBookings.length, "Đơn cần được tiếp nhận")}${metric("Yêu cầu cần xử lý", openRequests.length, "Yêu cầu đang chờ hoặc đang xử lý")}${metric("Hồ sơ lưu trú", data("residents").length, "Hồ sơ được gửi lên hệ thống")}</div>
     <div class="admin-quick-actions section-title">${actionButton("+ Tạo tài khoản nhân viên", "new-user", "", "")}${actionButton("Quản lý người dùng", "page-users")}${actionButton("Báo cáo vận hành", "page-analytics")}${actionButton("Nhật ký hệ thống", "page-audit")}</div>
-    <section class="card section-title"><div class="admin-section-heading"><h2>Học – làm – du lịch · Miễn phí</h2>${actionButton("Bảng tác động", "page-impact")}</div><p class="small muted">${data("activities").length} workshop · ${data("products").length} sản phẩm · ${data("expert_applications").filter((r) => r.status === "Chờ duyệt").length} hồ sơ chuyên gia chờ duyệt · ${data("tour_bookings").filter((r) => r.status === "Chờ duyệt").length} yêu cầu tham quan mới</p><div class="row">${actionButton("Quản lý workshop", "page-activities")}${actionButton("Duyệt chuyên gia", "page-expert_applications")}${actionButton("Duyệt nghệ nhân bạc", "page-gardens")}${actionButton("Duyệt sản phẩm", "page-products")}${actionButton("Tiếp nhận khách", "page-tour_bookings")}${actionButton("Xem trang công khai", "learning-public", "artisans")}</div></section>
-    <div class="grid two"><section class="card"><div class="admin-section-heading"><h2>Yêu cầu cần tiếp nhận</h2>${actionButton("Xem tất cả", "page-requests")}</div>${openRequests.length ? openRequests.slice(0, 5).map((r) => `<article class="admin-inbox-item"><strong>${esc(r.title)}</strong><p>${esc(residentName(r.resident))} · ${day(r.created_at)}</p><div class="row">${tag(r.status)}${recordButtons("requests", r)}</div></article>`).join("") : empty("Không có yêu cầu chờ xử lý", "Yêu cầu mới từ gia đình sẽ hiển thị tại đây khi bạn làm mới dữ liệu.")}</section>
-    <section class="card"><div class="admin-section-heading"><h2>Đơn lưu trú chờ duyệt</h2>${actionButton("Xem tất cả", "page-bookings")}</div>${pendingBookings.length ? pendingBookings.slice(0, 5).map((r) => `<article class="admin-inbox-item"><strong>${esc(residentName(r.resident))}</strong><p>${esc(r.code)} · ${esc(r.package_name)}<br>${day(r.start)} – ${day(r.end)}</p><div class="row">${tag(r.status)}${recordButtons("bookings", r)}</div></article>`).join("") : empty("Không có đơn chờ duyệt", "Đơn đăng ký lưu trú mới sẽ xuất hiện tại đây.")}</section></div>
+    <section class="card section-title"><div class="admin-section-heading"><h2>Học – làm – du lịch</h2>${actionButton("Bảng tác động", "page-impact")}</div><p class="small muted">${data("activities").length} workshop · ${data("products").length} sản phẩm · ${data("expert_applications").filter((r) => r.status === "Chờ duyệt").length} hồ sơ chuyên gia chờ duyệt · ${data("tour_bookings").filter((r) => r.status === "Chờ duyệt").length} yêu cầu tham quan mới</p><div class="row">${actionButton("Quản lý workshop", "page-activities")}${actionButton("Duyệt chuyên gia", "page-expert_applications")}${actionButton("Duyệt nghệ nhân bạc", "page-gardens")}${actionButton("Duyệt sản phẩm", "page-products")}${actionButton("Tiếp nhận khách", "page-tour_bookings")}${actionButton("Xem trang công khai", "learning-public", "artisans")}</div></section>
+    <div class="grid two"><section class="card"><div class="admin-section-heading"><h2>Yêu cầu cần tiếp nhận</h2>${actionButton("Xem tất cả", "page-requests")}</div>${openRequests.length ? openRequests.slice(0, 5).map((r) => `<article class="admin-inbox-item"><strong>${esc(r.title)}</strong><p>${esc(residentName(r.resident))} · ${day(r.created_at)}</p><div class="row">${tag(r.status)}${priorityBadge({ service_priority: casePriority(r) }, "Ưu tiên xử lý hồ sơ")}${recordButtons("requests", r)}</div></article>`).join("") : empty("Không có yêu cầu chờ xử lý", "Yêu cầu mới từ gia đình sẽ hiển thị tại đây khi bạn làm mới dữ liệu.")}</section>
+    <section class="card"><div class="admin-section-heading"><h2>Đơn lưu trú chờ duyệt</h2>${actionButton("Xem tất cả", "page-bookings")}</div>${pendingBookings.length ? pendingBookings.slice(0, 5).map((r) => `<article class="admin-inbox-item"><strong>${esc(residentName(r.resident))}</strong><p>${esc(r.code)} · ${esc(localized(r, "package_name"))}${priorityBadge(r)}<br>${day(r.start)} – ${day(r.end)}</p><div class="row">${tag(r.status)}${priorityBadge(r)}${recordButtons("bookings", r)}</div></article>`).join("") : empty("Không có đơn chờ duyệt", "Đơn đăng ký lưu trú mới sẽ xuất hiện tại đây.")}</section></div>
     <section class="card section-title"><div class="admin-section-heading"><h2>Người dùng đăng ký gần đây</h2>${actionButton("Quản lý tài khoản", "page-users")}</div>${families.length ? table(["Họ tên", "Email", "Ngày đăng ký", "Trạng thái", "Thao tác"], families.slice(0, 6).map((u) => [esc(u.name), esc(u.email), day(u.created_at), tag(u.active ? "Hoạt động" : "Đã khóa"), actionButton("Cấp quyền / khóa", "edit-user", u.id)])) : empty("Chưa có người dùng đăng ký", "Tài khoản gia đình mới sẽ hiển thị tại đây.")}</section>`;
 }
 function dashboard() {
@@ -92,10 +92,10 @@ function dashboard() {
   );
 }
 function table(headers, rows) {
-  return `<div class="table-wrap"><table class="table"><thead><tr>${headers.map((h) => `<th scope="col">${esc(h)}</th>`).join("")}</tr></thead><tbody>${rows.map((cells) => `<tr>${cells.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  return `<div class="table-wrap"><table class="table"><thead><tr>${headers.map((h) => `<th scope="col">${esc(t(h))}</th>`).join("")}</tr></thead><tbody>${rows.map((cells) => `<tr>${cells.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
 function controls(kind, statuses = []) {
-  return `<div class="toolbar"><input id="search" type="search" placeholder="Tìm kiếm trong ${esc(names[kind].toLowerCase())}…" aria-label="Tìm kiếm" value="${esc(state.query)}">${statuses.length ? `<select id="status-filter" aria-label="Lọc trạng thái"><option value="">Tất cả trạng thái</option>${statuses.map((s) => `<option ${state.filter === s ? "selected" : ""}>${esc(s)}</option>`).join("")}</select>` : ""}<button class="btn secondary" data-action="refresh">↻ Làm mới</button></div>`;
+  return `<div class="toolbar"><input id="search" type="search" placeholder="${esc(t("Tìm kiếm trong {name}…", { name: t(names[kind]).toLowerCase() }))}" aria-label="${esc(t("Tìm kiếm"))}" value="${esc(state.query)}">${statuses.length ? `<select id="status-filter" aria-label="${esc(t("Lọc trạng thái"))}"><option value="">${esc(t("Tất cả trạng thái"))}</option>${statuses.map((s) => `<option value="${esc(s)}" ${state.filter === s ? "selected" : ""}>${esc(t(s))}</option>`).join("")}</select>` : ""}<button class="btn secondary" data-action="refresh">↻ ${esc(t("Làm mới"))}</button></div>`;
 }
 const descriptions = {
   residents: "Thông tin, nhu cầu hỗ trợ và người được phép theo dõi.",
@@ -137,6 +137,8 @@ function listPage(kind) {
   const medicationHub = ["medications", "doses"].includes(kind);
   if (medicationHub) kind = state.medicationView;
   const records = filtered(kind);
+  if (kind === "bookings") records.sort(priorityOrder);
+  if (kind === "requests") records.sort(requestPriorityOrder);
   const statuses =
     kind === "bookings"
       ? [
@@ -165,7 +167,7 @@ function listPage(kind) {
     : "";
   let content = "";
   if (kind === "residents")
-    content = `<div class="grid three">${records.map((r) => `<article class="card"><div class="row between"><span class="avatar">${esc(r.name.slice(0, 2))}</span>${tag(r.consent ? "Đồng ý chia sẻ" : "Chưa chia sẻ")}</div><h2 class="section-title">${esc(r.name)}</h2><p class="muted small">Sinh ngày ${day(r.dob)} · ${esc(r.phone)}</p><p class="small">${esc(r.health || "Hồ sơ sức khỏe được bảo vệ theo quyền truy cập.")}</p><p class="small muted">Liên hệ khẩn cấp: ${esc(r.emergency || "Chưa nhập")}</p>${recordButtons(kind, r)}${actionButton("Hành trình chăm sóc", "resident-timeline", r.id)}</article>`).join("")}</div>`;
+    content = `<div class="grid three">${records.map((r) => `<article class="card"><div class="row between"><span class="avatar">${esc(r.name.slice(0, 2))}</span>${tag(r.consent ? "Đồng ý chia sẻ" : "Chưa chia sẻ")}</div><h2 class="section-title">${esc(r.name)}</h2><p class="muted small">${esc(t("Sinh ngày {date}", { date: day(r.dob) }))} · ${esc(r.phone)}</p><p class="small">${esc(r.health || t("Hồ sơ sức khỏe được bảo vệ theo quyền truy cập."))}</p><p class="small muted">${esc(t("Liên hệ khẩn cấp"))}: ${esc(r.emergency || t("Chưa nhập"))}</p>${recordButtons(kind, r)}${actionButton("Hành trình chăm sóc", "resident-timeline", r.id)}</article>`).join("")}</div>`;
   else if (kind === "rooms")
     content = `<div class="grid three">${records
       .map((r) => {
@@ -176,7 +178,7 @@ function listPage(kind) {
       })
       .join("")}</div>`;
   else if (kind === "packages")
-    content = `<div class="grid three">${records.map((r, i) => `<article class="card package ${i === 1 ? "featured" : ""}">${tag(r.active ? "Nhận đăng ký" : "Tạm ngừng")}<h2 class="section-title">${esc(r.name)}</h2><p class="muted">${esc(r.description)}</p><div class="price">${r.price === 0 ? "Miễn phí" : money(r.price)}</div><p class="small muted">${r.days} ngày / đơn vị</p>${isLearner() ? actionButton("Đặt gói này", "book-package", r.id, "") : recordButtons(kind, r)}</article>`).join("")}</div>`;
+    content = `<div class="grid three">${records.map((r, i) => `<article class="card package ${i === 1 ? "featured" : ""}">${tag(r.active ? "Nhận đăng ký" : "Tạm ngừng")}<h2 class="section-title">${esc(localized(r))}</h2><p class="muted">${esc(localized(r, "description"))}</p><div class="price">${money(r.price)}</div><p class="small muted">${esc(t(r.days + " ngày"))}</p>${isLearner() ? actionButton("Đăng ký gói này", "learning-package", r.id, "") : recordButtons(kind, r)}</article>`).join("")}</div>`;
   else if (kind === "activities")
     content = `<div class="grid three">${records.map((r) => workshopCard(r)).join("")}</div>`;
   else {
@@ -197,7 +199,7 @@ function listPage(kind) {
       ];
       cells = records.map((r) => [
         `<strong>${esc(r.code)}</strong><br><span class="muted">${esc(residentName(r.resident))}</span>`,
-        `<strong>${esc(r.package_name)}</strong><br><span class="muted">${day(r.start)} → ${day(r.end)}</span><br><span class="small">${esc(lookup("rooms", r.room_id)?.name || "Chưa phân phòng")}</span>`,
+        `<strong>${esc(localized(r, "package_name"))}${priorityBadge(r)}</strong><br><span class="muted">${day(r.start)} → ${day(r.end)}</span><br><span class="small">${esc(lookup("rooms", r.room_id)?.name || "Chưa phân phòng")}</span>`,
         tag(r.status),
         money(r.total),
         recordButtons(kind, r),
@@ -349,7 +351,7 @@ function listPage(kind) {
       cells = records.map((r) => [
         esc(residentName(r.resident)),
         `<div class="wrap"><strong>${esc(r.title)}</strong><br>${esc(r.notes)}<br><span class="muted">${esc(r.response || "Chưa phản hồi")}</span></div>`,
-        tag(r.priority),
+        tag(r.priority) + (kind === "requests" ? priorityBadge({ service_priority: casePriority(r) }, "Ưu tiên xử lý hồ sơ") : ""),
         tag(r.status),
         recordButtons(kind, r),
       ]);
@@ -403,7 +405,7 @@ function listPage(kind) {
       add,
     ) +
     (medicationHub
-      ? `<div class="row section-title" role="group" aria-label="Nội dung thuốc"><button type="button" class="btn ${state.medicationView === "medications" ? "primary" : "secondary"}" data-action="medication-view" data-view="medications" aria-pressed="${state.medicationView === "medications"}">Thuốc & chỉ định</button><button type="button" class="btn ${state.medicationView === "doses" ? "primary" : "secondary"}" data-action="medication-view" data-view="doses" aria-pressed="${state.medicationView === "doses"}">Nhật ký dùng thuốc</button></div>`
+      ? `<div class="row section-title" role="group" aria-label="Nội dung thuốc"><button type="button" class="btn ${state.medicationView === "medications" ? "primary" : "secondary"}" data-action="medication-view" data-view="medications" aria-pressed="${state.medicationView === "medications"}">${esc(t("Thuốc & chỉ định"))}</button><button type="button" class="btn ${state.medicationView === "doses" ? "primary" : "secondary"}" data-action="medication-view" data-view="doses" aria-pressed="${state.medicationView === "doses"}">Nhật ký dùng thuốc</button></div>`
       : "") +
     controls(kind, statuses) +
     notice +
@@ -554,7 +556,7 @@ function auditPage() {
 function settings() {
   return (
     header("Cài đặt & bảo mật", "Thông tin tài khoản và trạng thái dịch vụ.") +
-    `<div class="grid two"><article class="card"><h2>Tài khoản của bạn</h2><dl class="detail"><div><dt>Họ tên</dt><dd>${esc(state.user.name)}</dd></div><div><dt>Vai trò</dt><dd>${esc(roleNames[state.user.role])}</dd></div><div><dt>Email</dt><dd>${esc(state.user.email)}</dd></div><div><dt>Điện thoại</dt><dd>${esc(state.user.phone)}</dd></div></dl>${actionButton("Đổi mật khẩu", "password", "", "")}<p class="small muted section-title">Đổi mật khẩu sẽ đăng xuất tất cả phiên của tài khoản.</p></article><article class="card"><h2>Tích hợp dịch vụ</h2>${table(
+    `<div class="grid two"><article class="card"><h2>${esc(t("Tài khoản của bạn"))}</h2><dl class="detail"><div><dt>${esc(t("Họ tên"))}</dt><dd>${esc(state.user.name)}</dd></div><div><dt>${esc(t("Vai trò"))}</dt><dd>${esc(t(roleNames[state.user.role]))}</dd></div><div><dt>${esc(t("Email"))}</dt><dd>${esc(state.user.email)}</dd></div><div><dt>${esc(t("Điện thoại"))}</dt><dd>${esc(state.user.phone)}</dd></div></dl>${actionButton("Đổi mật khẩu", "password", "", "")}<p class="small muted section-title">${esc(t("Đổi mật khẩu sẽ đăng xuất tất cả phiên của tài khoản."))}</p></article><article class="card"><h2>${esc(t("Tích hợp dịch vụ"))}</h2>${table(
       ["Dịch vụ", "Trạng thái"],
       [
         ["Thanh toán tự động", tag("Chưa kết nối")],
@@ -563,7 +565,7 @@ function settings() {
         ["Đăng nhập", tag("Email và mật khẩu")],
         ["Cơ sở dữ liệu", tag("SQLite cục bộ")],
       ],
-    )}<p class="small muted section-title">Xem README để cấu hình sao lưu và các yêu cầu trước khi vận hành công khai.</p></article><article class="card"><h2>Quyền riêng tư</h2><p class="small muted">Chủ hồ sơ có thể bật hoặc thu hồi sự đồng ý chia sẻ trong hồ sơ người lưu trú. Báo cáo chỉ xuất hiện cho gia đình khi nhân viên chọn chia sẻ và hồ sơ cho phép.</p>${actionButton("Xem hồ sơ", "page-residents")}</article><article class="card"><h2>Trải nghiệm đọc</h2><p class="small muted">Thay đổi cỡ chữ để dễ theo dõi. Giao diện hỗ trợ màn hình nhỏ và điều hướng bằng bàn phím.</p>${actionButton("Đổi cỡ chữ Aᴀ", "font")}</article></div>`
+    )}<p class="small muted section-title">${esc(t("Xem README để cấu hình sao lưu và các yêu cầu trước khi vận hành công khai."))}</p></article><article class="card"><h2>Quyền riêng tư</h2><p class="small muted">Chủ hồ sơ có thể bật hoặc thu hồi sự đồng ý chia sẻ trong hồ sơ người lưu trú. Báo cáo chỉ xuất hiện cho gia đình khi nhân viên chọn chia sẻ và hồ sơ cho phép.</p>${actionButton("Xem hồ sơ", "page-residents")}</article><article class="card"><h2>${esc(t("Trải nghiệm đọc"))}</h2><p class="small muted">${esc(t("Thay đổi cỡ chữ để dễ theo dõi. Giao diện hỗ trợ màn hình nhỏ và điều hướng bằng bàn phím."))}</p>${actionButton("Đổi cỡ chữ Aᴀ", "font")}</article></div>`
   );
 }
 function projectPage() {
@@ -573,7 +575,7 @@ function projectPage() {
     .join("");
   return (
     header("Về dự án", "Nông trại dưỡng lão kế thừa sinh thái tại Bình Mỹ.") +
-    `<section class="project-author"><h2>Tác giả</h2><p><strong>Malware</strong></p></section>${sections}`
+    `<section class="project-author"><h2>${esc(t("Tác giả"))}</h2><p><strong>Malware</strong></p></section>${sections}`
   );
 }
 function renderPage() {

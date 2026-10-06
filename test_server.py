@@ -11,6 +11,7 @@ import threading
 import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import closing
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -227,18 +228,83 @@ class WellnessTests(unittest.TestCase):
         duplicate = Client(self.port)
         self.assertEqual(duplicate.request('register', 'POST', payload)[0], 409)
 
-    def test_free_experiences_and_safe_registration_roles(self):
-        self.assertTrue(all(p['price'] == 0 for p in self.packages))
+    def test_paid_packages_and_safe_registration_roles(self):
+        self.assertEqual({p['days']: p['price'] for p in self.packages}, {1: 450000, 7: 2000000, 30: 9000000})
         booking = self.booking()
-        self.assertEqual(booking['total'], 0)
-        self.assertEqual(self.accountant.request('payments', 'POST', {'booking_id': booking['id'], 'amount': 1, 'reference': 'charge-free', 'type': 'Thu tiền'})[0], 400)
+        self.assertEqual(booking['total'], self.packages[0]['price'])
+        self.assertEqual(self.accountant.request('payments', 'POST', {'booking_id': booking['id'], 'amount': booking['total']+1, 'reference': 'overcharge', 'type': 'Thu tiền'})[0], 400)
         status, result = self.admin.request('packages/'+self.packages[0]['id'], 'PATCH', {'price': 999999})
         self.assertEqual(status, 200, result)
-        self.assertEqual(result['price'], 0)
+        self.assertEqual(result['price'], 999999)
+        with server.connect() as db:
+            server.migrate_packages(db)
+        self.assertEqual(next(p for p in self.family.request('packages')[1] if p['id'] == result['id'])['price'], 999999)
+        # Restore the catalogue for the remaining independently run cases.
+        self.admin.request('packages/'+result['id'], 'PATCH', {'price': self.packages[0]['price']})
         senior = Client(self.port)
         status, result = senior.request('register', 'POST', {'name': 'Senior learner', 'email': 'new-senior@test.example', 'password': 'senior-test-password', 'account_type': 'SENIOR', 'role': 'ADMIN'})
         self.assertEqual(status, 200, result)
         self.assertEqual(result['user']['role'], 'SENIOR')
+
+    def test_package_entitlements_are_server_calculated_and_immutable(self):
+        for tier, price, priority in [('day', 450000, 0), ('week', 2000000, 1), ('month', 9000000, 2)]:
+            package = next(p for p in self.packages if p['health_tier'] == tier)
+            status, b = self.family.request('bookings', 'POST', {'resident': self.resident['id'], 'package_id': package['id'], 'start': date.today().isoformat(), 'duration': 2, 'total': 1, 'service_priority': 99, 'health_entitlements': {'expert_checkups': True}})
+            self.assertEqual(status, 200, b)
+            self.assertEqual(b['total'], price * 2)
+            self.assertEqual(b['service_priority'], priority)
+            self.assertTrue(all(b['health_entitlements'][key] for key in ['all_activities', 'workshops', 'talkshows', 'food_and_drinks', 'basic_screening']))
+            self.assertEqual(b['health_entitlements']['expert_checkups'], tier == 'month')
+            self.assertEqual(b['health_entitlements']['monitoring_days'], 14 if tier == 'week' else 0)
+            status, changed = self.admin.request('bookings/'+b['id'], 'PATCH', {'service_priority': 99, 'total': 1, 'health_tier': 'month', 'health_entitlements': {}})
+            self.assertEqual(status, 200, changed)
+            for key in ['total', 'service_priority', 'health_tier', 'health_entitlements']:
+                self.assertEqual(changed[key], b[key])
+
+    def test_case_priority_requires_confirmed_unexpired_package(self):
+        package = next(p for p in self.packages if p['health_tier'] == 'month')
+        _, b = self.family.request('bookings', 'POST', {'resident': self.resident['id'], 'package_id': package['id'], 'start': date.today().isoformat(), 'duration': 1})
+        _, request = self.family.request('requests', 'POST', {'resident': self.resident['id'], 'title': 'Help', 'service_priority': 99})
+        self.assertEqual(request['service_priority'], 0)
+        status, confirmed = self.admin.request('bookings/'+b['id'], 'PATCH', {'status': 'Đã xác nhận', 'room_id': self.rooms[0]['id']})
+        self.assertEqual(status, 200, confirmed)
+        self.assertEqual(self.admin.request('requests')[1][0]['service_priority'], 2)
+        _, request = self.family.request('requests/'+request['id'], 'PATCH', {'notes': 'Update', 'service_priority': 99})
+        self.assertEqual(request['service_priority'], 2)
+        self.admin.request('bookings/'+b['id'], 'PATCH', {'status': 'Đã hủy'})
+        self.assertEqual(self.admin.request('requests')[1][0]['service_priority'], 0)
+        _, request = self.family.request('requests/'+request['id'], 'PATCH', {'notes': 'After cancellation'})
+        self.assertEqual(request['service_priority'], 0)
+
+    def test_catalog_upgrade_preserves_historical_bookings_and_later_prices(self):
+        with closing(sqlite3.connect(':memory:')) as db:
+            db.row_factory = sqlite3.Row
+            db.execute('CREATE TABLE records(id TEXT,kind TEXT,owner TEXT,resident TEXT,body TEXT,created_at TEXT,updated_at TEXT)')
+            package_id = server.insert(db, 'packages', '', '', {'name': 'Học nghề', 'price': 0, 'days': 7, 'active': True})
+            booking_id = server.insert(db, 'bookings', '', '', {'package_id': package_id, 'total': 0, 'package_name': 'Học nghề'})
+            server.migrate_packages(db)
+            package = server.get_record(db, package_id)
+            self.assertEqual(package['price'], 2000000)
+            self.assertEqual(package['health_tier'], 'week')
+            self.assertEqual(server.get_record(db, booking_id)['total'], 0)
+            self.assertEqual(server.get_record(db, booking_id)['package_name'], 'Học nghề')
+            package['price'] = 2100000
+            server.update(db, package_id, package)
+            server.migrate_packages(db)
+            self.assertEqual(server.get_record(db, package_id)['price'], 2100000)
+
+    def test_english_content_requires_same_consent_and_moderation(self):
+        _, workshop = self.admin.request('activities', 'POST', {'name': 'Vườn rau', 'name_en': 'Vegetable garden', 'description_en': 'Learn gardening', 'date': date.today().isoformat(), 'capacity': 2, 'active': True})
+        public = Client(self.port).request('public')[1]
+        self.assertEqual(public['workshops'][0]['name_en'], 'Vegetable garden')
+        _, garden = self.family.request('gardens', 'POST', {'resident': self.resident['id'], 'name': 'Bác An', 'focus': 'Rau', 'focus_en': 'Vegetables', 'story_en': 'My garden story', 'public_consent': True})
+        self.assertEqual(Client(self.port).request('public')[1]['artisans'], [])
+        self.admin.request('gardens/'+garden['id'], 'PATCH', {'publication': 'Đã duyệt'})
+        public = Client(self.port).request('public')[1]
+        self.assertEqual(public['artisans'][0]['story_en'], 'My garden story')
+        self.assertNotIn('resident', public['artisans'][0])
+        self.family.request('gardens/'+garden['id'], 'PATCH', {'story_en': 'An edited story'})
+        self.assertEqual(Client(self.port).request('public')[1]['artisans'], [])
 
     def test_workshop_waitlist_and_expert_access(self):
         expert = self.login('EXPERT')

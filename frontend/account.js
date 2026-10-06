@@ -104,7 +104,8 @@ function displayValue(key, value) {
         )
         .join(", ") || "Chưa liên kết"
     );
-  if (typeof value === "boolean") return value ? "Có" : "Không";
+  if (typeof value === "boolean") return t(value ? "Có" : "Không");
+  if (["status", "mobility", "priority"].includes(key)) return t(value);
   return String(value ?? "—");
 }
 function detail(id) {
@@ -115,11 +116,11 @@ function detail(id) {
   let extra = "";
   if (kind === "bookings") {
     const paid = paidFor(id);
-    extra = `<div class="notice section-title">Đã thu ròng: ${money(paid)} · Còn nợ: ${money(item.status === "Đã hủy" ? 0 : Math.max(0, item.total - paid))}. Nếu cần hủy sau thanh toán, nhân viên xử lý hoàn tiền riêng.</div>`;
+    extra = `<div class="notice section-title">${esc(t("Đã thu ròng: {paid} · Còn nợ: {due}. Nếu cần hủy sau thanh toán, nhân viên xử lý hoàn tiền riêng.", { paid: money(paid), due: money(item.status === "Đã hủy" ? 0 : Math.max(0, item.total - paid)) }))}</div>`;
   }
   modal(
     names[kind],
-    `<dl class="detail">${fields.map(([key, value]) => `<div><dt>${esc(labels[key])}</dt><dd>${esc(displayValue(key, value))}</dd></div>`).join("")}</dl>${extra}<div class="form-actions">${actionButton("Đóng", "close")}${kind === "reports" ? actionButton("Xem bản in", "print-report", id, "") : ""}${kind === "bookings" ? actionButton("In biên nhận", "print-booking", id, "") : ""}${kind === "residents" ? actionButton("Xem hành trình", "resident-timeline", id, "") : ""}</div>`,
+    `<dl class="detail">${fields.map(([key, value]) => `<div><dt>${esc(t(labels[key]))}</dt><dd>${esc(key === "package_name" ? localized(item, "package_name") : displayValue(key, value))}</dd></div>`).join("")}</dl>${extra}${kind === "bookings" && item.health_tier ? `<section class="notice"><h3>${esc(t("Quyền lợi chăm sóc đã đăng ký"))} · ${esc(t(planLabels[item.health_tier]))}</h3><p>${esc(t("Ưu tiên đặt lịch"))}: ${esc(t(priorityLabels[packagePriority(item)]))}</p><ul>${careBenefits(item.health_tier).map((benefit) => `<li>${esc(t(benefit))}</li>`).join("")}</ul></section>` : ""}<div class="form-actions">${actionButton("Đóng", "close")}${kind === "reports" ? actionButton("Xem bản in", "print-report", id, "") : ""}${kind === "bookings" ? actionButton("In biên nhận", "print-booking", id, "") : ""}${kind === "residents" ? actionButton("Xem hành trình", "resident-timeline", id, "") : ""}</div>`,
   );
 }
 function timeline(id) {
@@ -146,7 +147,7 @@ function timeline(id) {
 function authForm(register = false, accountType = "FAMILY") {
   modal(
     register ? (accountType === "SENIOR" ? "Tạo tài khoản học viên cao tuổi" : "Tạo tài khoản gia đình") : "Chào mừng trở lại",
-    `<p class="small muted">${register ? (accountType === "SENIOR" ? "Đăng ký để học, thực hành và ghi lại hành trình của bạn. Mọi trải nghiệm đều miễn phí." : "Tạo tài khoản để quản lý hồ sơ và đặt lịch cho người thân.") : "Đăng nhập để tiếp tục hành trình cùng Wellness Farm."}</p><form id="auth-form"><div class="form-grid">${register ? fieldHTML(F("name", "Họ tên", "text", { required: true }), {}) : ""}${fieldHTML(F("email", "Email", "email", { required: true }), {})}<label class="field ${register ? "" : "wide"}">Mật khẩu *<input name="password" type="password" required ${register ? 'minlength="12"' : ""} maxlength="128" autocomplete="${register ? "new-password" : "current-password"}"><small>${register ? "Tối thiểu 12 ký tự." : "Nếu quên mật khẩu, liên hệ quản trị viên; email khôi phục chưa kết nối."}</small></label></div><p id="auth-error" class="error-text" role="alert"></p><div class="form-actions">${actionButton(register ? "Đã có tài khoản" : "Tạo tài khoản", register ? "login" : "register")}<button class="btn" type="submit">${register ? "Đăng ký" : "Đăng nhập"}</button></div></form>`,
+    `<p class="small muted">${esc(t(register ? (accountType === "SENIOR" ? "Đăng ký để học, thực hành và ghi lại hành trình của bạn." : "Tạo tài khoản để quản lý hồ sơ và đặt lịch cho người thân.") : "Đăng nhập để tiếp tục hành trình cùng Wellness Farm."))}</p><form id="auth-form"><div class="form-grid">${register ? fieldHTML(F("name", "Họ tên", "text", { required: true }), {}) : ""}${fieldHTML(F("email", "Email", "email", { required: true }), {})}<label class="field ${register ? "" : "wide"}">${esc(t("Mật khẩu"))} *<input name="password" type="password" required ${register ? 'minlength="12"' : ""} maxlength="128" autocomplete="${register ? "new-password" : "current-password"}"><small>${esc(t(register ? "Tối thiểu 12 ký tự." : "Nếu quên mật khẩu, liên hệ quản trị viên; email khôi phục chưa kết nối."))}</small></label></div><p id="auth-error" class="error-text" role="alert"></p><div class="form-actions">${actionButton(register ? "Đã có tài khoản" : "Tạo tài khoản", register ? "login" : "register")}<button class="btn" type="submit">${esc(t(register ? "Đăng ký" : "Đăng nhập"))}</button></div></form>`,
   );
   $("#auth-form").addEventListener("input", () => {
     $("#auth-error").textContent = "";
@@ -180,7 +181,7 @@ function authForm(register = false, accountType = "FAMILY") {
         state.pendingPackage = "";
         editForm("bookings", "", { package_id: packageId });
       }
-      toast("Xin chào " + state.user.name + ".");
+      toast(t("Xin chào {name}.", { name: state.user.name }));
     } catch (error) {
       $("#auth-error").textContent = error.message;
       button.disabled = false;
@@ -227,7 +228,7 @@ function userForm(id = "") {
 function passwordForm() {
   modal(
     "Đổi mật khẩu",
-    `<form id="password-form"><div class="stack"><label class="field">Mật khẩu hiện tại<input name="current" type="password" autocomplete="current-password" required></label><label class="field">Mật khẩu mới<input name="password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required><small>Tối thiểu 12 ký tự.</small></label></div><p id="form-error" class="error-text" role="alert"></p><div class="form-actions">${actionButton("Đóng", "close")}<button class="btn" type="submit">Đổi mật khẩu & đăng xuất</button></div></form>`,
+    `<form id="password-form"><div class="stack"><label class="field">${esc(t("Mật khẩu hiện tại"))}<input name="current" type="password" autocomplete="current-password" required></label><label class="field">${esc(t("Mật khẩu mới"))}<input name="password" type="password" minlength="12" maxlength="128" autocomplete="new-password" required><small>${esc(t("Tối thiểu 12 ký tự."))}</small></label></div><p id="form-error" class="error-text" role="alert"></p><div class="form-actions">${actionButton("Đóng", "close")}<button class="btn" type="submit">${esc(t("Đổi mật khẩu & đăng xuất"))}</button></div></form>`,
   );
   $("#password-form").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -253,7 +254,7 @@ function printRecord(id, kind) {
   closeModal();
   let html;
   if (kind === "reports")
-    html = `<div class="eyebrow">BÁO CÁO CHĂM SÓC</div><h1>${esc(item.title)}</h1><p>Người lưu trú: <strong>${esc(residentName(item.resident))}</strong><br>Kỳ báo cáo: ${esc(item.period)}<br>Ngày lập: ${day(item.created_at)}</p><hr><h2>Nội dung</h2><pre>${esc(item.summary)}</pre><h2>Kế hoạch tiếp theo</h2><pre>${esc(item.recommendation)}</pre>`;
+    html = `<div class="eyebrow">BÁO CÁO CHĂM SÓC</div><h1>${esc(item.title)}</h1><p>Người lưu trú: <strong>${esc(residentName(item.resident))}</strong><br>Kỳ báo cáo: ${esc(item.period)}<br>Ngày lập: ${day(item.created_at)}</p><hr><h2>${esc(t("Nội dung"))}</h2><pre>${esc(item.summary)}</pre><h2>Kế hoạch tiếp theo</h2><pre>${esc(item.recommendation)}</pre>`;
   else
     html = `<div class="eyebrow">BIÊN NHẬN ĐĂNG KÝ LƯU TRÚ</div><h1>${esc(item.code)}</h1><p>Người lưu trú: <strong>${esc(residentName(item.resident))}</strong><br>Gói: ${esc(item.package_name)}<br>Thời gian: ${day(item.start)} → ${day(item.end)}<br>Trạng thái: ${esc(item.status)}</p><hr><p>Tổng phí: <strong>${money(item.total)}</strong><br>Đã thu ròng: ${money(paidFor(id))}<br>Công nợ: ${money(item.status === "Đã hủy" ? 0 : Math.max(0, item.total - paidFor(id)))}</p><p class="small muted">Biên nhận đăng ký và số tiền ghi nhận nội bộ, không thay thế hóa đơn thuế.</p>`;
   $("#main").innerHTML =

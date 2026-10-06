@@ -9,6 +9,7 @@ from .policy import ROLES, OPS, CLINICAL, FINANCE, STATES
 from .security import APIError, require, text_field, integer, iso_date
 from .records import get_record, rows, now, uid
 from .learning import LEARNERS, LEARNING_KINDS, LEARNING_MANAGERS, TOPICS, expert_access, validate_learning
+from .packages import validate_package, package_entitlements
 
 
 def resident_access(db, user, resident_id, clinical=False):
@@ -134,9 +135,17 @@ def visible(db, user, kind, item):
     return role in ["MANAGER"] or (item["owner"] == user["id"])
 
 
-def project(user, kind, item):
+def case_service_priority(db, resident):
+    return max((2 if b.get("health_tier") == "month" else 0 for b in rows(db, "bookings")
+        if b.get("resident") == resident and b.get("status") in ["Đã xác nhận", "Đang lưu trú"]
+        and b.get("end", "") >= date.today().isoformat()), default=0)
+
+
+def project(user, kind, item, db=None):
     item = dict(item)
     item.pop("content", None)
+    if kind == "requests" and db is not None:
+        item["service_priority"] = case_service_priority(db, item.get("resident"))
     if kind == "residents" and user["role"] == "EXPERT":
         return {k: item[k] for k in ["id", "name", "owner", "resident", "created_at", "updated_at"]}
     if kind == "residents" and user["role"] == "RECEPTION":
@@ -236,8 +245,7 @@ def validate(db, user, kind, body, old=None):
         body["name"] = text_field(body, "name", True, 150)
         body["active"] = body.get("active") is True
         if kind == "packages":
-            body["price"] = 0
-            body["days"] = integer(body, "days", 1, 365)
+            body = validate_package(body)
         if kind in ["rooms", "activities"]:
             body["capacity"] = integer(body, "capacity", 1, 1000)
         if kind == "activities":
@@ -259,6 +267,8 @@ def validate(db, user, kind, body, old=None):
                 raise APIError(400, "Thông tin chủ đề, hình thức hoặc mức vận động không hợp lệ.")
             body["time"] = text_field(body, "time", False, 50)
             body["description"] = text_field(body, "description", False, 3000)
+            body["name_en"] = text_field(body, "name_en", False, 150)
+            body["description_en"] = text_field(body, "description_en", False, 3000)
             body["location"] = text_field(body, "location", False, 200)
     elif kind == "bookings":
         if old:
@@ -271,8 +281,15 @@ def validate(db, user, kind, body, old=None):
                 "end",
                 "total",
                 "code",
+                "health_tier",
+                "service_priority",
+                "health_entitlements",
+                "package_name_en",
             ]:
-                body[key] = old[key]
+                if key in old:
+                    body[key] = old[key]
+                else:
+                    body.pop(key, None)
             target = body.get("status", old["status"])
             if user["role"] in LEARNERS:
                 if (
@@ -314,6 +331,10 @@ def validate(db, user, kind, body, old=None):
                 raise APIError(400, "Ngày đến không được ở quá khứ.")
             body.update(
                 package_name=package["name"],
+                package_name_en=package.get("name_en", package["name"]),
+                health_tier=package.get("health_tier", "day"),
+                service_priority=package_entitlements(package)["priority"],
+                health_entitlements=package_entitlements(package),
                 duration=duration,
                 start=start.isoformat(),
                 end=(start + timedelta(days=duration * package["days"])).isoformat(),
@@ -322,6 +343,7 @@ def validate(db, user, kind, body, old=None):
                 code="WF-" + secrets.token_hex(5).upper(),
                 room_id="",
             )
+            body["health_entitlements"]["monitoring_days"] *= duration
     elif kind == "payments":
         booking = get_record(db, body.get("booking_id"), "bookings")
         body["amount"] = integer(body, "amount", 1, 1000000000)
@@ -426,6 +448,9 @@ def validate(db, user, kind, body, old=None):
     if kind == "reports":
         body["shared"] = body.get("shared") is True
     if kind in ["care", "incidents", "requests"]:
+        if kind == "requests":
+            # Only confirmed, unexpired registrations grant case priority.
+            body["service_priority"] = case_service_priority(db, body.get("resident"))
         if kind == "requests" and user["role"] in LEARNERS:
             if old and old["owner"] != user["id"]:
                 raise APIError(403, "Chỉ người gửi được sửa yêu cầu.")
