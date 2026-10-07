@@ -43,7 +43,7 @@ document.addEventListener("click", async (e) => {
       }
       return editForm("bookings", "", { package_id: p.id });
     }
-    if (action === "close") return closeModal();
+    if (action === "close") return closeModal(true);
     if (action === "login" || action === "register")
       return authForm(action === "register");
     if (action === "project") return navigate("project");

@@ -2,7 +2,14 @@ function actionButton(label, action, id = "", cls = "secondary compact") {
   return `<button class="btn ${cls}" data-action="${esc(action)}" data-id="${esc(id)}">${esc(t(label))}</button>`;
 }
 let modalTrigger;
-function closeModal() {
+function closeModal(cancel = false) {
+  if (cancel) {
+    state.learningIntent = null;
+    state.pendingPackage = "";
+    state.pendingBookingPackage = "";
+    state.pendingWorkshop = "";
+    state.afterLogin = "";
+  }
   $("#modal").close();
 }
 function modal(title, content) {
@@ -18,7 +25,7 @@ $("#modal").addEventListener("close", () => {
 $("#modal").addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     event.preventDefault();
-    closeModal();
+    closeModal(true);
     return;
   }
   if (event.key !== "Tab") return;
@@ -49,4 +56,13 @@ function empty(
 }
 function header(title, subtitle, actions = "") {
   return `<div class="page-head"><div><div class="eyebrow">WELLNESS FARM / ${esc(t(roleNames[state.user.role]))}</div><h1>${esc(t(title))}</h1><p>${esc(t(subtitle))}</p></div><div class="row">${actions}</div></div>`;
+}
+function projectCredits() {
+  return `<p class="small muted project-credits">${esc(t("Tác giả Malware và đồng tác giả là Team3"))}</p>`;
+}
+function recordEmpty(kind, allowCreate = false) {
+  if (state.query || state.filter) return empty("Không tìm thấy kết quả phù hợp", "Thử thay đổi từ khóa hoặc bộ lọc.");
+  if (kind === "skills") return empty("Chưa có kỹ năng được ghi nhận", "Kỹ năng sẽ hiển thị sau khi chuyên gia đánh giá và xác nhận.");
+  if (["bookings", "enrollments"].includes(kind)) return empty("Bạn chưa có đơn đăng ký nào", allowCreate ? "Bấm “Tạo mới” để bắt đầu." : "Thông tin sẽ xuất hiện khi được ghi nhận hoặc cấp quyền.");
+  return empty("Chưa có dữ liệu", allowCreate ? "Bấm “Tạo mới” để bắt đầu." : "Thông tin sẽ xuất hiện khi được ghi nhận hoặc cấp quyền.");
 }

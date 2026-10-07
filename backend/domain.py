@@ -76,6 +76,10 @@ def visible(db, user, kind, item):
     role = user["role"]
     if role == "ADMIN":
         return True
+    if kind in LEARNING_KINDS and role not in LEARNERS + ["EXPERT"] + LEARNING_MANAGERS:
+        return False
+    if role == "ACCOUNTANT" and kind not in ["packages", "rooms", "activities", "bookings", "payments"]:
+        return False
     if kind in ["expert_applications", "tour_bookings"]:
         return role in LEARNING_MANAGERS or item["owner"] == user["id"]
     if role == "EXPERT" and kind not in ["residents", "activities", "enrollments"] + LEARNING_KINDS:

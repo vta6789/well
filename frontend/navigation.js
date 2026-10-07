@@ -206,13 +206,16 @@ function shell() {
     )
     .join("");
   const mobileNav = `<details class="project-mobile-nav"><summary>${esc(t("Chức năng"))}<span aria-hidden="true">⌄</span></summary><div class="project-mobile-panel">${groups.map((group) => `<section><h2>${esc(t(group.title))}</h2>${group.links.map(navigationLink).join("")}</section>`).join("")}</div></details>`;
-  translateStatic($("footer", original));
-  const logo = $(
-    ".flex.items-center.gap-3.cursor-pointer",
-    original,
-  ).outerHTML.replace('data-action="original-home"', 'data-page="dashboard"');
+  const footer = translateStatic($("footer", original).cloneNode(true)).outerHTML;
+  const originalLogo = $(".flex.items-center.gap-3.cursor-pointer", original);
+  const logoButton = document.createElement("button");
+  logoButton.type = "button";
+  logoButton.className = originalLogo.className + " project-app-logo";
+  logoButton.innerHTML = originalLogo.innerHTML;
+  logoButton.dataset.page = "dashboard";
+  const logo = logoButton.outerHTML;
   $("#app").innerHTML =
-    `<div class="original-site"><header class="project-app-header sticky top-0 z-40"><div class="project-app-header-inner">${logo}<nav class="project-desktop-nav" aria-label="Chức năng theo vai trò">${desktopNav}</nav><div class="project-user-controls">${languageSwitch()}${mobileNav}<details class="project-user-menu"><summary><span class="project-user-avatar" aria-hidden="true">${esc(state.user.name.trim().charAt(0).toUpperCase())}</span><span class="project-user-name">${esc(state.user.name)}</span><span class="project-user-chevron" aria-hidden="true">⌄</span><span class="project-sr-only">${esc(t("Tài khoản"))}</span></summary><div class="project-user-menu-items"><div class="project-account-label">${esc(state.user.name)}<small>${esc(t(roleNames[state.user.role]))}</small></div>${actionButton("Cỡ chữ Aᴀ", "font", "", "project-font-toggle")}<button data-page="settings">${esc(t("Cài đặt & bảo mật"))}</button><button data-action="project">${esc(t("Về dự án"))}</button><button class="project-logout" data-action="logout">${esc(t("Đăng xuất"))}</button></div></details></div></div></header><div class="project-workspace"><main class="main upgraded-module" id="main" tabindex="-1"></main></div>${$("footer", original).outerHTML}</div>`;
+    `<div class="original-site"><header class="project-app-header sticky top-0 z-40"><div class="project-app-header-inner">${logo}<nav class="project-desktop-nav" aria-label="Chức năng theo vai trò">${desktopNav}</nav><div class="project-user-controls">${languageSwitch()}${mobileNav}<details class="project-user-menu"><summary><span class="project-user-avatar" aria-hidden="true">${esc(state.user.name.trim().charAt(0).toUpperCase())}</span><span class="project-user-name">${esc(state.user.name)}</span><span class="project-user-chevron" aria-hidden="true">⌄</span><span class="project-sr-only">${esc(t("Tài khoản"))}</span></summary><div class="project-user-menu-items"><div class="project-account-label">${esc(state.user.name)}<small>${esc(t(roleNames[state.user.role]))}</small></div>${actionButton("Cỡ chữ Aᴀ", "font", "", "project-font-toggle")}<button data-page="settings">${esc(t("Cài đặt & bảo mật"))}</button><button data-action="project">${esc(t("Về dự án"))}</button><button class="project-logout" data-action="logout">${esc(t("Đăng xuất"))}</button></div></details></div></div></header><div class="project-workspace"><main class="main upgraded-module" id="main" tabindex="-1"></main></div>${footer}</div>`;
   if (state.data.demo)
     $("#app").insertAdjacentHTML(
       "afterbegin",

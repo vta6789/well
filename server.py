@@ -305,14 +305,18 @@ class Handler(BaseHTTPRequestHandler):
                 if path in ["/api/login", "/api/register"] and method == "POST":
                     return self.auth(db, path, body)
                 if path == "/api/public" and method == "GET":
+                    learning = public_learning(db)
+                    def catalogue(kind, fields):
+                        return [{key: item[key] for key in fields if key in item}
+                                for item in rows(db, kind) if item.get("active")]
                     return self.send(
                         200,
                         {
                             "demo": DEMO,
-                            "packages": rows(db, "packages"),
-                            "rooms": rows(db, "rooms"),
-                            "activities": rows(db, "activities"),
-                            **public_learning(db),
+                            "packages": catalogue("packages", ["id", "name", "name_en", "description", "description_en", "price", "days", "health_tier", "active"]),
+                            "rooms": catalogue("rooms", ["id", "name", "capacity", "facility", "accessible", "active"]),
+                            "activities": learning["workshops"],
+                            **learning,
                         },
                     )
                 if path == "/api/impact" and method == "GET":
@@ -529,6 +533,9 @@ class Handler(BaseHTTPRequestHandler):
                         403, "Chỉ chủ hồ sơ được thay đổi thông tin và sự đồng ý."
                     )
                 merged = dict(old or {}, **body)
+                if old:
+                    # References to the owning profile come from storage, never a PATCH payload.
+                    merged["resident"] = old.get("resident")
                 if kind == "residents" and user["role"] == "RECEPTION" and old:
                     for key in [
                         "health",
@@ -569,15 +576,24 @@ class Handler(BaseHTTPRequestHandler):
 
     def auth(self, db, path, body):
         address = self.client_address[0]
-        recent = [t for t in ATTEMPTS.get(address, []) if t > time.time() - 900]
-        ATTEMPTS[address] = recent
-        if len(recent) >= 15:
+        email = text_field(body, "email", True, 254).lower()
+        current_time = time.time()
+        # A successful login to another account must not clear target failures.
+        attempt_key = (address, email)
+        address_key = (address, "*")
+        for key in list(ATTEMPTS):
+            ATTEMPTS[key] = [stamp for stamp in ATTEMPTS[key] if stamp > current_time - 900]
+            if not ATTEMPTS[key]:
+                del ATTEMPTS[key]
+        recent = ATTEMPTS.setdefault(attempt_key, [])
+        address_attempts = ATTEMPTS.setdefault(address_key, [])
+        if len(recent) >= 15 or len(address_attempts) >= 60:
             raise APIError(429, "Quá nhiều lần thử. Vui lòng chờ 15 phút.")
-        recent.append(time.time())
+        recent.append(current_time)
+        address_attempts.append(current_time)
         if path == "/api/register":
             account_type = "SENIOR" if body.get("account_type") == "SENIOR" else "FAMILY"
             self.create_user(db, dict(body, role=account_type), None, respond=False)
-        email = text_field(body, "email", True, 254).lower()
         row = db.execute(
             "SELECT * FROM users WHERE email=? AND active=1",
             (email,),
@@ -591,7 +607,7 @@ class Handler(BaseHTTPRequestHandler):
             (token, row["id"], csrf, time.time() + 8 * 3600),
         )
         audit(db, public_user(row), "Đăng nhập", "users", row["id"])
-        ATTEMPTS[address] = []
+        ATTEMPTS.pop(attempt_key, None)
         return self.send(
             200,
             {

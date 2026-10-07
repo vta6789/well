@@ -1,4 +1,4 @@
-# Wellness Farm — học, thực hành và trải nghiệm miễn phí
+# Wellness Farm — học, thực hành và du lịch
 
 Phát triển tiếp từ `wellness_farm_web_app (1).html` theo hướng **học → tạo giá trị → du lịch**, với thông điệp “Đến để học. Ở lại để tạo giá trị.” Trang chủ, lịch workshop, Nghệ nhân bạc và đăng ký trải nghiệm dùng cùng màu xanh, font và ảnh nông trại của dự án. Trang quản trị riêng giữ menu bên trái và quyền quản lý dữ liệu cũ.
 
@@ -95,9 +95,9 @@ Lệnh tạo dữ liệu hoàn toàn giả và in mật khẩu ngẫu nhiên cho
 ## Quy trình sử dụng
 
 1. Gia đình đăng ký tài khoản và tạo hồ sơ người thân.
-2. Chọn workshop hoặc hành trình miễn phí; nếu cần lưu trú, chọn ngày đến và thời lượng để quản lý xác nhận.
+2. Đăng ký online với gói Ngày, Tuần hoặc Tháng; chọn ngày đến và thời lượng để quản lý xác nhận. Cả ba gói có quyền tham gia trải nghiệm, workshop và talkshow như nhau.
 3. Lễ tân/quản lý xem hồ sơ, đánh giá tiếp nhận, chọn phòng và xác nhận; có thể chuyển vào danh sách chờ.
-4. Người dùng không phải thanh toán cho các trải nghiệm mới. Kế toán chỉ dùng phần tài chính để đối soát giao dịch lịch sử khi cần.
+4. Đội ngũ tiếp nhận và đối soát phí gói: Ngày 450.000đ, Tuần 2.000.000đ, Tháng 9.000.000đ. Kế toán ghi nhận thu, hoàn tiền và công nợ theo quyền; ứng dụng chưa kết nối cổng thanh toán trực tuyến.
 5. Quản lý phân công nhân viên chăm sóc vào hồ sơ.
 6. Nhân viên ghi công việc, chỉ số, bữa ăn, bàn giao và báo cáo. Chỉ định thuốc do bác sĩ hoặc quản lý được cấp quyền nhập.
 7. Báo cáo chia sẻ chỉ xuất hiện cho gia đình khi báo cáo được chọn chia sẻ và hồ sơ có sự đồng ý. Gia đình có thể thu hồi sự đồng ý.
@@ -118,6 +118,8 @@ Lệnh dùng SQLite backup API để tạo bản sao nhất quán trong thư m�
 Khôi phục: dừng server; sao lưu database hiện tại; chép bản backup đã kiểm tra thành `wellness.sqlite3` trong thư mục dữ liệu đang chọn; chạy lại server. Không ghi đè database khi server còn chạy. Backup hiện được chạy theo lệnh, chưa lập lịch tự động.
 
 ## Kiểm tra
+
+Báo cáo sửa giao diện và bảo mật ngày 07/10/2026, kèm hướng dẫn bàn giao: [reports/user-ui-security-2026-10-07.md](reports/user-ui-security-2026-10-07.md).
 
 ```powershell
 python -m unittest discover -v

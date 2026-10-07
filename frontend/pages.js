@@ -398,7 +398,7 @@ function listPage(kind) {
         : kind === "incidents"
           ? '<div class="notice warn section-title">Trong tình huống khẩn cấp, gọi trực tiếp nhân viên trực hoặc cấp cứu. Chưa kết nối hệ thống báo động bên ngoài.</div>'
           : "";
-          const displayAdd = kind === "skills" ? "" : add;
+  const displayAdd = kind === "skills" ? "" : add;
   return (
     header(
       medicationHub ? "Thuốc & nhật ký dùng thuốc" : names[kind],
@@ -412,10 +412,7 @@ function listPage(kind) {
     notice +
     (records.length
       ? content
-      : `<div class="card">${empty(
-    kind === "registrations" || kind === "bookings" ? "Bạn chưa có đơn đăng ký nào" : (kind === "skills" ? "Chưa có kỹ năng được ghi nhận" : "Chưa có dữ liệu phù hợp"),
-    can(kind) ? "Bấm “Tạo mới” để bắt đầu." : (kind === "skills" ? "Kỹ năng sẽ hiển thị sau khi chuyên gia đánh giá và xác nhận." : "Thông tin sẽ xuất hiện khi được ghi nhận hoặc cấp quyền.")
-  )}</div>`
+      : `<div class="card">${recordEmpty(kind, Boolean(displayAdd))}</div>`)
   );
 }
 function calendarPage() {
@@ -579,7 +576,7 @@ function projectPage() {
     .join("");
   return (
     header("Về dự án", "Nông trại dưỡng lão kế thừa sinh thái tại Bình Mỹ.") +
-    `<section class="project-author"><h2>${esc(t("Tác giả"))}</h2><p><strong>Malware</strong></p></section>${sections}`
+    `<section class="project-author"><h2>${esc(t("Tác giả"))}</h2>${projectCredits()}</section>${sections}`
   );
 }
 function renderPage() {

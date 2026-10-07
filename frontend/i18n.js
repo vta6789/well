@@ -195,6 +195,16 @@ Object.assign(english, {
   "Nếu đã thanh toán, nhân viên cần đối soát và xử lý hoàn tiền riêng.": "If you have paid, our team needs to reconcile the payment and arrange a refund.",
   "Đã thu ròng: {paid} · Còn nợ: {due}. Nếu cần hủy sau thanh toán, nhân viên xử lý hoàn tiền riêng.": "Net paid: {paid} · Outstanding: {due}. Our team handles refunds separately for paid registrations."
 });
+Object.assign(english, {
+  "Tác giả Malware và đồng tác giả là Team3": "Created by Malware with co-author Team3",
+  "Không tìm thấy kết quả phù hợp": "No matching results",
+  "Thử thay đổi từ khóa hoặc bộ lọc.": "Try another search term or filter.",
+  "Chưa có kỹ năng được ghi nhận": "No skills recorded yet",
+  "Kỹ năng sẽ hiển thị sau khi chuyên gia đánh giá và xác nhận.": "Skills appear after an expert assesses and verifies them.",
+  "Bạn chưa có đơn đăng ký nào": "You have no registrations yet",
+  "Bấm “Tạo mới” để bắt đầu.": "Choose New to get started.",
+  "Thông tin sẽ xuất hiện khi được ghi nhận hoặc cấp quyền.": "Information appears once recorded or shared with you.",
+});
 function t(source, values = {}) {
   let result = language === "en" ? english[source] || source : source;
   if (language === "en" && !english[source] && typeof source === "string" && source.startsWith("+ ")) result = "+ " + (english[source.slice(2)] || source.slice(2));
