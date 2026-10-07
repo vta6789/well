@@ -398,11 +398,12 @@ function listPage(kind) {
         : kind === "incidents"
           ? '<div class="notice warn section-title">Trong tình huống khẩn cấp, gọi trực tiếp nhân viên trực hoặc cấp cứu. Chưa kết nối hệ thống báo động bên ngoài.</div>'
           : "";
+          const displayAdd = kind === "skills" ? "" : add;
   return (
     header(
       medicationHub ? "Thuốc & nhật ký dùng thuốc" : names[kind],
       medicationHub ? descriptions[state.medicationView] : descriptions[kind],
-      add,
+      displayAdd,
     ) +
     (medicationHub
       ? `<div class="row section-title" role="group" aria-label="Nội dung thuốc"><button type="button" class="btn ${state.medicationView === "medications" ? "primary" : "secondary"}" data-action="medication-view" data-view="medications" aria-pressed="${state.medicationView === "medications"}">${esc(t("Thuốc & chỉ định"))}</button><button type="button" class="btn ${state.medicationView === "doses" ? "primary" : "secondary"}" data-action="medication-view" data-view="doses" aria-pressed="${state.medicationView === "doses"}">Nhật ký dùng thuốc</button></div>`
@@ -411,7 +412,10 @@ function listPage(kind) {
     notice +
     (records.length
       ? content
-      : `<div class="card">${empty("Chưa có bản ghi phù hợp", can(kind) ? "Chọn “Tạo mới” để bắt đầu." : "Thông tin sẽ xuất hiện khi được ghi nhận hoặc cấp quyền.")}</div>`)
+      : `<div class="card">${empty(
+    kind === "registrations" || kind === "bookings" ? "Bạn chưa có đơn đăng ký nào" : (kind === "skills" ? "Chưa có kỹ năng được ghi nhận" : "Chưa có dữ liệu phù hợp"),
+    can(kind) ? "Bấm “Tạo mới” để bắt đầu." : (kind === "skills" ? "Kỹ năng sẽ hiển thị sau khi chuyên gia đánh giá và xác nhận." : "Thông tin sẽ xuất hiện khi được ghi nhận hoặc cấp quyền.")
+  )}</div>`
   );
 }
 function calendarPage() {

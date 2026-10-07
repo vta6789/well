@@ -10,6 +10,11 @@
  <link rel="stylesheet" href="/design-tokens.css">
  <link rel="stylesheet" href="/original-theme.css">
  <link rel="stylesheet" href="/assets/fontawesome/css/all.min.css">
+ <style>
+   html {
+     scroll-behavior: smooth;
+   }
+ </style>
  <script src="/frontend/i18n.js" defer></script>
  <script src="/frontend/core.js" defer></script>
  <script src="/frontend/components.js" defer></script>
@@ -28,31 +33,26 @@
  <div id="toast" role="status" aria-live="polite"></div>
  <template id="original-project">
   <div class="original-site" id="original-site">
-<header class="sticky top-0 z-40 glass border-b border-stone-200 shadow-sm">
+    <header class="sticky top-0 z-40 glass border-b border-stone-200 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
                 <!-- Brand -->
-                <div class="flex items-center gap-3 cursor-pointer" data-action="original-home">
+                <a href="#sec-home" class="flex items-center gap-3 cursor-pointer">
                     <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 to-emerald-400 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
                         <i class="fa-solid fa-leaf text-xl"></i>
                     </div>
                     <div>
                         <span class="text-xl font-extrabold tracking-tight text-stone-900 block leading-none">Wellness<span class="text-brand-600">Farm</span></span>
                     </div>
-                </div>
+                </a>
 
-                <nav class="public-nav text-sm font-semibold text-stone-600" aria-label="Điều hướng chính">
-                    <button data-action="original-section" data-section="sec-about">Giới thiệu</button>
-                    <button data-action="original-packages">Gói dưỡng lão</button>
-                    <button data-action="original-section" data-section="sec-process">Quy trình</button>
-                    <details class="project-nav-dropdown">
-                        <summary>Về dự án <span aria-hidden="true">▾</span></summary>
-                        <div class="project-nav-menu">
-                            <button data-action="original-section" data-section="sec-nabc">NABC & SDGs</button>
-                            <button data-action="original-section" data-section="sec-survey">Khảo sát</button>
-                            <button data-action="original-section" data-section="sec-zones">5 phân khu</button>
-                        </div>
-                    </details>
+                <nav class="public-nav text-sm font-semibold text-stone-600 flex items-center gap-6" aria-label="Điều hướng chính">
+                    <a href="#sec-home" class="hover:text-brand-600 transition">Trang chủ</a>
+                    <a href="#sec-about" class="hover:text-brand-600 transition">Giới thiệu</a>
+                    <a href="#sec-zones" class="hover:text-brand-600 transition">5 Phân khu</a>
+                    <a href="#sec-process" class="hover:text-brand-600 transition">Quy trình</a>
+                    <a href="#sec-packages" class="hover:text-brand-600 transition">Gói dưỡng lão</a>
+                    <a href="#sec-nabc" class="hover:text-brand-600 transition">NABC & SDGs</a>
                 </nav>
 
                 <!-- Auth Buttons & Profile -->
@@ -62,7 +62,8 @@
             </div>
         </div>
     </header>
-<main class="flex-grow" id="main"><section id="sec-home" class="py-10">
+    <main class="flex-grow" id="main">
+        <section id="sec-home" class="py-10">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <!-- Hero Header -->
                 <div class="grid lg:grid-cols-2 gap-12 items-center mb-16">
@@ -94,9 +95,9 @@
                         </div>
 
                         <div class="flex flex-wrap gap-4">
-                            <button data-action="original-packages" class="px-8 py-4 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl font-bold shadow-lg shadow-brand-600/30 transition transform hover:-translate-y-0.5">
+                            <a href="#sec-packages" class="px-8 py-4 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl font-bold shadow-lg shadow-brand-600/30 transition transform hover:-translate-y-0.5 inline-block text-center">
                                 Chọn gói <i class="fa-solid fa-arrow-right ml-2"></i>
-                            </button>
+                            </a>
                             <button data-action="login" class="px-6 py-4 bg-white hover:bg-stone-100 text-stone-800 border border-stone-200 rounded-2xl font-semibold transition">
                                 Đăng nhập
                             </button>
@@ -383,7 +384,10 @@
                 </div>
 
             </div>
-        </section><section id="sec-packages" class="py-12 bg-stone-100 hidden">
+        </section>
+
+        <!-- ĐÃ BỎ CLASS hidden ĐỂ HIỂN THỊ LIỀN MẠCH -->
+        <section id="sec-packages" class="py-12 bg-stone-100">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-2xl mx-auto mb-12">
                     <span class="text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-50 px-3 py-1 rounded-full">Đặt Vé Trải Nghiệm</span>
@@ -457,7 +461,9 @@
                     </div>
                 </div>
             </div>
-        </section></main><footer class="bg-stone-900 text-stone-400 py-12 border-t border-stone-800">
+        </section>
+    </main>
+    <footer class="bg-stone-900 text-stone-400 py-12 border-t border-stone-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-3 gap-8 mb-8">
                 <div>
@@ -473,9 +479,7 @@
                 </div>
                 <div>
                     <h4 class="text-white font-bold text-sm mb-3">Tác giả</h4>
-                    <ul class="text-xs space-y-2">
-                        <li><strong class="text-stone-200">Malware</strong></li>
-                    </ul>
+                    <p class="text-xs text-stone-400">Tác giả Malware và đồng tác giả là Team3</p>
                 </div>
                 <div>
                     <h4 class="text-white font-bold text-sm mb-3">Liên Hệ Ban Quản Lý</h4>
