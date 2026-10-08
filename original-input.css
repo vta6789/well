@@ -2,6 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
+.original-site .upgraded-module { font-size: 17px; line-height: 1.6; }
+.original-site .upgraded-module .small { font-size: 14px; line-height: 1.55; }
+.original-site .upgraded-module .table { font-size: 15px; }
+.original-site .upgraded-module input,
+.original-site .upgraded-module select,
+.original-site .upgraded-module textarea { font-size: 16px; }
+.update-dot,
+.update-group-dot {
+  display: inline-block;
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #dc5c27;
+  box-shadow: 0 0 0 2px #fff;
+}
+.update-dot { margin-left: auto; }
+.update-group-dot { margin-left: 5px; }
+.learning-record-table .table-wrap { overflow-x: auto; }
+.learning-record-table .table th,
+.learning-record-table .table td { vertical-align: top; }
+
 :root {
   font-family: var(--font-body);
 }
@@ -15,8 +37,47 @@ h2,
 .btn {
   border-radius: var(--radius-button);
 }
+.password-input { position: relative; }
+#auth-form .password-input input { width: 100%; padding-right: 52px; }
+.password-toggle {
+  position: absolute;
+  right: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 38px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #456d51;
+  cursor: pointer;
+}
+.password-toggle:hover { background: #eaf2e6; }
+.password-toggle[aria-pressed="true"] { color: #215e3e; }
 .card {
   border-radius: var(--radius-card);
+}
+.dashboard-schedule-items { display: grid; gap: 10px; margin-top: 16px; }
+.dashboard-schedule-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-align: left;
+  background: #f7faf5;
+  color: #234b35;
+}
+.dashboard-schedule-item:hover { background: #edf5e9; }
+.dashboard-schedule-item span { color: #617568; font-size: 13px; }
+.workshop-recommendations .grid { margin-top: 14px; }
+@media (max-width: 600px) {
+  .dashboard-schedule-item { align-items: flex-start; flex-direction: column; }
 }
 .brand-mark {
   background: #16a34a;
@@ -615,34 +676,31 @@ html.large-text .original-site {
 .language-switch button[aria-pressed="true"] { color: #fff; background: #2d684a; }
 .language-switch button:focus-visible { outline: 2px solid #2d684a; outline-offset: 2px; }
 .online-registration .registration-intro { max-width: 850px; margin-bottom: 28px; }
-.registration-shared { padding: 28px; margin: 30px 0; border: 1px solid #d6e3cd; border-radius: 24px; background: linear-gradient(120deg, #edf3e3, #fbf6e7); }
-.learning-public .registration-shared h2 { font-size: 26px; margin: 0 0 18px; }
-.registration-shared > div { display: flex; flex-wrap: wrap; gap: 18px 36px; }
-.registration-shared span { display: flex; gap: 12px; align-items: center; color: #355d42; }
+.registration-plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; align-items: stretch; }
+.registration-plan-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.registration-plan-mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 14px; background: #edf3e3; color: #34734b; font-size: 20px; }
 .registration-price { margin: 22px 0 16px; color: #28573d; font-weight: 800; font-size: clamp(25px, 2.6vw, 34px); }
 .registration-price > span { display: block; font-size: 14px; font-weight: 500; color: #657162; margin-top: 4px; }
 .online-registration .learning-package { display: flex; flex-direction: column; min-width: 0; }
-.online-registration .learning-package > p { flex-grow: 1; }
-.registration-benefits { padding: 0; margin: 20px 0 26px; list-style: none; display: grid; gap: 12px; }
+.online-registration .learning-package > .registration-plan-description { min-height: 112px; margin-bottom: 22px; font-size: 14px; line-height: 1.7; }
+.registration-plan-benefits { margin-top: 28px; border-top: 1px solid #dce5d7; }
+.registration-benefit-group { padding-top: 22px; }
+.original-site .registration-benefit-group h3 { color: #355d42; font-size: 13px; font-weight: 800; }
+.registration-benefits { padding: 0; margin: 12px 0 0; list-style: none; display: grid; gap: 10px; }
 .registration-benefits li { display: flex; align-items: baseline; gap: 10px; line-height: 1.6; font-size: 15px; }
 .registration-benefits i { color: #34734b; flex-shrink: 0; }
-.online-registration .learning-package > .btn { width: 100%; margin-top: auto; }
+.online-registration .learning-package > .btn { width: 100%; }
 .package-recommended { border-color: #80a383 !important; box-shadow: 0 12px 30px #335e4214; }
-.registration-comparison { margin-top: 52px; }
-.registration-table-scroll { overflow-x: auto; border: 1px solid #d9e0d1; border-radius: 20px; margin: 22px 0 16px; background: #fffdf6; }
-.registration-table-scroll table { width: 100%; min-width: 690px; border-collapse: collapse; font-size: 15px; }
-.registration-table-scroll th, .registration-table-scroll td { padding: 18px 22px; text-align: left; border-bottom: 1px solid #e4e8db; line-height: 1.6; }
-.registration-table-scroll thead { color: #315e40; background: #eaf0e1; }
-.registration-table-scroll tbody th { font-weight: 650; width: 29%; }
-.registration-table-scroll tbody tr:last-child > * { border-bottom: 0; }
+.registration-care-note { margin-top: 24px; }
+@media (max-width: 900px) {
+  .registration-plans { grid-template-columns: 1fr; max-width: 620px; margin-inline: auto; }
+  .online-registration .learning-package > .registration-plan-description { min-height: 0; }
+}
 .priority-badge { margin: 6px 0; font-size: 11px; }
 @media (max-width: 760px) {
   .learning-public-header #navAuthArea { flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
   .learning-public-header .language-switch button { padding: 5px 8px; }
-  .registration-shared { padding: 22px; }
-  .registration-shared > div { flex-direction: column; gap: 14px; }
   .registration-price { font-size: 30px; }
-  .registration-table-scroll th, .registration-table-scroll td { padding: 14px 16px; }
 }
 .learning-public-footer { border-top: 1px solid #e2e8e4; padding: 36px 24px; text-align: center; color: #64746a; }
 .learning-public-footer strong { color: #15803d; }
@@ -1325,4 +1383,20 @@ html.large-text .original-site {
   .wf-reveal { opacity: 1 !important; transform: none !important; animation: none !important; }
   .wf-scene-enter { animation: none !important; opacity: 1 !important; transform: none !important; }
   .learning-sprig, .learning-scroll-progress, .learning-discover { display: none; }
+}
+
+/* Comfortable default reading size, with the existing Aᴀ control for more. */
+.project-function-menu summary,
+.project-mobile-nav summary { font-size: 15px; }
+.project-function-items button,
+.project-mobile-panel button,
+.project-user-menu-items button { font-size: 15px; }
+.project-user-menu summary { font-size: 14px; }
+.learning-public-header nav button { font-size: 15px; }
+.learning-public .learning-section p,
+.learning-public .learning-workshop-meta,
+.learning-public-footer p { font-size: 15px; }
+@media (max-width: 760px) {
+  .learning-public-header nav button { font-size: 14px; }
+  .learning-public .learning-hero-copy > p { font-size: 16px; }
 }

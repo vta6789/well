@@ -146,13 +146,13 @@ test("registration, settings and logout use the real backend", async ({
     .getByLabel("Email", { exact: false })
     .fill(`family-${suffix}@example.test`);
   await expect(dialog.getByLabel("Số điện thoại")).toHaveCount(0);
-  await dialog.getByLabel("Mật khẩu").fill("Wellness-test-12345");
+  await dialog.locator('input[name="password"]').fill("Wellness-test-12345");
   await dialog.getByRole("button", { name: "Đăng ký", exact: true }).click();
   await expect(dialog).not.toBeVisible();
   await expect(page.locator(".project-app-header")).toBeVisible();
-  const functions = await openFunctions(page, "Lưu trú");
+  const functions = await openFunctions(page, "Đăng ký online");
   await functions
-    .getByRole("button", { name: "Lưu trú của tôi", exact: true })
+    .getByRole("button", { name: "Sổ đăng ký online", exact: true })
     .click();
   await page.locator(".project-user-menu summary").click();
   const font = page.getByRole("button", { name: "Cỡ chữ Aᴀ" });
@@ -165,7 +165,7 @@ test("registration, settings and logout use the real backend", async ({
     "aria-pressed",
     "true",
   );
-  await page.getByRole("button", { name: "Về dự án", exact: true }).click();
+  await page.getByRole("button", { name: "Dự án", exact: true }).click();
   await expect(
     page.locator("#main").getByRole("heading", { name: "Tác giả" }),
   ).toBeVisible();
@@ -187,7 +187,7 @@ test("registration, settings and logout use the real backend", async ({
 });
 
 const roles = [
-  ["FAMILY", "Lưu trú", "bookings", "Lưu trú của tôi"],
+  ["FAMILY", "Đăng ký online", "bookings", "Sổ đăng ký online"],
   ["RECEPTION", "Lưu trú", "rooms", "Phòng & sức chứa"],
   ["NURSE", "Chăm sóc", "care", "Kế hoạch chăm sóc"],
   ["DOCTOR", "Chăm sóc", "medications", "Thuốc & nhật ký dùng thuốc"],
@@ -270,12 +270,12 @@ for (const [role, group, target, label] of roles) {
     const header = page.locator(".project-app-header");
     expect(
       await header.locator(".project-function-menu").count(),
-    ).toBeLessThanOrEqual(4);
+    ).toBeLessThanOrEqual(5);
     expect(
       await header.evaluate((el) => el.scrollWidth <= el.clientWidth),
     ).toBe(true);
     expect(await header.locator("summary:visible").count()).toBeLessThanOrEqual(
-      5,
+      6,
     );
     expect(
       await page

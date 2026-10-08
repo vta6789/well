@@ -141,25 +141,33 @@ async function api(path, method = "GET", body) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const result = await response.json();
-  if (!response.ok)
-    throw new Error(t(result.error || "Không thể kết nối máy chủ."));
+  if (!response.ok) {
+    const error = new Error(t(result.error || "Không thể kết nối máy chủ."));
+    error.status = response.status;
+    throw error;
+  }
   return result;
 }
 async function refresh() {
+  const account = state.user;
+  if (!account) return false;
   const results = await Promise.all(
     kinds.map(async (kind) => [kind, await api(kind)]),
   );
-  const demo = state.data.demo;
-  state.data = Object.fromEntries(results);
-  state.data.demo = demo;
-  state.public = await api("public");
-  if (["MANAGER", "ADMIN"].includes(state.user.role))
-    [state.users, state.audit] = await Promise.all([
+  const publicData = await api("public");
+  let users = [], audit = [];
+  if (["MANAGER", "ADMIN"].includes(account.role))
+    [users, audit] = await Promise.all([
       api("users"),
       api("audit"),
     ]);
-  else {
-    state.users = [];
-    state.audit = [];
-  }
+  // A request from a previous account must never repopulate the new session.
+  if (state.user?.id !== account.id || state.user.role !== account.role) return false;
+  state.data = Object.fromEntries(results);
+  state.data.demo = publicData.demo;
+  state.public = publicData;
+  state.users = users;
+  state.audit = audit;
+  syncUpdateMarks();
+  return true;
 }

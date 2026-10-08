@@ -16,14 +16,15 @@ test("English persists and a visitor registers a correctly priced day package", 
   await expect(day).toContainText("450,000");
   await expect(page.locator(".learning-package").filter({ hasText: "Week Package" })).toContainText("2,000,000");
   await expect(page.locator(".learning-package").filter({ hasText: "Month Package" })).toContainText("9,000,000");
-  await expect(page.getByRole("columnheader", { name: "Month Package" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Month Package", exact: true })).toBeVisible();
+  await expect(page.locator(".online-registration table")).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.screenshot({ path: `screenshots/online-en-${info.project.name}.png`, fullPage: true });
+  await page.screenshot({ path: `test-results/online-en-${info.project.name}.png`, fullPage: true });
   await day.getByRole("button", { name: "Register for this package" }).click();
   await page.locator("#auth-form").getByRole("button", { name: "Create account", exact: true }).click();
   await page.locator('#auth-form input[name="name"]').fill("Nguyễn Visitor");
   await page.locator('#auth-form input[name="email"]').fill(`visitor-${Date.now()}-${info.project.name}@example.test`);
-  await page.getByLabel("Password", { exact: false }).fill("Visitor-test-12345");
+  await page.locator('#auth-form input[name="password"]').fill("Visitor-test-12345");
   await expect(page.locator('#auth-form input')).toHaveCount(3);
   await page.locator('#auth-form button[type="submit"]').click();
   await expect(page.getByRole("heading", { name: "New · Visitor profiles" })).toBeVisible();
@@ -53,7 +54,7 @@ test("English persists and a visitor registers a correctly priced day package", 
   expect(errors).toEqual([]);
 });
 
-test("English public navigation translates empty states and comparison benefits", async ({ page }) => {
+test("English public navigation translates empty states and full package benefits", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "English", exact: true }).click();
   await page.locator('nav [data-id="workshops"]').click();
@@ -64,8 +65,27 @@ test("English public navigation translates empty states and comparison benefits"
   await expect(page.getByRole("heading", { name: "Silver Artisans and their creations" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Community impact" })).toBeVisible();
   await page.locator('nav [data-id="packages"]').click();
-  await expect(page.getByRole("rowheader", { name: "Booking priority", exact: true })).toBeVisible();
-  await expect(page.getByRole("rowheader", { name: "Case processing priority", exact: true })).toBeVisible();
+  const plans = page.locator(".learning-package");
+  await expect(plans).toHaveCount(3);
+  for (const plan of await plans.all()) {
+    for (const benefit of ["Farm experiences", "Workshop participation", "Talkshow participation", "Blood pressure & heart rate screening", "Food & drinks"]) {
+      await expect(plan.locator(".registration-plan-benefits")).toContainText(benefit);
+    }
+    await expect(plan.getByRole("button", { name: "Register for this package" })).toBeVisible();
+  }
+  const day = plans.filter({ hasText: "Day Package" });
+  const week = plans.filter({ hasText: "Week Package" });
+  const month = plans.filter({ hasText: "Month Package" });
+  await expect(day).toContainText("Standard booking order");
+  await expect(day).not.toContainText("Nutrition advice");
+  await expect(week).toContainText("Health monitoring twice a day for 7 days");
+  await expect(week).toContainText("Nutrition advice");
+  await expect(week).not.toContainText("Regular expert check-ups");
+  await expect(month).toContainText("Regular expert check-ups");
+  await expect(month).toContainText("Weekly nutrition advice");
+  await expect(month).toContainText("Highest priority for case processing");
+  await expect(page.locator(".online-registration table")).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByRole("button", { name: "Tiếng Việt", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Đăng ký online tại Wellness Farm" })).toBeVisible();
 });

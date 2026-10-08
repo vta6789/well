@@ -31,7 +31,7 @@ async function menuPage(page, id) {
 test('public site displays synced author information', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('footer')).toContainText('Team3');
-  await page.getByRole('button', { name: 'Về dự án', exact: true }).click();
+  await page.getByRole('button', { name: 'Dự án', exact: true }).click();
   await expect(page.locator('#main')).toContainText('Team3');
 });
 

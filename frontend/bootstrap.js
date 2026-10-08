@@ -139,4 +139,71 @@ async function init() {
     }
   }
 }
+let dataSyncTimer;
+let dataSyncBusy = false;
+let dataSyncNeedsRender = false;
+let dataSyncNeedsShell = false;
+function dataSyncPaused() {
+  return document.hidden || $("#modal").open ||
+    document.activeElement?.matches("input, textarea, select, [contenteditable='true']");
+}
+function dataSnapshot() {
+  return JSON.stringify([state.user, state.data, state.public, state.users,
+    state.page === "audit" ? state.audit : null]);
+}
+async function syncBrowserData() {
+  if (!state.user || dataSyncBusy || dataSyncPaused()) return;
+  const accountId = state.user.id;
+  const before = dataSnapshot();
+  const previousRole = state.user.role;
+  const previousName = state.user.name;
+  dataSyncBusy = true;
+  try {
+    const session = await api("me");
+    if (state.user?.id !== accountId) return;
+    if (session.user.id !== accountId) return;
+    state.user = session.user;
+    state.csrf = session.csrf;
+    if (!await refresh()) return;
+    const identityChanged = previousRole !== state.user.role || previousName !== state.user.name;
+    dataSyncNeedsShell ||= identityChanged;
+    dataSyncNeedsRender ||= before !== dataSnapshot();
+    if (previousRole !== state.user.role) state.page = "dashboard";
+    if (dataSyncPaused() || !dataSyncNeedsRender) return;
+    if ($(".learning-public")) learningLanding(state.publicView || "home");
+    else if (dataSyncNeedsShell) shell();
+    else renderPage();
+    dataSyncNeedsRender = false;
+    dataSyncNeedsShell = false;
+  } catch (error) {
+    if (state.user?.id !== accountId) return;
+    if (error.status === 401) {
+      state.user = null;
+      state.csrf = "";
+      state.data = {};
+      state.users = [];
+      state.audit = [];
+      dataSyncNeedsRender = false;
+      dataSyncNeedsShell = false;
+      // The dialog lives outside #app, so its draft survives the page change.
+      try {
+        await publicLoad();
+      } catch {
+        $("#app").innerHTML = `<div class="loading">${esc(t("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."))}</div>`;
+      }
+      toast("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", true);
+    } else toast("Không thể cập nhật dữ liệu. Vui lòng tải lại trang.", true);
+  } finally {
+    dataSyncBusy = false;
+  }
+}
+function scheduleBrowserSync() {
+  clearTimeout(dataSyncTimer);
+  dataSyncTimer = setTimeout(syncBrowserData, 250);
+}
+window.addEventListener("focus", scheduleBrowserSync);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) scheduleBrowserSync();
+});
+$("#modal").addEventListener("close", scheduleBrowserSync);
 init();

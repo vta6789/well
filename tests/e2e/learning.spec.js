@@ -21,7 +21,7 @@ test("senior joins workshops, shares an approved portfolio and books a garden vi
     await page.locator('#auth-form input[name="password"]').fill("Senior-test-12345");
     await page.locator('#auth-form button[type="submit"]').click();
     await expect(page.getByRole("heading", { name: "Học mỗi ngày. Tạo giá trị mỗi ngày." })).toBeVisible();
-    await page.getByRole("button", { name: "Nghệ nhân bạc", exact: true }).click();
+    await page.getByRole("button", { name: "Chuyên gia", exact: true }).click();
     await page.locator('nav [data-id="workshops"]').click();
     await page.screenshot({ path: `screenshots/learning-workshops-${info.project.name}.png`, fullPage: true });
     const card = page.locator(".learning-workshop").filter({ hasText: workshop.name });
@@ -50,7 +50,7 @@ test("senior joins workshops, shares an approved portfolio and books a garden vi
       const approval = await admin.patch(`/api/${kind}/${record.id}`, { headers: adminHeaders, data: { publication: "Đã duyệt" } });
       expect(approval.status()).toBe(200);
     }
-    await page.getByRole("button", { name: "Nghệ nhân bạc", exact: true }).click();
+    await page.getByRole("button", { name: "Chuyên gia", exact: true }).click();
     const artist = page.locator(".learning-artisan").filter({ hasText: `Nghệ nhân ${suffix}` });
     await expect(artist.getByText(`Chậu rau ${suffix}`, { exact: true })).toBeVisible();
     await artist.getByRole("button", { name: "Đặt tham quan vườn", exact: true }).click();
@@ -60,7 +60,7 @@ test("senior joins workshops, shares an approved portfolio and books a garden vi
     const tours = await (await page.context().request.get(origin + "/api/tour_bookings")).json();
     expect(tours[0].status).toBe("Chờ duyệt");
     expect(tours[0].guests).toBe(2);
-    await page.getByRole("button", { name: "Nghệ nhân bạc", exact: true }).click();
+    await page.getByRole("button", { name: "Chuyên gia", exact: true }).click();
     await expect(page.locator(".learning-artisan").filter({ hasText: `Nghệ nhân ${suffix}` })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: `screenshots/learning-${info.project.name}.png`, fullPage: true });

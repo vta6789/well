@@ -1,6 +1,15 @@
 function metric(label, value, note) {
   return `<article class="card metric"><div class="eyebrow">${esc(t(label))}</div><strong>${esc(value)}</strong><span>${esc(t(note))}</span></article>`;
 }
+function dashboardSchedule() {
+  const sessions = upcomingWorkshops().filter((activity) => activity.date === today());
+  return `<section class="card section-title dashboard-schedule"><div class="row between"><div><h2>${esc(t("Lịch hôm nay"))}</h2><p class="small muted">${day(today())} · ${esc(t("Sự kiện do đội ngũ và chuyên gia tổ chức"))}</p></div>${actionButton("Xem lịch đầy đủ", "page-calendar")}</div>${sessions.length ? `<div class="dashboard-schedule-items">${sessions.map((session) => `<button type="button" class="dashboard-schedule-item" data-action="detail" data-id="${esc(session.id)}"><strong>${esc(localized(session))}</strong><span>${esc(session.time || t("Đang cập nhật"))} · ${esc(session.location || t("Đang cập nhật"))}</span></button>`).join("")}</div>` : `<p class="small muted">${esc(t("Hôm nay chưa có sự kiện."))}</p>`}</section>`;
+}
+function workshopRecommendations() {
+  const enrolled = new Set(data("enrollments").filter((record) => record.status !== "Đã hủy").map((record) => record.activity_id));
+  const suggestions = upcomingWorkshops().filter((activity) => !enrolled.has(activity.id)).slice(0, 3);
+  return `<section class="section-title workshop-recommendations"><div class="row between"><div><h2>${esc(t("Sự kiện sắp diễn ra"))}</h2><p class="small muted">${esc(t("Chọn một buổi phù hợp để đăng ký tham gia."))}</p></div>${actionButton("Xem lịch workshop", "page-activities")}</div>${suggestions.length ? `<div class="grid three">${suggestions.map((activity) => workshopCard(activity)).join("")}</div>` : `<div class="card"><p class="small muted">${esc(t("Chưa có workshop mới để đăng ký."))}</p></div>`}</section>`;
+}
 function adminDashboard() {
   const pendingBookings = data("bookings").filter((r) => r.status === "Chờ duyệt").sort(priorityOrder);
   const openRequests = data("requests")
@@ -15,7 +24,7 @@ function adminDashboard() {
     <section class="card section-title"><div class="admin-section-heading"><h2>Học – làm – du lịch</h2>${actionButton("Bảng tác động", "page-impact")}</div><p class="small muted">${data("activities").length} workshop · ${data("products").length} sản phẩm · ${data("expert_applications").filter((r) => r.status === "Chờ duyệt").length} hồ sơ chuyên gia chờ duyệt · ${data("tour_bookings").filter((r) => r.status === "Chờ duyệt").length} yêu cầu tham quan mới</p><div class="row">${actionButton("Quản lý workshop", "page-activities")}${actionButton("Duyệt chuyên gia", "page-expert_applications")}${actionButton("Duyệt nghệ nhân bạc", "page-gardens")}${actionButton("Duyệt sản phẩm", "page-products")}${actionButton("Tiếp nhận khách", "page-tour_bookings")}${actionButton("Xem trang công khai", "learning-public", "artisans")}</div></section>
     <div class="grid two"><section class="card"><div class="admin-section-heading"><h2>Yêu cầu cần tiếp nhận</h2>${actionButton("Xem tất cả", "page-requests")}</div>${openRequests.length ? openRequests.slice(0, 5).map((r) => `<article class="admin-inbox-item"><strong>${esc(r.title)}</strong><p>${esc(residentName(r.resident))} · ${day(r.created_at)}</p><div class="row">${tag(r.status)}${priorityBadge({ service_priority: casePriority(r) }, "Ưu tiên xử lý hồ sơ")}${recordButtons("requests", r)}</div></article>`).join("") : empty("Không có yêu cầu chờ xử lý", "Yêu cầu mới từ gia đình sẽ hiển thị tại đây khi bạn làm mới dữ liệu.")}</section>
     <section class="card"><div class="admin-section-heading"><h2>Đơn lưu trú chờ duyệt</h2>${actionButton("Xem tất cả", "page-bookings")}</div>${pendingBookings.length ? pendingBookings.slice(0, 5).map((r) => `<article class="admin-inbox-item"><strong>${esc(residentName(r.resident))}</strong><p>${esc(r.code)} · ${esc(localized(r, "package_name"))}${priorityBadge(r)}<br>${day(r.start)} – ${day(r.end)}</p><div class="row">${tag(r.status)}${priorityBadge(r)}${recordButtons("bookings", r)}</div></article>`).join("") : empty("Không có đơn chờ duyệt", "Đơn đăng ký lưu trú mới sẽ xuất hiện tại đây.")}</section></div>
-    <section class="card section-title"><div class="admin-section-heading"><h2>Người dùng đăng ký gần đây</h2>${actionButton("Quản lý tài khoản", "page-users")}</div>${families.length ? table(["Họ tên", "Email", "Ngày đăng ký", "Trạng thái", "Thao tác"], families.slice(0, 6).map((u) => [esc(u.name), esc(u.email), day(u.created_at), tag(u.active ? "Hoạt động" : "Đã khóa"), actionButton("Cấp quyền / khóa", "edit-user", u.id)])) : empty("Chưa có người dùng đăng ký", "Tài khoản gia đình mới sẽ hiển thị tại đây.")}</section>`;
+    <section class="card section-title"><div class="admin-section-heading"><h2>Người dùng đăng ký gần đây</h2>${actionButton("Quản lý tài khoản", "page-users")}</div>${families.length ? table(["Họ tên", "Email", "Ngày đăng ký", "Trạng thái", "Thao tác"], families.slice(0, 6).map((u) => [esc(u.name), esc(u.email), day(u.created_at), tag(u.active ? "Hoạt động" : "Đã khóa"), actionButton("Cấp quyền / khóa", "edit-user", u.id)])) : empty("Chưa có người dùng đăng ký", "Tài khoản gia đình mới sẽ hiển thị tại đây.")}</section>` + dashboardSchedule();
 }
 function dashboard() {
   const role = state.user.role,
@@ -59,7 +68,7 @@ function dashboard() {
         ? actionButton("+ Đặt lịch lưu trú", "new", "bookings", "")
         : "",
     ) +
-    `<section class="hero-panel"><div class="eyebrow">CHĂM SÓC BẰNG SỰ THẤU HIỂU</div><h2>${role === "FAMILY" ? "Luôn gần bên, dù ở xa." : "Mỗi người một hành trình.<br>Mỗi ngày một niềm vui."}</h2><p>${role === "FAMILY" ? "Theo dõi lịch lưu trú, những hoạt động và báo cáo chăm sóc của người thân trong cùng một nơi." : "Kết nối lịch lưu trú, kế hoạch chăm sóc và hoạt động hôm nay để không bỏ sót những điều cần quan tâm."}</p><span class="tag">❧ Wellness Farm · Bình Mỹ</span></section><div class="grid four">${cards.join("")}</div><div class="grid two section-title"><section class="card"><div class="row between"><h2>Lưu trú gần đây</h2><button class="small" data-page="bookings">Xem tất cả ↗</button></div>${
+    `<section class="hero-panel"><div class="eyebrow">CHĂM SÓC BẰNG SỰ THẤU HIỂU</div><h2>${role === "FAMILY" ? "Luôn gần bên, dù ở xa." : "Mỗi người một hành trình.<br>Mỗi ngày một niềm vui."}</h2><p>${role === "FAMILY" ? "Theo dõi lịch lưu trú, những hoạt động và báo cáo chăm sóc của người thân trong cùng một nơi." : "Kết nối lịch lưu trú, kế hoạch chăm sóc và hoạt động hôm nay để không bỏ sót những điều cần quan tâm."}</p><span class="tag">❧ Wellness Farm · Bình Mỹ</span></section><div class="grid four">${cards.join("")}</div>${dashboardSchedule()}<div class="grid two section-title"><section class="card"><div class="row between"><h2>Lưu trú gần đây</h2><button class="small" data-page="bookings">Xem tất cả ↗</button></div>${
       bookings.length
         ? table(
             ["Người lưu trú", "Ngày đến", "Trạng thái"],
@@ -401,10 +410,11 @@ function listPage(kind) {
   const displayAdd = kind === "skills" ? "" : add;
   return (
     header(
-      medicationHub ? "Thuốc & nhật ký dùng thuốc" : names[kind],
-      medicationHub ? descriptions[state.medicationView] : descriptions[kind],
+      medicationHub ? "Thuốc & nhật ký dùng thuốc" : kind === "bookings" && isLearner() ? "Sổ đăng ký online" : names[kind],
+      medicationHub ? descriptions[state.medicationView] : kind === "bookings" && isLearner() ? "Theo dõi các gói đã đăng ký, ngày đến và trạng thái tiếp nhận." : descriptions[kind],
       displayAdd,
     ) +
+    (kind === "enrollments" && isLearner() ? workshopRecommendations() : "") +
     (medicationHub
       ? `<div class="row section-title" role="group" aria-label="Nội dung thuốc"><button type="button" class="btn ${state.medicationView === "medications" ? "primary" : "secondary"}" data-action="medication-view" data-view="medications" aria-pressed="${state.medicationView === "medications"}">${esc(t("Thuốc & chỉ định"))}</button><button type="button" class="btn ${state.medicationView === "doses" ? "primary" : "secondary"}" data-action="medication-view" data-view="doses" aria-pressed="${state.medicationView === "doses"}">Nhật ký dùng thuốc</button></div>`
       : "") +
@@ -415,6 +425,22 @@ function listPage(kind) {
       : `<div class="card">${recordEmpty(kind, Boolean(displayAdd))}</div>`)
   );
 }
+function calendarReminders() {
+  const upcoming = [
+    ...data("enrollments")
+      .filter((record) => record.status !== "Đã hủy")
+      .map((record) => ({ record, activity: lookup("activities", record.activity_id) }))
+      .filter(({ activity }) => activity?.active && activity.date >= today())
+      .map(({ record, activity }) => ({ id: record.id, date: activity.date, title: localized(activity), detail: `${t(record.status || "Đã đăng ký")} · ${activity.time || t("Đang cập nhật")}` })),
+    ...data("bookings")
+      .filter((record) => record.status !== "Đã hủy" && record.start >= today())
+      .map((record) => ({ id: record.id, date: record.start, title: t("Ngày đến") + " · " + localized(record, "package_name"), detail: t(record.status) })),
+    ...data("care")
+      .filter((record) => record.status !== "Hoàn tất" && record.due >= today())
+      .map((record) => ({ id: record.id, date: record.due, title: record.title, detail: t("Chăm sóc") })),
+  ];
+  return upcoming.sort((a, b) => a.date.localeCompare(b.date)).slice(0, 6);
+}
 function calendarPage() {
   const first = new Date(state.year, state.month, 1),
     days = new Date(state.year, state.month + 1, 0).getDate(),
@@ -423,27 +449,29 @@ function calendarPage() {
   for (const b of data("bookings").filter((b) => b.status !== "Đã hủy")) {
     events.push({
       date: b.start,
-      label: "Nhận: " + residentName(b.resident),
+      label: t("Nhận") + ": " + residentName(b.resident),
       id: b.id,
     });
     events.push({
       date: b.end,
-      label: "Trả: " + residentName(b.resident),
+      label: t("Trả") + ": " + residentName(b.resident),
       id: b.id,
     });
   }
   for (const v of data("visits").filter((v) => v.status !== "Đã hủy"))
-    events.push({ date: v.date, label: "Thăm: " + v.visitor, id: v.id });
+    events.push({ date: v.date, label: t("Thăm") + ": " + v.visitor, id: v.id });
   for (const a of data("activities").filter((a) => a.active))
     events.push({ date: a.date, label: a.name, id: a.id });
-  for (const t of data("care").filter((t) => t.status !== "Hoàn tất"))
-    events.push({ date: t.due, label: "Chăm sóc: " + t.title, id: t.id });
+  for (const task of data("care").filter((record) => record.status !== "Hoàn tất"))
+    events.push({ date: task.due, label: t("Chăm sóc") + ": " + task.title, id: task.id });
+  const learnerCalendar = ["FAMILY", "SENIOR", "EXPERT"].includes(state.user.role);
+  const reminders = learnerCalendar ? calendarReminders() : [];
   return (
     header(
-      "Lịch tổng hợp",
+      ["FAMILY", "SENIOR", "EXPERT"].includes(state.user.role) ? "Lịch sự kiện" : "Lịch tổng hợp",
       "Ngày đến, ngày về, lịch thăm, hoạt động và công việc chăm sóc.",
     ) +
-    `<section class="card"><div class="row between section-title"><h2>Tháng ${state.month + 1}, ${state.year}</h2><div class="row">${actionButton("←", "prev-month")}${actionButton("Hôm nay", "current-month")}${actionButton("→", "next-month")}</div></div><div class="calendar-grid">${["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map((x) => `<div class="calendar-day">${x}</div>`).join("")}${Array.from({ length: offset }, () => "<div></div>").join("")}${Array.from(
+    `<section class="card"><div class="row between section-title"><h2>${esc(t("Tháng {month}, {year}", { month: state.month + 1, year: state.year }))}</h2><div class="row">${actionButton("←", "prev-month")}${actionButton("Hôm nay", "current-month")}${actionButton("→", "next-month")}</div></div><div class="calendar-grid">${(language === "en" ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] : ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]).map((x) => `<div class="calendar-day">${x}</div>`).join("")}${Array.from({ length: offset }, () => "<div></div>").join("")}${Array.from(
       { length: days },
       (_, i) => {
         const dt = `${state.year}-${String(state.month + 1).padStart(2, "0")}-${String(i + 1).padStart(2, "0")}`;
@@ -455,7 +483,7 @@ function calendarPage() {
           )
           .join("")}</div>`;
       },
-    ).join("")}</div></section>`
+    ).join("")}</div></section>${learnerCalendar ? `<section class="card section-title calendar-reminders"><h2>${esc(t("Nhắc việc"))}</h2><p class="small muted">${esc(t("Các buổi đã đăng ký và lịch cần chú ý sắp tới."))}</p>${reminders.length ? `<div class="timeline">${reminders.map((item) => `<div class="timeline-item"><strong>${esc(item.title)}</strong><p>${day(item.date)} · ${esc(item.detail)}</p>${actionButton("Xem chi tiết", "detail", item.id)}</div>`).join("")}</div>` : `<p class="small muted">${esc(t("Chưa có lời nhắc sắp tới."))}</p>`}</section>` : ""}`
   );
 }
 function analytics() {
@@ -575,13 +603,14 @@ function projectPage() {
     .map((id) => template.querySelector(`#${id}`)?.outerHTML || "")
     .join("");
   return (
-    header("Về dự án", "Nông trại dưỡng lão kế thừa sinh thái tại Bình Mỹ.") +
+    header("Dự án", "Nông trại dưỡng lão kế thừa sinh thái tại Bình Mỹ.") +
     `<section class="project-author"><h2>${esc(t("Tác giả"))}</h2>${projectCredits()}</section>${sections}`
   );
 }
 function renderPage() {
   const main = $("#main");
   if (!main) return;
+  markPageRead(state.page);
   if (state.page === "project") main.innerHTML = projectPage();
   else if (learningKinds.includes(state.page)) main.innerHTML = learningListPage(state.page);
   else if (state.page === "journey") main.innerHTML = journeyPage();
@@ -644,8 +673,8 @@ function notificationsPage() {
   ].sort((a, b) => b.at.localeCompare(a.at));
   return (
     header(
-      "Thông báo & nhắc việc",
-      "Cập nhật và công việc từ các hồ sơ bạn được phép theo dõi.",
+      ["FAMILY", "SENIOR", "EXPERT"].includes(state.user.role) ? "Nhắc việc" : "Thông báo & nhắc việc",
+      "Cập nhật và công việc từ các hồ sơ",
       actionButton("↻ Cập nhật", "refresh"),
     ) +
     `<div class="card">${items.length ? `<div class="timeline">${items.map((i) => `<div class="timeline-item"><strong>${esc(i.title)}</strong><p>${esc(i.desc)} · ${day(i.at)}</p>${actionButton("Xem chi tiết", "detail", i.id)}</div>`).join("")}</div>` : empty("Chưa có cập nhật")}</div>`

@@ -18,6 +18,12 @@ File phát triển chính là `index.html`. URL `/wellness_farm_web_app.html` đ
 
 ADMIN dùng trang quản trị riêng với menu bên trái và bảng tổng quan. Các vai trò khác dùng menu nhóm trên thanh điều hướng để mở chức năng theo quyền.
 
+Edge, Chrome và các trình duyệt khác dùng chung dữ liệu khi mở cùng máy chủ và đăng nhập cùng tài khoản. Phiên đăng nhập, ngôn ngữ và cỡ chữ vẫn riêng theo trình duyệt. Web kiểm tra dữ liệu mới khi cửa sổ lấy lại focus hoặc tab trở lại hiển thị; không cần đăng xuất rồi đăng nhập lại. Biểu mẫu đang mở và ô đang nhập được giữ nguyên; đóng hộp thoại sẽ kiểm tra dữ liệu mới. Đây là cập nhật khi quay lại trang, chưa phải thông báo đẩy thời gian thực.
+
+Chỉ chạy một máy chủ trên một cổng. Trên Windows, máy chủ từ chối chạy trùng cổng để tránh các phiên máy chủ chồng lên nhau. Dữ liệu vận hành dùng chung ở `data/production/wellness.sqlite3`, trừ khi cấu hình thư mục dữ liệu khác bằng `WF_DATA_DIR`.
+
+Nếu khởi động báo cổng đang được sử dụng, mở địa chỉ web hiện có. Muốn khởi động lại, nhấn `Ctrl+C` trong cửa sổ máy chủ cũ rồi chạy lại. Nếu máy chủ chạy nền, kiểm tra đúng tiến trình giữ cổng trước khi dừng; không đóng tất cả tiến trình Python.
+
 Nếu thay đổi CSS hoặc muốn lấy lại nội dung từ bản nguồn, dùng Node.js và các công cụ phát triển:
 
 ```powershell

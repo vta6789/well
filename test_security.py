@@ -7,6 +7,12 @@ import server
 
 
 class SecurityTests(harness.WellnessTests):
+    def test_only_one_server_can_listen_on_a_local_port(self):
+        with server.WellnessHTTPServer(('127.0.0.1', 0), server.Handler) as first:
+            with self.assertRaises(OSError):
+                with server.WellnessHTTPServer(first.server_address, server.Handler):
+                    self.fail('A second server was allowed to share the same port')
+
     def test_private_learning_and_support_not_visible_to_finance(self):
         _, garden = self.family.request('gardens', 'POST', {'resident': self.resident['id'], 'name': 'Private garden', 'focus': 'Plants', 'story': 'PRIVATE_STORY', 'public_consent': False})
         _, request = self.family.request('requests', 'POST', {'resident': self.resident['id'], 'title': 'PRIVATE_SUPPORT', 'notes': 'PRIVATE_CONTACT'})

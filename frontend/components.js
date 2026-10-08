@@ -1,6 +1,9 @@
 function actionButton(label, action, id = "", cls = "secondary compact") {
   return `<button class="btn ${cls}" data-action="${esc(action)}" data-id="${esc(id)}">${esc(t(label))}</button>`;
 }
+function authPasswordField(register) {
+  return `<div class="field ${register ? "" : "wide"}"><label for="auth-password">${esc(t("Mật khẩu"))} *</label><div class="password-input"><input id="auth-password" name="password" type="password" required ${register ? 'minlength="12"' : ""} maxlength="128" autocomplete="${register ? "new-password" : "current-password"}"><button type="button" class="password-toggle" data-action="toggle-password" aria-controls="auth-password" aria-label="${esc(t("Hiện mật khẩu"))}" title="${esc(t("Hiện mật khẩu"))}" aria-pressed="false"><i class="fa-solid fa-eye" aria-hidden="true"></i></button></div><small>${esc(t(register ? "Tối thiểu 12 ký tự." : "Nếu quên mật khẩu, liên hệ quản trị viên; email khôi phục chưa kết nối."))}</small></div>`;
+}
 let modalTrigger;
 function closeModal(cancel = false) {
   if (cancel) {
@@ -58,7 +61,7 @@ function header(title, subtitle, actions = "") {
   return `<div class="page-head"><div><div class="eyebrow">WELLNESS FARM / ${esc(t(roleNames[state.user.role]))}</div><h1>${esc(t(title))}</h1><p>${esc(t(subtitle))}</p></div><div class="row">${actions}</div></div>`;
 }
 function projectCredits() {
-  return `<p class="small muted project-credits">${esc(t("Tác giả Malware và đồng tác giả là Team3"))}</p>`;
+  return `<p class="small muted project-credits">${esc(t("Malware (tác giả) · Team3 (đồng tác giả)"))}</p>`;
 }
 function recordEmpty(kind, allowCreate = false) {
   if (state.query || state.filter) return empty("Không tìm thấy kết quả phù hợp", "Thử thay đổi từ khóa hoặc bộ lọc.");

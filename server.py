@@ -3,6 +3,7 @@
 import argparse
 import base64
 import csv
+import errno
 import hashlib
 import hmac
 import io
@@ -10,6 +11,7 @@ import json
 import os
 import re
 import secrets
+import socket
 import sqlite3
 import threading
 import time
@@ -52,6 +54,16 @@ from backend.learning import LEARNERS, LEARNING_KINDS, public_learning
 from backend.packages import migrate_packages
 
 ATTEMPTS = {}
+
+
+class WellnessHTTPServer(ThreadingHTTPServer):
+    # Windows otherwise permits several HTTP servers to share one local port.
+    allow_reuse_address = os.name != "nt"
+
+    def server_bind(self):
+        if os.name == "nt":
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
 
 
 class Database(sqlite3.Connection):
@@ -257,7 +269,7 @@ class Handler(BaseHTTPRequestHandler):
                 if path == "/index.html":
                     assets[path] = ("index.html", "text/html; charset=utf-8")
                 elif re.fullmatch(
-                    r"/frontend/(i18n|core|components|navigation|pages|forms|account|learning|events|bootstrap)\.js",
+                    r"/frontend/(i18n|core|components|navigation|updates|pages|forms|account|learning|events|bootstrap)\.js",
                     path,
                 ):
                     assets[path] = (path[1:], "application/javascript; charset=utf-8")
@@ -715,7 +727,17 @@ def main():
             )
         print("Account created.")
         return
-    server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
+    try:
+        server = WellnessHTTPServer(("127.0.0.1", args.port), Handler)
+    except OSError as error:
+        if error.errno == errno.EADDRINUSE or getattr(error, "winerror", None) == 10048:
+            raise SystemExit(
+                f"Cổng {args.port} đang được sử dụng. Nếu Wellness Farm đã chạy, "
+                f"hãy mở http://127.0.0.1:{args.port}/.\n"
+                "Để khởi động lại, dừng máy chủ cũ trước (Ctrl+C trong cửa sổ đang chạy).\n"
+                "Hoặc chọn cổng khác: python server.py --port 8001"
+            ) from None
+        raise
     print(f"Wellness Farm: http://127.0.0.1:{args.port}", flush=True)
     server.serve_forever()
 

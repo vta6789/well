@@ -4,6 +4,18 @@ document.addEventListener("click", async (e) => {
   const id = button.dataset.id,
     action = button.dataset.action;
   try {
+    if (action === "toggle-password") {
+      const input = document.getElementById(button.getAttribute("aria-controls"));
+      if (!input) return;
+      const visible = input.type === "password";
+      input.type = visible ? "text" : "password";
+      const label = t(visible ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+      button.setAttribute("aria-pressed", String(visible));
+      button.setAttribute("aria-label", label);
+      button.title = label;
+      button.querySelector("i").className = visible ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
+      return;
+    }
     if (action === "language") return await setLanguage(id);
     if (action?.startsWith("learning-")) return await learningAction(action, id);
     if (button.dataset.page) return navigate(button.dataset.page);
