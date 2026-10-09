@@ -173,6 +173,20 @@ CI ở `.github/workflows/ci.yml` chạy unittest, kiểm tra cú pháp JavaScri
 
 ## Cookie khi chạy HTTPS
 
+### Demo công khai qua Cloudflare Tunnel
+
+Chạy `tools/cloudflare/cloudflared.exe tunnel --url http://127.0.0.1:8002` và lấy URL HTTPS được in ra. Trong terminal khác, chạy:
+
+```powershell
+$env:WF_DEMO = "1"
+$env:WF_DATA_DIR = Join-Path (Get-Location) "data/public-demo"
+$env:WF_COOKIE_SECURE = "1"
+$env:WF_PUBLIC_ORIGIN = "https://TEN-LINK.trycloudflare.com"
+python server.py --port 8002
+```
+
+Thay `WF_PUBLIC_ORIGIN` bằng đúng URL tunnel; cấu hình này chỉ chấp nhận một hostname cụ thể và giữ kiểm tra Origin cho các yêu cầu ghi. Database demo riêng không dùng dữ liệu production. Chỉ nhập dữ liệu thử nghiệm vào bản demo. Cần giữ máy, server và tunnel chạy; URL đổi khi tạo tunnel mới. Dừng cả hai tiến trình bằng Ctrl+C khi kết thúc demo. Chạy 24/7 cần triển khai máy chủ riêng và hoàn tất các yêu cầu production bên trên.
+
 HTTP localhost mặc định không bật Secure. Khi đặt sau HTTPS proxy:
 
 ```powershell

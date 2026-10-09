@@ -9,3 +9,6 @@ test-results/
 .e2e-data/
 .venv/
 debug.log
+
+tools/cloudflare/*.exe
+tools/cloudflare/*.log

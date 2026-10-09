@@ -47,6 +47,11 @@ DATA = Path(
     os.environ.get("WF_DATA_DIR", ROOT / ("data/demo" if DEMO else "data/production"))
 )
 COOKIE_SECURE = os.environ.get("WF_COOKIE_SECURE") == "1"
+PUBLIC_ORIGIN = os.environ.get("WF_PUBLIC_ORIGIN", "").rstrip("/")
+if PUBLIC_ORIGIN and not re.fullmatch(r"https://[a-zA-Z0-9.-]+", PUBLIC_ORIGIN):
+    raise RuntimeError("WF_PUBLIC_ORIGIN must be an HTTPS origin without a path.")
+if PUBLIC_ORIGIN and not COOKIE_SECURE:
+    raise RuntimeError("WF_PUBLIC_ORIGIN requires WF_COOKIE_SECURE=1.")
 DB = DATA / "wellness.sqlite3"
 LOCK = threading.RLock()
 from backend.policy import ROLES, OPS, CLINICAL, FINANCE, STATES
@@ -244,6 +249,7 @@ class Handler(BaseHTTPRequestHandler):
             if host not in [
                 f"127.0.0.1:{self.server.server_port}",
                 f"localhost:{self.server.server_port}",
+                *([PUBLIC_ORIGIN.removeprefix("https://")] if PUBLIC_ORIGIN else []),
             ]:
                 raise APIError(400, "Host không được phép.")
             if not path.startswith("/api/"):
@@ -299,7 +305,7 @@ class Handler(BaseHTTPRequestHandler):
             if method != "GET":
                 if (
                     self.headers.get("Origin")
-                    != f"{'https' if COOKIE_SECURE else 'http'}://{host}"
+                    != (PUBLIC_ORIGIN or f"{'https' if COOKIE_SECURE else 'http'}://{host}")
                 ):
                     raise APIError(403, "Nguồn yêu cầu không hợp lệ.")
                 if "application/json" not in self.headers.get("Content-Type", ""):
