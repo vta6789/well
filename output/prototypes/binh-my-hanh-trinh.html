@@ -1,0 +1,155 @@
+<style>
+#bm-preview{--bm-bg:light-dark(#f8f7f2,#17201d);--bm-surface:light-dark(#fffef9,#202d26);--bm-ink:light-dark(#243c30,#edf1e7);--bm-muted:light-dark(#586b5d,#b8c8b9);--bm-green:light-dark(#315c44,#b3d5a2);--bm-on-green:light-dark(#fffef9,#182b20);--bm-soft:light-dark(#e7eddf,#2e4032);--bm-line:light-dark(#d8ded1,#425447);--bm-clay:light-dark(#a96347,#cc9373);--bm-pot:light-dark(#c48c69,#aa765b);color:var(--bm-ink);background:var(--bm-bg);font:15px/1.6 'Segoe UI',Arial,sans-serif;border-radius:14px;overflow:hidden;color-scheme:light dark}
+#bm-preview *{box-sizing:border-box}
+#bm-preview [hidden]{display:none!important}
+#bm-preview button{font:inherit;color:inherit}
+#bm-preview h1,#bm-preview h2,#bm-preview h3,#bm-preview p{margin:0}
+#bm-preview h1{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:clamp(32px,4.4vw,50px);line-height:1.16;letter-spacing:-1.3px}
+#bm-preview h2{font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:1.3;font-weight:400;letter-spacing:-.5px}
+#bm-preview h3{font-size:17px;font-weight:600}
+#bm-preview .bm-note{padding:8px 28px;background:var(--bm-soft);font-size:12px;color:var(--bm-muted)}
+#bm-preview .bm-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 28px;border-bottom:1px solid var(--bm-line);padding-right:104px}
+#bm-preview .bm-brand{display:flex;align-items:center;gap:10px;white-space:nowrap}
+#bm-preview .bm-mark{width:32px;height:32px;display:grid;place-items:center;border-radius:50%;background:var(--bm-green);color:var(--bm-on-green)}
+#bm-preview .bm-brand strong{display:block;font-size:16px;letter-spacing:2px;font-weight:600}
+#bm-preview .bm-brand small{display:block;font-size:11px;letter-spacing:.5px;color:var(--bm-muted)}
+#bm-preview .bm-nav{display:flex;flex-wrap:wrap;gap:4px}
+#bm-preview .bm-nav button{background:none;border:0;padding:9px 10px;border-radius:6px;font-size:13px;white-space:nowrap}
+#bm-preview .bm-nav button[aria-selected=true]{background:var(--bm-soft);color:var(--bm-green);font-weight:600}
+#bm-preview .bm-page{padding:34px 32px 30px}
+#bm-preview .bm-eyebrow{display:block;color:var(--bm-green);font-size:11px;letter-spacing:1.8px;font-weight:600;text-transform:uppercase;margin-bottom:12px}
+#bm-preview .bm-muted{color:var(--bm-muted)}
+#bm-preview .bm-hero{display:grid;grid-template-columns:1.15fr 1fr;gap:36px;align-items:center;margin-bottom:32px}
+#bm-preview .bm-hero p{max-width:450px;margin-top:18px;color:var(--bm-muted)}
+#bm-preview .bm-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+#bm-preview .bm-action{border:1px solid var(--bm-line);background:var(--bm-surface);padding:11px 15px;border-radius:7px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:8px}
+#bm-preview .bm-action-primary{background:var(--bm-green);border-color:var(--bm-green);color:var(--bm-on-green)}
+#bm-preview .bm-action i{width:16px;height:16px}
+#bm-preview .bm-garden{height:290px;background:var(--bm-soft);border-radius:100px 100px 12px 12px;position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;gap:16px;padding-bottom:48px}
+#bm-preview .bm-garden:before{content:'';position:absolute;width:76%;height:78%;border:1px solid var(--bm-line);border-radius:100px 100px 0 0;bottom:34px}
+#bm-preview .bm-garden:after{content:'Vườn thực hành · minh họa';position:absolute;bottom:13px;font-size:11px;letter-spacing:.5px;color:var(--bm-muted)}
+#bm-preview .bm-plant{position:relative;width:75px;height:140px;z-index:1}
+#bm-preview .bm-plant:nth-child(2){height:178px;width:92px}
+#bm-preview .bm-stem{position:absolute;bottom:38px;left:50%;height:84%;width:3px;background:var(--bm-green)}
+#bm-preview .bm-leaf{position:absolute;width:35px;height:20px;border-radius:0 90% 0 90%;background:var(--bm-green);left:17px;top:18px;transform:rotate(20deg)}
+#bm-preview .bm-leaf.bm-right{left:39px;top:43px;transform:scaleX(-1) rotate(10deg)}
+#bm-preview .bm-leaf.bm-low{top:69px}
+#bm-preview .bm-pot{position:absolute;bottom:0;left:4px;right:4px;height:49px;background:var(--bm-pot);clip-path:polygon(0 0,100% 0,86% 100%,14% 100%);border-radius:3px}
+#bm-preview .bm-ribbon{display:grid;grid-template-columns:repeat(3,1fr);padding:17px 0;border-top:1px solid var(--bm-line);border-bottom:1px solid var(--bm-line);gap:20px;margin-bottom:30px}
+#bm-preview .bm-ribbon div{display:flex;gap:10px;align-items:center;font-size:13px}
+#bm-preview .bm-ribbon i{color:var(--bm-green);width:19px;height:19px;flex-shrink:0}
+#bm-preview .bm-section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:18px}
+#bm-preview .bm-segment{display:flex;gap:3px;background:var(--bm-soft);padding:4px;border-radius:8px}
+#bm-preview .bm-segment button{border:0;background:none;border-radius:5px;padding:7px 12px;font-size:13px}
+#bm-preview .bm-segment button[aria-pressed=true]{background:var(--bm-green);color:var(--bm-on-green)}
+#bm-preview .bm-package{display:grid;grid-template-columns:.72fr 1.4fr;gap:28px;background:var(--bm-surface);border:1px solid var(--bm-line);border-radius:12px;padding:24px}
+#bm-preview .bm-price{font-family:Georgia,serif;font-size:29px;line-height:1.3;margin:10px 0 5px}
+#bm-preview .bm-outcomes{list-style:none;padding:0;margin:10px 0 12px;display:grid;gap:8px}
+#bm-preview .bm-outcomes li{display:flex;align-items:flex-start;gap:8px;font-size:14px}
+#bm-preview .bm-outcomes i{width:16px;height:16px;color:var(--bm-green);margin-top:4px;flex-shrink:0}
+#bm-preview .bm-fine{font-size:12px;color:var(--bm-muted)}
+#bm-preview .bm-story-teaser{display:flex;align-items:center;gap:16px;margin-top:20px;padding:18px 0 0}
+#bm-preview .bm-avatar{height:44px;width:44px;border-radius:50%;background:var(--bm-soft);display:grid;place-items:center;flex-shrink:0;font-family:Georgia,serif;font-size:23px;color:var(--bm-green)}
+#bm-preview .bm-link{background:none;border:0;padding:8px 0;color:var(--bm-green);font-size:13px;font-weight:600;display:flex;gap:6px;align-items:center}
+#bm-preview .bm-link i{height:15px;width:15px}
+#bm-preview .bm-intro{margin-bottom:25px;max-width:650px}
+#bm-preview .bm-intro p{margin-top:10px;color:var(--bm-muted)}
+#bm-preview .bm-story-layout{display:grid;grid-template-columns:.9fr 1.3fr;gap:26px}
+#bm-preview .bm-art{background:var(--bm-soft);height:215px;display:grid;place-items:center;border-radius:12px;position:relative;overflow:hidden}
+#bm-preview .bm-art .bm-plant{height:170px;width:115px;transform:scale(1.08)}
+#bm-preview .bm-art .bm-leaf{left:38px}
+#bm-preview .bm-art .bm-leaf.bm-right{left:59px}
+#bm-preview .bm-art small{position:absolute;bottom:10px;font-size:11px;color:var(--bm-muted)}
+#bm-preview .bm-quote{font-family:Georgia,serif;font-size:21px;line-height:1.5;margin-top:16px}
+#bm-preview .bm-timeline{list-style:none;padding:0;margin:0}
+#bm-preview .bm-timeline li{border-left:1px solid var(--bm-line);padding:0 0 22px 22px;position:relative}
+#bm-preview .bm-timeline li:before{content:'';position:absolute;left:-5px;top:6px;width:9px;height:9px;border-radius:50%;background:var(--bm-green)}
+#bm-preview .bm-timeline p{font-size:14px;color:var(--bm-muted);margin-top:5px}
+#bm-preview .bm-certificate{background:var(--bm-surface);border:1px solid var(--bm-line);padding:18px;border-radius:9px;margin-top:12px}
+#bm-preview .bm-certificate strong{display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:6px}
+#bm-preview .bm-certificate i{width:19px;height:19px;color:var(--bm-green)}
+#bm-preview .bm-ecosystem{display:grid;grid-template-columns:repeat(4,1fr);margin:24px 0;gap:12px}
+#bm-preview .bm-node{border-top:2px solid var(--bm-green);padding:17px 9px 12px 0;background:transparent;text-align:left;border-right:0;border-left:0;border-bottom:0;border-radius:0}
+#bm-preview .bm-node[aria-pressed=true]{background:var(--bm-soft);padding-left:12px;border-radius:0 0 8px 8px}
+#bm-preview .bm-node small{display:block;color:var(--bm-muted);margin-top:5px;font-size:12px}
+#bm-preview .bm-node span{display:block;font-family:Georgia,serif;font-size:24px;color:var(--bm-green);margin-bottom:9px}
+#bm-preview .bm-detail{background:var(--bm-surface);border:1px solid var(--bm-line);border-radius:12px;padding:24px;min-height:135px}
+#bm-preview .bm-detail p{margin-top:8px;color:var(--bm-muted)}
+#bm-preview .bm-family-title{display:flex;gap:14px;align-items:center;margin-bottom:25px}
+#bm-preview .bm-family-title h2{font-size:26px}
+#bm-preview .bm-family-layout{display:grid;grid-template-columns:1.3fr 1fr;gap:24px}
+#bm-preview .bm-journal{border-top:1px solid var(--bm-line);padding:17px 0;display:grid;grid-template-columns:70px 1fr;gap:16px}
+#bm-preview .bm-journal time{font-size:12px;color:var(--bm-muted);padding-top:2px}
+#bm-preview .bm-journal p{color:var(--bm-muted);font-size:14px;margin-top:5px}
+#bm-preview .bm-sharing{display:flex;gap:8px;align-items:center;margin-top:18px;padding:12px;background:var(--bm-soft);border-radius:8px;font-size:12px;color:var(--bm-muted)}
+#bm-preview .bm-sharing i{height:16px;width:16px;flex-shrink:0}
+#bm-preview .bm-footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;border-top:1px solid var(--bm-line);padding:15px 28px;color:var(--bm-muted);font-size:11px}
+@media(max-width:700px){#bm-preview .bm-header{padding:17px 20px;align-items:flex-start;flex-direction:column;gap:14px}#bm-preview .bm-page{padding:25px 20px}#bm-preview .bm-hero{gap:22px;grid-template-columns:1fr}#bm-preview .bm-garden{height:220px;border-radius:60px 60px 10px 10px}#bm-preview .bm-package,#bm-preview .bm-story-layout,#bm-preview .bm-family-layout{grid-template-columns:1fr;gap:20px}#bm-preview .bm-ribbon{grid-template-columns:1fr;gap:12px}#bm-preview .bm-section-head{align-items:flex-start;flex-direction:column}#bm-preview .bm-ecosystem{grid-template-columns:repeat(2,1fr)}#bm-preview .bm-story-teaser{align-items:flex-start;flex-wrap:wrap}#bm-preview .bm-nav{gap:0}#bm-preview .bm-nav button{padding:9px 8px}#bm-preview .bm-note{padding:8px 20px}#bm-preview .bm-journal{grid-template-columns:54px 1fr}}
+@media(pointer:coarse){#bm-preview button{min-height:44px}}
+</style>
+<div id="bm-preview">
+ <div class="bm-note">Bản mô phỏng nội dung · Nhân vật, thành quả và hoạt động bên dưới là minh họa.</div>
+ <header class="bm-header">
+  <div class="bm-brand"><span class="bm-mark"><i data-lucide="sprout" aria-hidden="true"></i></span><div><strong>BÌNH MỸ</strong><small>WELLNESS FARM</small></div></div>
+  <nav class="bm-nav" role="tablist" aria-label="Khám phá Bình Mỹ">
+   <button class="cursor-interaction" id="bm-tab-home" type="button" role="tab" aria-selected="true" aria-controls="bm-home" data-page="home">Khám phá</button>
+   <button class="cursor-interaction" id="bm-tab-journey" type="button" role="tab" aria-selected="false" aria-controls="bm-journey" data-page="journey">Hành trình</button>
+   <button class="cursor-interaction" id="bm-tab-ecosystem" type="button" role="tab" aria-selected="false" aria-controls="bm-ecosystem" data-page="ecosystem">Hệ sinh thái</button>
+   <button class="cursor-interaction" id="bm-tab-family" type="button" role="tab" aria-selected="false" aria-controls="bm-family" data-page="family">Góc gia đình</button>
+  </nav>
+ </header>
+ <main>
+  <section id="bm-home" class="bm-page" role="tabpanel" aria-labelledby="bm-tab-home">
+   <div class="bm-hero" aria-label="Thông điệp trang chủ">
+    <div><span class="bm-eyebrow">Mỗi ngày, một điều có ý nghĩa</span><h1>An tâm sống.<br>Tiếp tục học.<br>Sẻ chia giá trị.</h1><p>Được chăm sóc, được làm điều mình yêu thích và được trân trọng những điều mình tạo ra. Một hành trình mới, theo nhịp sống của bạn.</p><div class="bm-actions"><button type="button" class="bm-action bm-action-primary cursor-interaction" data-scroll="bm-packages">Khám phá trải nghiệm <i data-lucide="arrow-down" aria-hidden="true"></i></button><button type="button" class="bm-action cursor-interaction" data-go="journey">Xem một hành trình</button></div></div>
+    <div class="bm-garden" role="img" aria-label="Minh họa ba chậu cây trong vườn thực hành"><div class="bm-plant"><span class="bm-stem"></span><span class="bm-leaf"></span><span class="bm-leaf bm-right"></span><span class="bm-leaf bm-low"></span><span class="bm-pot"></span></div><div class="bm-plant"><span class="bm-stem"></span><span class="bm-leaf"></span><span class="bm-leaf bm-right"></span><span class="bm-leaf bm-low"></span><span class="bm-pot"></span></div><div class="bm-plant"><span class="bm-stem"></span><span class="bm-leaf"></span><span class="bm-leaf bm-right"></span><span class="bm-pot"></span></div></div>
+   </div>
+   <div class="bm-ribbon"><div><i data-lucide="heart-handshake" aria-hidden="true"></i>Chăm sóc để an tâm</div><div><i data-lucide="book-open" aria-hidden="true"></i>Học theo sở thích của bạn</div><div><i data-lucide="sprout" aria-hidden="true"></i>Thành quả được ghi nhận</div></div>
+   <section id="bm-packages" aria-label="Gói trải nghiệm">
+    <div class="bm-section-head"><div><span class="bm-eyebrow">Chọn nhịp trải nghiệm</span><h2>Bạn mang về điều gì?</h2></div><div class="bm-segment" role="group" aria-label="Thời gian trải nghiệm"><button class="cursor-interaction" type="button" data-package="day" aria-pressed="false">Ngày</button><button class="cursor-interaction" type="button" data-package="week" aria-pressed="true">Tuần</button><button class="cursor-interaction" type="button" data-package="month" aria-pressed="false">Tháng</button></div></div>
+    <div class="bm-package" aria-live="polite"><div><h3 id="bm-package-name">Một tuần để thử và làm</h3><div class="bm-price" id="bm-price">2.000.000đ</div><p class="bm-fine" id="bm-duration">7 ngày · giá từ danh mục hiện tại</p><p class="bm-fine" id="bm-care" style="margin-top:13px">Theo dõi sức khỏe, tư vấn dinh dưỡng và ưu tiên đặt lịch hoạt động.</p></div><div><h3>Cơ hội trải nghiệm</h3><ul class="bm-outcomes" id="bm-outcomes"><li><i data-lucide="check" aria-hidden="true"></i>Làm quen và thực hành một kỹ năng yêu thích.</li><li><i data-lucide="check" aria-hidden="true"></i>Từng bước hoàn thiện một sản phẩm nhỏ.</li><li><i data-lucide="check" aria-hidden="true"></i>Lưu lại nhật ký và thành quả của riêng mình.</li></ul><p class="bm-fine">Lộ trình đề xuất được điều chỉnh theo sức khỏe, sở thích và lịch hoạt động.</p></div></div>
+   </section>
+   <div class="bm-story-teaser"><span class="bm-avatar" aria-hidden="true">A</span><div style="flex:1"><h3>Từ một buổi học đến góc vườn của bác An</h3><p class="bm-fine">Một kỹ năng mới. Một thành quả riêng. Một câu chuyện để sẻ chia.</p></div><button class="bm-link cursor-interaction" type="button" data-go="journey">Xem câu chuyện <i data-lucide="arrow-right" aria-hidden="true"></i></button></div>
+  </section>
+  <section id="bm-journey" class="bm-page" role="tabpanel" aria-labelledby="bm-tab-journey" hidden>
+   <div class="bm-intro"><span class="bm-eyebrow">Hành trình của bác An · minh họa</span><h2>“Tôi vẫn có thể học thêm một điều mới.”</h2><p>Từ làm quen với cây đến tự tay chăm một chậu húng quế. Thành quả nhỏ, niềm vui của riêng bác.</p></div>
+   <div class="bm-story-layout"><div><div class="bm-art" role="img" aria-label="Minh họa sản phẩm chậu húng quế"><div class="bm-plant"><span class="bm-stem"></span><span class="bm-leaf"></span><span class="bm-leaf bm-right"></span><span class="bm-leaf bm-low"></span><span class="bm-pot"></span></div><small>Minh họa sản phẩm · chậu húng quế</small></div><p class="bm-quote">“Tôi muốn kể cho cháu nghe cách chăm chậu cây này.”</p><p class="bm-fine" style="margin-top:8px">Lời chia sẻ minh họa của nhân vật bác An.</p></div><div><ol class="bm-timeline"><li><h3>Làm quen</h3><p>Chọn húng quế vì bác thích mùi thơm và từng trồng rau ở nhà.</p></li><li><h3>Học và thực hành</h3><p>Tìm hiểu cách chọn đất, gieo hạt và tưới vừa đủ. Ghi lại 3 buổi thực hành.</p></li><li><h3>Tạo thành quả</h3><p>Tự chăm một chậu cây và viết hướng dẫn chăm sóc bằng lời của mình.</p></li><li><h3>Sẻ chia</h3><p>Đồng ý chia sẻ nhật ký với gia đình và giới thiệu chậu cây trong buổi gặp gỡ.</p></li></ol><div class="bm-certificate"><strong><i data-lucide="badge-check" aria-hidden="true"></i>Thẻ thành quả · minh họa</strong><p class="bm-fine">Kỹ năng: chăm cây gia vị cơ bản.<br>Thực hành: 3 buổi · Thành quả: 1 chậu cây.<br>Người hướng dẫn xác nhận: chọn đất và tưới cây đúng cách.</p></div></div></div>
+  </section>
+  <section id="bm-ecosystem" class="bm-page" role="tabpanel" aria-labelledby="bm-tab-ecosystem" hidden>
+   <div class="bm-intro"><span class="bm-eyebrow">Cùng nhau tạo giá trị</span><h2>Một chậu cây, nhiều kết nối.</h2><p>Chọn từng mắt xích để thấy vai trò và giá trị nhận được trong hành trình minh họa.</p></div>
+   <div class="bm-ecosystem" role="group" aria-label="Các mắt xích hệ sinh thái"><button type="button" class="bm-node cursor-interaction" data-node="mentor" aria-pressed="true"><span>01</span><h3>Người hướng dẫn</h3><small>Truyền kiến thức</small></button><button type="button" class="bm-node cursor-interaction" data-node="senior" aria-pressed="false"><span>02</span><h3>Người cao tuổi</h3><small>Học và sáng tạo</small></button><button type="button" class="bm-node cursor-interaction" data-node="farm" aria-pressed="false"><span>03</span><h3>Nông trại Bình Mỹ</h3><small>Kết nối và lưu giữ</small></button><button type="button" class="bm-node cursor-interaction" data-node="community" aria-pressed="false"><span>04</span><h3>Gia đình & cộng đồng</h3><small>Đón nhận và sẻ chia</small></button></div>
+   <div class="bm-detail" aria-live="polite"><span class="bm-eyebrow" id="bm-node-role">Người hướng dẫn</span><h3 id="bm-node-title">Kinh nghiệm được tiếp nối</h3><p id="bm-node-text">Hướng dẫn cách chọn đất, gieo hạt và tưới cây. Kiến thức được thực hành, ghi nhận và truyền lại qua câu chuyện của người học.</p></div>
+   <p class="bm-fine" style="margin-top:20px">Khi triển khai: mỗi kết nối đi kèm người phụ trách, nguồn nguyên liệu và kết quả thực tế.</p>
+  </section>
+  <section id="bm-family" class="bm-page" role="tabpanel" aria-labelledby="bm-tab-family" hidden>
+   <div class="bm-family-title"><span class="bm-avatar" aria-hidden="true">A</span><div><span class="bm-eyebrow" style="margin-bottom:4px">Góc gia đình · hồ sơ minh họa</span><h2>Tuần này, bác An có gì mới?</h2><p class="bm-fine">Những khoảnh khắc bác chọn chia sẻ với gia đình.</p></div></div>
+   <div class="bm-family-layout"><div><article class="bm-journal"><time>Đầu tuần</time><div><h3>Một điều mới để học</h3><p>Bác chọn lớp chăm cây gia vị và làm quen cách chuẩn bị đất trồng.</p></div></article><article class="bm-journal"><time>Giữa tuần</time><div><h3>Một việc tự tay làm</h3><p>Bác thực hành tưới cây và ghi lại thay đổi của chậu húng quế.</p></div></article><article class="bm-journal"><time>Cuối tuần</time><div><h3>Một câu chuyện muốn kể</h3><p>“Lần tới cháu đến, ông sẽ chỉ cháu cách chăm cây.”</p></div></article><div class="bm-sharing"><i data-lucide="lock-keyhole" aria-hidden="true"></i>Nội dung minh họa trạng thái đã đồng ý chia sẻ với gia đình.</div></div><div><div class="bm-art" role="img" aria-label="Minh họa chậu cây bác An chăm sóc"><div class="bm-plant"><span class="bm-stem"></span><span class="bm-leaf"></span><span class="bm-leaf bm-right"></span><span class="bm-leaf bm-low"></span><span class="bm-pot"></span></div><small>Thành quả trong tuần · minh họa</small></div><div class="bm-certificate"><strong><i data-lucide="sprout" aria-hidden="true"></i>Điều bác mang về</strong><p class="bm-fine">Một chậu cây tự chăm, kỹ năng mới và niềm vui được chia sẻ với cháu.</p></div><button type="button" class="bm-link cursor-interaction" data-go="journey">Xem hành trình của bác <i data-lucide="arrow-right" aria-hidden="true"></i></button></div></div>
+  </section>
+ </main>
+ <footer class="bm-footer"><span>BÌNH MỸ · Mỗi hành trình có nhịp độ riêng.</span><span>Nội dung & hình vẽ minh họa cho phương án website.</span></footer>
+</div>
+<script>
+(()=>{
+const root=document.getElementById('bm-preview');
+const plans={day:{name:'Một ngày để khám phá',price:'450.000đ',duration:'1 ngày',care:'Sàng lọc sức khỏe cơ bản, đồ ăn, nước uống và hoạt động trải nghiệm.',outcomes:['Thử một hoạt động phù hợp với sở thích.','Làm quen một kỹ năng cùng người hướng dẫn.','Mang về một trải nghiệm và ý tưởng để tiếp tục.']},week:{name:'Một tuần để thử và làm',price:'2.000.000đ',duration:'7 ngày',care:'Theo dõi sức khỏe, tư vấn dinh dưỡng và ưu tiên đặt lịch hoạt động.',outcomes:['Làm quen và thực hành một kỹ năng yêu thích.','Từng bước hoàn thiện một sản phẩm nhỏ.','Lưu lại nhật ký và thành quả của riêng mình.']},month:{name:'Một tháng để học và sẻ chia',price:'9.000.000đ',duration:'30 ngày',care:'Khám định kỳ, tư vấn dinh dưỡng hằng tuần và ưu tiên đặt lịch.',outcomes:['Theo đuổi một chủ đề với lộ trình cá nhân.','Tích lũy thành quả và nhận góp ý từ người hướng dẫn.','Tự tin giới thiệu điều mình làm với gia đình, cộng đồng.']}};
+const nodes={mentor:{role:'Người hướng dẫn',title:'Kinh nghiệm được tiếp nối',text:'Hướng dẫn cách chọn đất, gieo hạt và tưới cây. Kiến thức được thực hành, ghi nhận và truyền lại qua câu chuyện của người học.'},senior:{role:'Người cao tuổi',title:'Tôi có thành quả và tiếng nói của mình',text:'Bác An lựa chọn điều muốn học, thực hành theo sức khỏe và tự chăm chậu cây. Bác quyết định câu chuyện nào được chia sẻ với gia đình và cộng đồng.'},farm:{role:'Nông trại Bình Mỹ',title:'Một không gian để học, làm và kết nối',text:'Cung cấp nơi thực hành, đất trồng và cây giống; kết nối người hướng dẫn; lưu giữ nhật ký và tổ chức dịp giới thiệu thành quả khi người học đồng ý.'},community:{role:'Gia đình & cộng đồng',title:'Giá trị được đón nhận và tiếp tục lan tỏa',text:'Gia đình hiểu thêm cuộc sống của người thân. Khách tham quan lắng nghe câu chuyện chăm cây; các thành viên cùng trao đổi kinh nghiệm và học hỏi lẫn nhau.'}};
+let state={page:'home',plan:'week',node:'mentor'};
+const icons=()=>{if(globalThis.lucide)lucide.createIcons({attrs:{width:18,height:18}})};
+function render(){
+ if(!plans[state.plan])state.plan='week';if(!nodes[state.node])state.node='mentor';if(!['home','journey','ecosystem','family'].includes(state.page))state.page='home';
+ root.querySelectorAll('[role="tabpanel"]').forEach(el=>el.hidden=el.id!=='bm-'+state.page);
+ root.querySelectorAll('[data-page]').forEach(el=>el.setAttribute('aria-selected',String(el.dataset.page===state.page)));
+ root.querySelectorAll('[data-package]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.package===state.plan)));
+ const plan=plans[state.plan];root.querySelector('#bm-package-name').textContent=plan.name;root.querySelector('#bm-price').textContent=plan.price;root.querySelector('#bm-duration').textContent=plan.duration+' · giá từ danh mục hiện tại';root.querySelector('#bm-care').textContent=plan.care;
+ root.querySelector('#bm-outcomes').replaceChildren(...plan.outcomes.map(text=>{const li=document.createElement('li');const icon=document.createElement('i');icon.dataset.lucide='check';icon.setAttribute('aria-hidden','true');li.append(icon,document.createTextNode(text));return li}));
+ root.querySelectorAll('[data-node]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.node===state.node)));
+ const node=nodes[state.node];root.querySelector('#bm-node-role').textContent=node.role;root.querySelector('#bm-node-title').textContent=node.title;root.querySelector('#bm-node-text').textContent=node.text;icons();
+}
+function save(){if(window.openai?.setWidgetState)window.openai.setWidgetState({modelContent:{view:state.page,package:state.plan,ecosystem:state.node},privateContent:state}).catch(()=>{})}
+function restore(saved){if(saved?.privateContent)state={...state,...saved.privateContent};render()}
+restore(window.openai?.widgetState);
+root.addEventListener('click',event=>{const button=event.target.closest('button');if(!button)return;let changed=false;if(button.dataset.page||button.dataset.go){state.page=button.dataset.page||button.dataset.go;changed=true}if(button.dataset.package){state.plan=button.dataset.package;changed=true}if(button.dataset.node){state.node=button.dataset.node;changed=true}if(changed){render();save()}if(button.dataset.scroll)root.querySelector('#'+button.dataset.scroll)?.scrollIntoView({behavior:'smooth',block:'center'})});
+window.addEventListener('openai:set_globals',event=>{if(event.detail?.globals?.widgetState)restore(event.detail.globals.widgetState)});
+if(globalThis.Tweak){const design={hero:'Sống có ý nghĩa',radius:14};const hero=root.querySelector('.bm-hero');const tweak=new Tweak({container:hero,onChange:()=>{root.style.borderRadius=design.radius+'px';hero.querySelector('h1').innerHTML=design.hero==='Học và tạo giá trị'?'Đến để học.<br>Ở lại để tạo<br>giá trị.':'An tâm sống.<br>Tiếp tục học.<br>Sẻ chia giá trị.'}});tweak.addSelect(design,'hero',{label:'Thông điệp mở đầu',options:['Sống có ý nghĩa','Học và tạo giá trị']});tweak.addSlider(design,'radius',{label:'Bo góc',min:0,max:24,unit:'px'})}
+})();
+</script>

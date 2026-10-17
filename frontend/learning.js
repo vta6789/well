@@ -91,9 +91,14 @@ function onlineRegistration(packages) {
       : [tier === "week" ? "Ưu tiên đặt lịch" : "Đặt lịch theo thứ tự tiêu chuẩn", "Xử lý hồ sơ theo thứ tự tiêu chuẩn"];
     return [["Trải nghiệm & hoạt động", ["Trải nghiệm tại nông trại", "Tham gia workshop", "Tham gia talkshow"]], ["Chăm sóc sức khỏe", health], ["Đặt lịch & hồ sơ", priority]];
   };
-  return `<section class="learning-section online-registration"><span class="learning-kicker">${esc(t("CHUẨN BỊ CHO CHUYẾN ĐI"))}</span><h1>${esc(t("Đăng ký online tại Wellness Farm"))}</h1><p class="muted registration-intro">${esc(t("Chọn gói Ngày, Tuần hoặc Tháng. Cả ba cùng có quyền tham gia trải nghiệm, workshop và talkshow; khác nhau về chăm sóc sức khỏe và mức ưu tiên."))}</p>
-    <div class="registration-plans">${sorted.map((p) => `<article class="card learning-package ${p.health_tier === "week" ? "package-recommended" : ""}"><div class="registration-plan-head"><span class="registration-plan-mark"><i class="fa-solid fa-${{ day: "sun", week: "calendar-week", month: "calendar-days" }[p.health_tier] || "leaf"}" aria-hidden="true"></i></span>${tag(t(priorityLabels[{day:0,week:1,month:2}[p.health_tier] || 0]))}</div><h2>${esc(localized(p))}</h2><div class="registration-price">${money(p.price)}<span> / ${esc(t(p.days + " ngày"))}</span></div><p class="muted registration-plan-description">${esc(localized(p, "description"))}</p>${actionButton("Đăng ký gói này", "learning-package", p.id, p.health_tier === "week" ? "" : "secondary")}<div class="registration-plan-benefits">${benefits(p.health_tier).map(([title, items]) => `<section class="registration-benefit-group"><h3>${esc(t(title))}</h3><ul class="registration-benefits">${items.map((benefit) => `<li><i class="fa-solid fa-check" aria-hidden="true"></i><span>${esc(t(benefit))}</span></li>`).join("")}</ul></section>`).join("")}</div></article>`).join("")}</div>
+  return `<section class="learning-section online-registration"><span class="learning-kicker">${esc(t("CHUẨN BỊ CHO CHUYẾN ĐI"))}</span><h1>${esc(t("Đăng ký online tại Tinh Hoa Bình Mỹ"))}</h1><p class="muted registration-intro">${esc(t("Chọn gói Ngày, Tuần hoặc Tháng. Cả ba cùng có quyền tham gia trải nghiệm, workshop và talkshow; khác nhau về chăm sóc sức khỏe và mức ưu tiên."))}</p>
+    <div class="registration-plans">${sorted.map((p) => `<article class="card learning-package ${p.health_tier === "week" ? "package-recommended" : ""}"><div class="registration-plan-head"><span class="registration-plan-mark"><i class="fa-solid fa-${{ day: "sun", week: "calendar-week", month: "calendar-days" }[p.health_tier] || "leaf"}" aria-hidden="true"></i></span>${tag(t(priorityLabels[{day:0,week:1,month:2}[p.health_tier] || 0]))}</div><h2>${esc(localized(p))}</h2><div class="registration-price">${money(p.price)}<span> / ${esc(t(p.days + " ngày"))}</span></div><p class="muted registration-plan-description">${esc(localized(p, "description"))}</p>${actionButton("Đăng ký gói này", "learning-package", p.id, p.health_tier === "week" ? "" : "secondary")}<div class="registration-plan-benefits">${experienceGroup(p.health_tier)}${benefits(p.health_tier).map(([title, items]) => `<section class="registration-benefit-group"><h3>${esc(t(title))}</h3><ul class="registration-benefits">${items.map((benefit) => `<li><i class="fa-solid fa-check" aria-hidden="true"></i><span>${esc(t(benefit))}</span></li>`).join("")}</ul></section>`).join("")}</div></article>`).join("")}</div>
     <p class="small muted registration-care-note">${esc(t("Lịch chăm sóc và chuyên gia được đội ngũ xác nhận khi tiếp nhận đăng ký."))}</p></section>`;
+}
+
+function homepageStats() {
+  const stats = [["Đội ngũ", 50, ""], ["Người dùng", 100, "+"], ["Bài viết", 10000, "+"], ["Chuyên gia", 36, "+"], ["Buổi", 45, ""]];
+  return `<section class="homepage-stats" aria-label="${esc(t("Tinh Hoa Bình Mỹ qua những con số"))}">${stats.map(([label, value, suffix]) => `<div class="metric homepage-stat"><strong data-count-target="${value}" data-count-suffix="${suffix}" aria-label="${esc(new Intl.NumberFormat(language === "en" ? "en-US" : "vi-VN").format(value) + suffix)}">${new Intl.NumberFormat(language === "en" ? "en-US" : "vi-VN").format(value)}${suffix}</strong><span>${esc(t(label))}</span></div>`).join("")}</section>`;
 }
 
 function learningLanding(view = "home") {
@@ -104,26 +109,29 @@ function learningLanding(view = "home") {
   const links = [["home", "Trang chủ"], ["workshops", "Workshop"], ["artisans", "Chuyên gia"], ["packages", "Đăng ký online"]];
   let content = "";
   if (view === "home") {
-    content = `<section class="learning-hero"><div class="learning-hero-copy"><span class="learning-kicker">${esc(t("LÀNG SỨC KHỎE BÌNH MỸ"))}</span><h1>${esc(t("Đến để học."))}<br>${esc(t("Ở lại để"))} <em>${esc(t("tạo giá trị."))}</em></h1><p>${esc(t("Chuyên gia chia sẻ kinh nghiệm. Người cao tuổi học, thực hành và tạo sản phẩm của riêng mình. Du khách đến để học hỏi và kết nối."))}</p><div class="row">${actionButton("Xem lịch workshop", "learning-public", "workshops", "")}${actionButton("Chọn gói & đăng ký", "learning-public", "packages", "secondary")}</div><p class="learning-free-note"><i class="fa-solid fa-seedling" aria-hidden="true"></i>${esc(t("Hoạt động, workshop và talkshow có trong cả ba gói."))}</p><button class="learning-discover" data-action="learning-discover"><span aria-hidden="true">↓</span>${esc(t("Khám phá hành trình"))}</button></div><figure class="learning-hero-visual">${learningSprig()}<div class="learning-photo-frame"><img src="/assets/images/farm.jpg" alt="${esc(t("Không gian xanh để học tập và thực hành tại nông trại"))}" width="700" height="500"><span class="learning-photo-location"><i class="fa-solid fa-location-dot" aria-hidden="true"></i>${esc(t("Bình Mỹ · Một miền xanh"))}</span></div><div class="learning-floating-note"><span aria-hidden="true">❧</span><div>${esc(t("Gieo một kỹ năng."))}<br><strong>${esc(t("Gặt một hành trình."))}</strong></div></div><figcaption class="learning-photo-caption"><span aria-hidden="true">✦</span>${esc(t("Cho những khởi đầu mới"))}</figcaption></figure></section>
+    content = `<section class="learning-hero"><div class="learning-hero-copy"><span class="learning-kicker">${esc(t("TINH HOA BÌNH MỸ"))}</span><h1>${esc(t("Đến để học."))}<br>${esc(t("Ở lại để"))} <em>${esc(t("tạo giá trị."))}</em></h1><p>${esc(t("Chuyên gia chia sẻ kinh nghiệm. Người cao tuổi học, thực hành và tạo sản phẩm của riêng mình. Du khách đến để học hỏi và kết nối."))}</p><div class="row">${actionButton("Xem lịch workshop", "learning-public", "workshops", "")}${actionButton("Chọn gói & đăng ký", "learning-public", "packages", "secondary")}</div><p class="learning-free-note"><i class="fa-solid fa-seedling" aria-hidden="true"></i>${esc(t("Hoạt động, workshop và talkshow có trong cả ba gói."))}</p><button class="learning-discover" data-action="learning-discover"><span aria-hidden="true">↓</span>${esc(t("Khám phá hành trình"))}</button></div><figure class="learning-hero-visual">${learningSprig()}<div class="learning-photo-frame"><img src="/assets/images/farm.jpg" alt="${esc(t("Không gian xanh để học tập và thực hành tại nông trại"))}" width="700" height="500"><span class="learning-photo-location"><i class="fa-solid fa-location-dot" aria-hidden="true"></i>${esc(t("Bình Mỹ · Một miền xanh"))}</span></div><div class="learning-floating-note"><span aria-hidden="true">❧</span><div>${esc(t("Gieo một kỹ năng."))}<br><strong>${esc(t("Gặt một hành trình."))}</strong></div></div><figcaption class="learning-photo-caption"><span aria-hidden="true">✦</span>${esc(t("Cho những khởi đầu mới"))}</figcaption></figure></section>
+    ${homepageStats()}
     <section class="learning-value-chain" aria-label="Vòng giá trị 5 bước">${[["microphone", "Chuyên gia chia sẻ"], ["graduation-cap", "Người cao tuổi học"], ["seedling", "Thực hành tại vườn"], ["box", "Tạo sản phẩm"], ["users", "Du khách kết nối"]].map(([icon, label], i) => `<article><span class="learning-step">0${i + 1}</span><i class="fa-solid fa-${icon}" aria-hidden="true"></i><strong>${esc(t(label))}</strong></article>`).join("")}</section>
-    <section class="learning-section"><div class="learning-section-head"><div><span class="learning-kicker">${esc(t("HỌC CÙNG NHAU"))}</span><h2>${esc(t("Workshop & Talkshow sắp tới"))}</h2></div>${actionButton("Xem lịch đầy đủ", "learning-public", "workshops")}</div>${workshopList.length ? `<div class="grid three">${workshopList.slice(0, 3).map((w) => workshopCard(w, true)).join("")}</div>` : learningEmpty("Lịch workshop đang được cập nhật", "Bạn có chuyên môn muốn chia sẻ? Gửi hồ sơ để cùng xây dựng cộng đồng học tập.")}</section>
+    <section class="learning-section"><div class="learning-section-head"><div><span class="learning-kicker">${esc(t("HỌC CÙNG NHAU"))}</span><h2>${esc(t("Workshop & Talkshow sắp tới"))}</h2></div>${actionButton("Xem lịch đầy đủ", "learning-public", "workshops")}</div>${publicEventCalendar(workshopList)}</section>
+    ${forumSection()}
     <section class="learning-invitation"><div><h2>${esc(t("Kinh nghiệm của bạn có thể mở ra một hành trình mới."))}</h2><p>${esc(t("Đồng hành cùng người cao tuổi trong nông nghiệp, sức khỏe, số hóa và thủ công."))}</p></div>${actionButton("Đăng ký làm chuyên gia", "learning-expert", "", "")}</section>`;
   } else if (view === "workshops") {
     content = `<section class="learning-section"><div class="learning-section-head"><div><span class="learning-kicker">${esc(t("HỌC – THỰC HÀNH – KẾT NỐI"))}</span><h1>${esc(t("Lịch workshop và talkshow"))}</h1><p class="muted">${esc(t("Chọn chủ đề và mức vận động phù hợp. Các hoạt động có trong tất cả gói đăng ký."))}</p></div>${actionButton("Đăng ký làm chuyên gia", "learning-expert")}</div><div class="learning-topic-filter">${["Tất cả", "Nông nghiệp", "Sức khỏe", "Số hóa", "Thủ công"].map((topic) => `<button class="btn ${(!state.workshopTopic && topic === "Tất cả") || state.workshopTopic === topic ? "" : "secondary"}" data-action="learning-topic" data-id="${esc(topic)}">${esc(t(topic))}</button>`).join("")}</div><div class="grid three">${workshopList.filter((w) => !state.workshopTopic || w.topic === state.workshopTopic).map((w) => workshopCard(w, true)).join("")}</div>${!workshopList.filter((w) => !state.workshopTopic || w.topic === state.workshopTopic).length ? learningEmpty("Chưa có lịch cho chủ đề này", "Quay lại để xem các buổi học mới được chuyên gia và quản trị viên cập nhật.") : ""}</section>`;
   } else if (view === "artisans") {
     content = `<section class="learning-section"><span class="learning-kicker">${esc(t("MỖI NGƯỜI MỘT HÀNH TRÌNH"))}</span><h1>${esc(t("Nghệ nhân bạc và sản phẩm của họ"))}</h1><p class="muted">${esc(t("Những khu vườn, kỹ năng và câu chuyện được học viên đồng ý chia sẻ."))}</p><div class="grid three">${artisans.map((a) => `<article class="card learning-artisan"><span class="avatar">${esc(a.name.slice(0, 1))}</span><h2>${esc(a.name)}</h2><p class="small">${esc(localized(a, "focus"))}</p>${tag(t("{count} kỹ năng đã học", { count: a.skills_count }))}<p class="muted small">${esc(localized(a, "story"))}</p>${a.products.length ? `<h3>${esc(t("Sản phẩm từ hành trình học"))}</h3><ul>${a.products.map((p) => `<li><strong>${esc(localized(p))}</strong> · ${p.quantity} ${esc(p.unit)}<p class="small muted">${esc(localized(p, "description"))}</p></li>`).join("")}</ul>` : ""}${actionButton("Đặt tham quan vườn", "learning-tour", a.id, "secondary")}</article>`).join("")}</div>${!artisans.length ? learningEmpty("Các câu chuyện đang được vun đắp", "Hồ sơ và sản phẩm chỉ xuất hiện khi học viên đồng ý công khai và quản trị viên đã duyệt.") : ""}</section>${publicImpact(impact)}`;
   } else if (view === "project") {
-    content = `<section class="learning-section"><span class="learning-kicker">WELLNESS FARM</span><h1>${esc(t("Nền tảng học – làm – du lịch"))}</h1><p>${esc(t("Chúng tôi kết nối kinh nghiệm của chuyên gia với khả năng sáng tạo của người cao tuổi. Mỗi buổi học dẫn đến thực hành, mỗi sản phẩm kể một câu chuyện, mỗi chuyến tham quan tạo thêm kết nối."))}</p><div class="grid two"><article class="card"><h2>${esc(t("SDG 4 · Học tập suốt đời"))}</h2><p>${esc(t("Workshop và hoạt động thực hành phù hợp nhiều mức thể trạng, có trong cả ba gói."))}</p></article><article class="card"><h2>${esc(t("SDG 8 · Tạo giá trị"))}</h2><p>${esc(t("Ghi nhận kỹ năng, giới thiệu sản phẩm và kết nối du khách với người tạo ra chúng."))}</p></article></div></section>${projectCredits()}${publicImpact(impact)}`;
+    content = `<section class="learning-section"><span class="learning-kicker">TINH HOA BÌNH MỸ</span><h1>${esc(t("Nền tảng học – làm – du lịch"))}</h1><p>${esc(t("Chúng tôi kết nối kinh nghiệm của chuyên gia với khả năng sáng tạo của người cao tuổi. Mỗi buổi học dẫn đến thực hành, mỗi sản phẩm kể một câu chuyện, mỗi chuyến tham quan tạo thêm kết nối."))}</p><div class="grid two"><article class="card"><h2>${esc(t("SDG 4 · Học tập suốt đời"))}</h2><p>${esc(t("Workshop và hoạt động thực hành phù hợp nhiều mức thể trạng, có trong cả ba gói."))}</p></article><article class="card"><h2>${esc(t("SDG 8 · Tạo giá trị"))}</h2><p>${esc(t("Ghi nhận kỹ năng, giới thiệu sản phẩm và kết nối du khách với người tạo ra chúng."))}</p></article></div></section>${projectCredits()}${publicImpact(impact)}`;
   } else {
     content = onlineRegistration(publicData.packages || []);
   }
   state.publicView = view;
-  const markup = `<div class="original-site learning-public"><header class="learning-public-header"><button class="learning-logo" data-action="learning-public" data-id="home"><i class="fa-solid fa-leaf" aria-hidden="true"></i> Wellness Farm</button><nav aria-label="${esc(t("Điều hướng chính"))}">${links.map(([id, label]) => `<button data-action="learning-public" data-id="${id}" ${view === id ? 'aria-current="page"' : ""}>${esc(t(label))}</button>`).join("")}<button data-action="learning-public" data-id="project">${esc(t("Dự án"))}</button></nav><div id="navAuthArea">${languageSwitch()}${state.user ? actionButton(state.user.role === "ADMIN" ? "Trang quản trị" : "Trang của tôi", "learning-dashboard", "", "") : `${actionButton("Đăng nhập", "login", "", "secondary")}${actionButton("Tạo tài khoản", "register", "", "")}`}</div><div class="learning-scroll-progress" aria-hidden="true"></div></header><main id="main" class="learning-public-main">${state.data.demo ? `<div class="notice" role="status">${esc(t("DỮ LIỆU DEMO · Số liệu và câu chuyện minh họa."))}</div>` : ""}${content}</main><footer class="learning-public-footer"><strong>❧ Wellness Farm · Bình Mỹ</strong>${projectCredits()}<p>${esc(t("Học cùng nhau. Tạo giá trị cùng nhau. Khám phá Wellness Farm."))}</p>${actionButton("Đăng ký học viên cao tuổi", "learning-senior", "", "secondary")}</footer></div>`;
+  const markup = `<div class="original-site learning-public"><header class="learning-public-header"><button class="learning-logo" data-action="learning-public" data-id="home"><i class="fa-solid fa-leaf" aria-hidden="true"></i> Tinh Hoa Bình Mỹ</button><nav aria-label="${esc(t("Điều hướng chính"))}">${links.map(([id, label]) => `<button data-action="learning-public" data-id="${id}" ${view === id ? 'aria-current="page"' : ""}>${esc(t(label))}</button>`).join("")}<button data-action="learning-public" data-id="project">${esc(t("Dự án"))}</button></nav><div id="navAuthArea">${languageSwitch()}${state.user ? actionButton(state.user.role === "ADMIN" ? "Trang quản trị" : "Trang của tôi", "learning-dashboard", "", "") : `${actionButton("Đăng nhập", "login", "", "secondary")}${actionButton("Tạo tài khoản", "register", "", "")}`}</div><div class="learning-scroll-progress" aria-hidden="true"></div></header><main id="main" class="learning-public-main">${state.data.demo ? `<div class="notice" role="status">${esc(t("DỮ LIỆU DEMO · Số liệu và câu chuyện minh họa."))}</div>` : ""}${content}</main><footer class="learning-public-footer"><strong>❧ Tinh Hoa Bình Mỹ</strong>${projectCredits()}<p>${esc(t("Học cùng nhau. Tạo giá trị cùng nhau. Khám phá Tinh Hoa Bình Mỹ."))}</p>${actionButton("Đăng ký học viên cao tuổi", "learning-senior", "", "secondary")}</footer></div>`;
   return presentExperience(() => {
     $("#app").innerHTML = markup;
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     enhanceExperience($("#main"));
     updateScrollProgress();
+    loadForum();
   });
 }
 
@@ -158,15 +166,15 @@ function journeyPage() {
   const selected = profiles.find((p) => p.id === state.journeyResident) || profiles[0];
   const forPerson = (kind) => data(kind).filter((r) => r.resident === selected?.id);
   return header("Hành trình giá trị", "Từ điều đã học đến việc đã làm và sản phẩm của riêng mỗi người.") +
-    (selected ? `<label class="field learning-profile-picker">${esc(t("Người học"))}<select id="journey-resident">${profiles.map((p) => `<option value="${p.id}" ${p.id === selected.id ? "selected" : ""}>${esc(localized(p))}</option>`).join("")}</select></label><div class="grid four">${metric("Workshop", forPerson("enrollments").filter((r) => r.status !== "Đã hủy").length, "Đăng ký và danh sách chờ")}${metric("Kỹ năng đã học", forPerson("skills").filter((r) => r.status === "Đã học").length, "Đã được chuyên gia xác nhận")}${metric("Lần thực hành", forPerson("practice").length, "Nhật ký đã ghi nhận")}${metric("Sản phẩm", forPerson("products").length, "Thành quả được tạo ra")}</div>${[["gardens", "Vườn riêng & câu chuyện"], ["skills", "Kỹ năng đã học"], ["practice", "Nhật ký thực hành"], ["products", "Sản phẩm tạo ra"]].map(([kind, label]) => `<section class="card section-title"><div class="admin-section-heading"><h2>${esc(t(label))}</h2>${can(kind) ? actionButton("+ Ghi nhận", "learning-new", kind) : ""}</div>${forPerson(kind).length ? forPerson(kind).map((r) => `<article class="admin-inbox-item"><strong>${esc(r.name || r.title)}</strong><p>${esc(r.focus || r.notes || r.description || r.story || "")}</p>${r.status ? tag(r.status) : ""}${recordButtons(kind, r)}</article>`).join("") : `<p class="small muted">${esc(t("Chưa có nội dung được ghi nhận."))}</p>`}</section>`).join("")}` : `<div class="notice">${esc(t("Tạo hồ sơ người học để bắt đầu hành trình."))}</div>${can("residents") ? actionButton("Tạo hồ sơ người học", "new", "residents", "") : ""}`);
+    (selected ? `<label class="field learning-profile-picker">${esc(t("Người học"))}<select id="journey-resident">${profiles.map((p) => `<option value="${p.id}" ${p.id === selected.id ? "selected" : ""}>${esc(localized(p))}</option>`).join("")}</select></label>${personalJourney(selected)}<div class="grid four">${metric("Workshop", forPerson("enrollments").filter((r) => r.status !== "Đã hủy").length, "Đăng ký và danh sách chờ")}${metric("Kỹ năng đã học", forPerson("skills").filter((r) => r.status === "Đã học").length, "Đã được chuyên gia xác nhận")}${metric("Lần thực hành", forPerson("practice").length, "Nhật ký đã ghi nhận")}${metric("Sản phẩm", forPerson("products").length, "Thành quả được tạo ra")}</div>${[["gardens", "Vườn riêng & câu chuyện"], ["skills", "Kỹ năng đã học"], ["practice", "Nhật ký thực hành"], ["products", "Sản phẩm tạo ra"]].map(([kind, label]) => `<section class="card section-title"><div class="admin-section-heading"><h2>${esc(t(label))}</h2>${can(kind) ? actionButton("+ Ghi nhận", "learning-new", kind) : ""}</div>${forPerson(kind).length ? forPerson(kind).map((r) => `<article class="admin-inbox-item"><strong>${esc(r.name || r.title)}</strong><p>${esc(r.focus || r.notes || r.description || r.story || "")}</p>${r.status ? tag(r.status) : ""}${recordButtons(kind, r)}</article>`).join("") : `<p class="small muted">${esc(t("Chưa có nội dung được ghi nhận."))}</p>`}</section>`).join("")}` : journeyStart());
 }
 
 function learningDashboard() {
   if (state.user.role === "EXPERT") {
     const mine = data("activities").filter((w) => w.expert_id === state.user.id);
-    return header("Không gian chuyên gia", "Chia sẻ kiến thức, theo dõi thực hành và xác nhận kỹ năng cho học viên.", actionButton("+ Tạo workshop", "new", "activities", "")) + `<div class="grid three">${metric("Workshop phụ trách", mine.length, "Lịch do bạn tổ chức")}${metric("Học viên", data("residents").length, "Hồ sơ tham gia workshop của bạn")}${metric("Kỹ năng chờ xác nhận", data("skills").filter((r) => r.status === "Chờ xác nhận").length, "Cần được xem xét")}</div>${dashboardSchedule()}<div class="row section-title">${actionButton("Xác nhận kỹ năng", "page-skills")}${actionButton("Hành trình học viên", "page-journey")}${actionButton("Xem trang công khai", "learning-public", "workshops")}</div><div class="grid three section-title">${mine.map((w) => workshopCard(w)).join("")}</div>`;
+    return dashboardSignature() + header("Không gian chuyên gia", "Chia sẻ kiến thức, theo dõi thực hành và xác nhận kỹ năng cho học viên.", actionButton("+ Tạo workshop", "new", "activities", "")) + `<div class="grid three">${metric("Workshop phụ trách", mine.length, "Lịch do bạn tổ chức")}${metric("Học viên", data("residents").length, "Hồ sơ tham gia workshop của bạn")}${metric("Kỹ năng chờ xác nhận", data("skills").filter((r) => r.status === "Chờ xác nhận").length, "Cần được xem xét")}</div>${dashboardSchedule()}<div class="row section-title">${actionButton("Xác nhận kỹ năng", "page-skills")}${actionButton("Hành trình học viên", "page-journey")}${actionButton("Xem trang công khai", "learning-public", "workshops")}</div><div class="grid three section-title">${mine.map((w) => workshopCard(w)).join("")}</div>`;
   }
-  return header("Học mỗi ngày. Tạo giá trị mỗi ngày.", t("Xin chào {name}. Chọn hoạt động yêu thích và theo dõi hành trình của bạn.", { name: state.user.name }), actionButton("Xem workshop", "page-activities", "", "")) + `<div class="grid four">${metric("Workshop đã đăng ký", data("enrollments").filter((e) => e.status !== "Đã hủy").length, "Bao gồm danh sách chờ")}${metric("Kỹ năng đã học", data("skills").filter((s) => s.status === "Đã học").length, "Được chuyên gia xác nhận")}${metric("Nhật ký thực hành", data("practice").length, "Việc đã làm và bài học")}${metric("Sản phẩm của tôi", data("products").length, "Thành quả từ hành trình học")}</div>${dashboardSchedule()}<div class="learning-invitation section-title"><div><h2>${esc(t("Hành trình giá trị của bạn"))}</h2><p>${esc(t("Ghi lại vườn riêng, kỹ năng, những lần thực hành và sản phẩm được tạo ra."))}</p></div>${actionButton("Mở hành trình", "page-journey", "", "")}</div><div class="row">${actionButton("Tạo hồ sơ người học", "new", "residents")}${actionButton("Chuyên gia", "learning-public", "artisans")}${actionButton("Tham quan vườn", "page-tour_bookings")}${actionButton("Đăng ký làm chuyên gia", "learning-expert")}</div>`;
+  return dashboardSignature() + header("Học mỗi ngày. Tạo giá trị mỗi ngày.", t("Xin chào {name}. Chọn hoạt động yêu thích và theo dõi hành trình của bạn.", { name: state.user.name }), actionButton("Xem workshop", "page-activities", "", "")) + `<div class="grid four">${metric("Workshop đã đăng ký", data("enrollments").filter((e) => e.status !== "Đã hủy").length, "Bao gồm danh sách chờ")}${metric("Kỹ năng đã học", data("skills").filter((s) => s.status === "Đã học").length, "Được chuyên gia xác nhận")}${metric("Nhật ký thực hành", data("practice").length, "Việc đã làm và bài học")}${metric("Sản phẩm của tôi", data("products").length, "Thành quả từ hành trình học")}</div>${dashboardPersonalJourney()}${dashboardSchedule()}<div class="learning-invitation section-title"><div><h2>${esc(t("Hành trình giá trị của bạn"))}</h2><p>${esc(t("Ghi lại vườn riêng, kỹ năng, những lần thực hành và sản phẩm được tạo ra."))}</p></div>${actionButton("Mở hành trình", "page-journey", "", "")}</div><div class="row">${actionButton("Tạo hồ sơ người học", "new", "residents")}${actionButton("Chuyên gia", "learning-public", "artisans")}${actionButton("Tham quan vườn", "page-tour_bookings")}${actionButton("Đăng ký làm chuyên gia", "learning-expert")}</div>`;
 }
 
 function basicHealthPage() {
@@ -177,6 +185,12 @@ async function learningIntent(action, id) {
   if (!state.user) {
     state.learningIntent = { action, id };
     return authForm();
+  }
+  if (action === "learning-forum-new") { await learningLanding("home"); return openForumComposer(); }
+  if (action === "learning-forum-reaction") {
+    await learningLanding("home");
+    await loadForum();
+    return reactToForumPost(id);
   }
   if (action === "learning-expert") return editForm("expert_applications");
   if (action === "learning-tour") return editForm("tour_bookings", "", { artisan_id: id });
@@ -199,6 +213,24 @@ async function learningIntent(action, id) {
 }
 
 async function learningAction(action, id) {
+  if (action === "learning-community") { state.public = await api("public"); await learningLanding("home"); document.querySelector(".community-forum")?.scrollIntoView({block:"start"}); return; }
+  if (action === "learning-calendar-month") {
+    state.publicCalendarOffset = (state.publicCalendarOffset || 0) + Number(id);
+    const target = document.querySelector('#public-event-calendar');
+    if (target) target.outerHTML = publicEventCalendar(state.public?.workshops || []);
+    return;
+  }
+  if (action === "learning-event-day") {
+    const events = (state.public?.workshops || []).filter(w => w.date === id);
+    return modal(day(id), `<div class="stack">${events.map(w => workshopCard(w, true)).join('')}</div>`);
+  }
+  if (action === "learning-forum-reload") return loadForum();
+  if (action === "learning-forum-reaction") return reactToForumPost(id);
+  if (action === "learning-forum-new") return openForumComposer();
+  if (action === "learning-forum-delete") {
+    await api('forum/' + id, 'DELETE', {});
+    return loadForum();
+  }
   if (action === "learning-discover") return document.querySelector(".learning-value-chain")?.scrollIntoView({ behavior: motionPreference.matches ? "instant" : "smooth", block: "center" });
   if (action === "learning-public") { state.public = await api("public"); return learningLanding(id); }
   if (action === "learning-topic") { state.workshopTopic = id === "Tất cả" ? "" : id; return learningLanding("workshops"); }
@@ -210,4 +242,273 @@ async function learningAction(action, id) {
 
 document.addEventListener("change", (event) => {
   if (event.target.id === "journey-resident") { state.journeyResident = event.target.value; renderPage(); }
+});
+
+function publicEventCalendar(workshops) {
+  const now = new Date();
+  const month = new Date(now.getFullYear(), now.getMonth() + (state.publicCalendarOffset || 0), 1);
+  const year = month.getFullYear(), m = month.getMonth();
+  const first = (month.getDay() + 6) % 7;
+  const total = new Date(year, m + 1, 0).getDate();
+  const cells = Array.from({length: first}, () => '<div class="event-calendar-blank" aria-hidden="true"></div>');
+  for (let d = 1; d <= total; d++) {
+    const key = `${year}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const events = workshops.filter(w => w.date === key);
+    cells.push(`<div class="event-calendar-day ${events.length ? 'has-event' : ''} ${key === today() ? 'is-today' : ''}"><time datetime="${key}">${d}</time>${events.length ? `<span class="event-calendar-summary">${esc(events[0].time)} · ${esc(localized(events[0]))}${events.length > 1 ? ` (+${events.length-1})` : ''}</span><button type="button" data-action="learning-event-day" data-id="${key}" aria-label="${esc(t('Xem chi tiết'))} ${day(key)}">${esc(t('Xem chi tiết'))}<span class="event-mobile-dot" aria-hidden="true">●</span></button>` : ''}</div>`);
+  }
+  return `<div id="public-event-calendar" class="event-calendar"><div class="event-calendar-toolbar">${actionButton('Tháng trước', 'learning-calendar-month', '-1', 'secondary compact')}<h3>${esc(month.toLocaleDateString(uiLocale(), {month:'long',year:'numeric'}))}</h3>${actionButton('Tháng sau', 'learning-calendar-month', '1', 'secondary compact')}</div><div class="event-calendar-weekdays">${(language==='en' ? ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] : ['T2','T3','T4','T5','T6','T7','CN']).map(d=>`<span>${d}</span>`).join('')}</div><div class="event-calendar-grid">${cells.join('')}</div><p class="small muted">${esc(t('Ngày tô xanh có hoạt động. Chọn xem chi tiết để đọc nội dung và đăng ký.'))}</p></div>`;
+}
+
+function forumAvatar(name) {
+  const words = String(name || '').trim().split(/\s+/);
+  return esc(words.slice(-2).map(word => word.charAt(0)).join('').toUpperCase() || 'WF');
+}
+
+function forumSection() {
+  return `<section class="learning-section community-forum"><div class="learning-section-head"><div><span class="learning-kicker">${esc(t('CHIA SẺ & KẾT NỐI'))}</span><h2>${esc(t('Diễn đàn cộng đồng'))}</h2><p class="muted">${esc(t('Chia sẻ câu chuyện, kinh nghiệm và những điều bạn học được.'))}</p></div></div><div class="forum-feed"><div class="forum-compose card"><div class="forum-compose-row"><span class="forum-avatar" aria-hidden="true">${forumAvatar(state.user?.name)}</span><button type="button" class="forum-compose-prompt" data-action="learning-forum-new">${esc(t('Bạn muốn chia sẻ điều gì?'))}</button></div><div class="forum-compose-footer"><span>${esc(t('Câu chuyện của bạn kết nối mọi người.'))}</span>${actionButton('Viết bài', 'learning-forum-new')}</div></div><div id="forum-posts" class="forum-posts" aria-live="polite"><p>${esc(t('Đang tải bài viết…'))}</p></div></div></section>`;
+}
+
+const forumReactionChoices = [
+  ["like", "👍", "Thích"], ["love", "❤️", "Yêu thích"], ["haha", "😄", "Vui quá"],
+  ["clap", "👏", "Tuyệt vời"], ["inspire", "🌱", "Truyền cảm hứng"],
+];
+let forumLoadRevision = 0;
+const pendingForumReactions = new Set();
+function forumReactions(post) {
+  return `<footer class="forum-reaction-footer"><p class="forum-reaction-total">${esc(t("{count} cảm xúc", { count: post.reaction_total || 0 }))}</p><div class="forum-reactions" role="group" aria-label="${esc(t("Cảm xúc cho bài viết"))}">${forumReactionChoices.map(([choice, emoji, label]) => {
+    const count = post.reactions?.[choice] || 0;
+    const selected = post.my_reaction === choice;
+    return `<button type="button" class="forum-reaction-button" data-action="learning-forum-reaction" data-id="${esc(post.id + ':' + choice)}" data-reaction="${choice}" aria-pressed="${selected}" aria-label="${esc(t("{label}: {count} lượt", { label: t(label), count }))}" title="${esc(t(state.user ? (selected ? "Bấm lại để bỏ cảm xúc" : label) : "Đăng nhập để thả cảm xúc"))}"><span class="forum-reaction-emoji" aria-hidden="true">${emoji}</span><span>${esc(t(label))}</span><span class="forum-reaction-count">${count}</span>${selected ? '<span aria-hidden="true">✓</span>' : ''}</button>`;
+  }).join('')}</div></footer>`;
+}
+async function reactToForumPost(id) {
+  if (!state.user) { state.learningIntent = { action: "learning-forum-reaction", id }; return authForm(); }
+  const [postId, choice] = id.split(':');
+  if (!forumReactionChoices.some(([value]) => value === choice) || pendingForumReactions.has(postId)) return;
+  const accountId = state.user.id;
+  const selector = `.forum-post[data-post-id="${CSS.escape(postId)}"]`;
+  const article = document.querySelector(selector);
+  const footer = article?.querySelector('.forum-reaction-footer');
+  const selected = footer?.querySelector(`[data-reaction="${choice}"]`)?.getAttribute('aria-pressed') === 'true';
+  pendingForumReactions.add(postId);
+  footer?.setAttribute('aria-busy', 'true');
+  footer?.querySelectorAll('button').forEach(button => { button.disabled = true; });
+  try {
+    const result = await api(`forum/${encodeURIComponent(postId)}/reaction`, 'POST', { reaction: selected ? '' : choice });
+    if (state.user?.id !== accountId) return;
+    forumLoadRevision++;
+    const current = document.querySelector(selector)?.querySelector('.forum-reaction-footer');
+    if (current) {
+      current.outerHTML = forumReactions({ id: postId, ...result });
+      document.querySelector(selector)?.querySelector(`[data-reaction="${choice}"]`)?.focus({ preventScroll: true });
+    }
+  } catch (error) {
+    if (error.status === 401 && state.user?.id === accountId) {
+      state.learningIntent = { action: "learning-forum-reaction", id };
+      return authForm();
+    }
+    throw error;
+  } finally {
+    pendingForumReactions.delete(postId);
+    footer?.removeAttribute('aria-busy');
+    footer?.querySelectorAll('button').forEach(button => { button.disabled = false; });
+  }
+}
+async function loadForum() {
+  const target = document.querySelector('#forum-posts');
+  if (!target) return;
+  const revision = ++forumLoadRevision;
+  const accountId = state.user?.id;
+  try {
+    const posts = await api('forum');
+    if (!target.isConnected || revision !== forumLoadRevision || accountId !== state.user?.id) return;
+    target.innerHTML = posts.length ? posts.map(post => `<article class="card forum-post" data-post-id="${esc(post.id)}"><header class="forum-post-header"><span class="forum-avatar" aria-hidden="true">${forumAvatar(post.author)}</span><div class="forum-author"><strong>${esc(post.author)}</strong><time datetime="${esc(post.created_at)}">${day(post.created_at.slice(0,10))} · ${esc(t('Cộng đồng'))}</time></div>${state.user && (post.owner === state.user.id || ['ADMIN','MANAGER'].includes(state.user.role)) ? actionButton('Xóa bài', 'learning-forum-delete', post.id, 'secondary compact forum-delete') : ''}</header><div class="forum-post-body"><h3>${esc(post.title)}</h3><p class="forum-content">${esc(post.content)}</p></div>${forumReactions(post)}</article>`).join('') : `<p class="muted">${esc(t('Chưa có bài viết. Hãy chia sẻ câu chuyện đầu tiên của bạn.'))}</p>`;
+  } catch (error) {
+    if (target.isConnected && revision === forumLoadRevision && accountId === state.user?.id) target.innerHTML = `<p class="error-text">${esc(error.message)}</p>${actionButton('Tải lại bài viết', 'learning-forum-reload')}`;
+  }
+}
+
+function openForumComposer() {
+  if (!state.user) { state.learningIntent = {action:"learning-forum-new", id:""}; return authForm(); }
+  modal(t('Viết bài'), `<form id="forum-form"><label class="field">${esc(t('Tiêu đề'))}<input name="title" maxlength="150" required></label><label class="field">${esc(t('Nội dung'))}<textarea name="content" rows="7" maxlength="5000" required></textarea></label><p class="small muted">${esc(t('Bài viết sẽ hiển thị công khai. Không đăng thông tin sức khỏe hoặc liên hệ riêng tư.'))}</p><p id="forum-error" class="error-text" role="alert"></p><div class="form-actions">${actionButton('Hủy', 'close')}<button type="submit" class="btn">${esc(t('Đăng bài'))}</button></div></form>`);
+  document.querySelector('#forum-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const form = event.currentTarget, submit = form.querySelector('[type="submit"]');
+    submit.disabled = true;
+    try { await api('forum', 'POST', Object.fromEntries(new FormData(form))); closeModal(); await loadForum(); toast(t('Đã đăng bài.')); }
+    catch(error) { form.querySelector('#forum-error').textContent = error.message; submit.disabled = false; }
+  });
+}
+
+
+// Personal package trees and learning portfolios.
+
+// Opportunity flowers describe a proposed learning path, never completed skills.
+const experiencePaths = {
+  day: [
+    ["Làm quen", "Thử một hoạt động yêu thích và làm quen một kỹ năng cùng người hướng dẫn."],
+  ],
+  week: [
+    ["Học và thực hành", "Thực hành một kỹ năng yêu thích qua những buổi học phù hợp."],
+    ["Thành quả đầu tiên", "Từng bước làm một sản phẩm nhỏ và ghi lại điều mình học được."],
+  ],
+  month: [
+    ["Lộ trình học", "Theo đuổi một chủ đề yêu thích với lộ trình phù hợp sức khỏe và sở thích."],
+    ["Thành quả riêng", "Tích lũy sản phẩm, nhật ký và nhận góp ý từ người hướng dẫn."],
+    ["Sẻ chia giá trị", "Có cơ hội giới thiệu thành quả và chia sẻ kinh nghiệm trong workshop, talkshow."],
+  ],
+};
+
+function experienceGroup(tier) {
+  const path = experiencePaths[tier] || [];
+  if (!path.length) return "";
+  return `<section class="registration-benefit-group experience-opportunities"><h3>${esc(t("Cơ hội trải nghiệm"))}</h3><ul class="registration-benefits">${path.map(([label, description]) => `<li><i class="fa-solid fa-seedling" aria-hidden="true"></i><span><strong>${esc(t(label))}</strong> · ${esc(t(description))}</span></li>`).join("")}</ul><p class="small muted">${esc(t("Lộ trình được điều chỉnh theo sức khỏe, sở thích và lịch hoạt động."))}</p></section>`;
+}
+
+function dashboardSignature() {
+  return `<section class="dashboard-signature" aria-label="${esc(t("Mỗi ngày, một điều có ý nghĩa"))}"><span class="learning-kicker">${esc(t("Mỗi ngày, một điều có ý nghĩa"))}</span><h2 class="pen-signature"><span>${esc(t("An tâm sống."))}</span> <span>${esc(t("Tiếp tục học."))}</span> <span>${esc(t("Sẻ chia giá trị."))}</span></h2><p>${esc(t("Được chăm sóc, được làm điều mình yêu thích và được trân trọng những điều mình tạo ra. Một hành trình mới, theo nhịp sống của bạn."))}</p></section>`;
+}
+
+function selectedJourneyProfile() {
+  const profiles = data("residents");
+  return profiles.find((profile) => profile.id === state.journeyResident) || profiles[0];
+}
+
+function personLearningRecords(profile) {
+  const records = {};
+  for (const kind of ["gardens", "enrollments", "skills", "practice", "products"]) {
+    records[kind] = data(kind).filter((record) => record.resident === profile.id);
+  }
+  records.learned = records.skills.filter((skill) => skill.status === "Đã học" && skill.verified_by);
+  records.shared = [...records.gardens, ...records.products].filter((record) => record.public_consent && record.publication === "Đã duyệt");
+  return records;
+}
+
+function opportunityPlant(tier) {
+  const path = experiencePaths[tier] || [];
+  const leaves = { day: 2, week: 4, month: 6 }[tier] || 2;
+  const top = { day: 154, week: 110, month: 67 }[tier] || 172;
+  const flowers = [[155, 80], [95, 121], [216, 122]];
+  return `<svg class="opportunity-tree" viewBox="0 0 310 290" role="img" aria-label="${esc(path.length ? t("Cây có {count} bông hoa, tương ứng {count} cơ hội trải nghiệm của gói.", { count: path.length }) : t("Mầm cây chờ một hành trình mới."))}"><path class="tree-stem" d="M155 225 Q149 175 155 ${top}"/>${Array.from({ length: leaves }, (_, index) => {
+    const y = 208 - Math.floor(index / 2) * 36;
+    return index % 2 ? `<path class="tree-leaf" d="M154 ${y} Q182 ${y - 38} 205 ${y - 29} Q199 ${y - 3} 154 ${y}Z"/>` : `<path class="tree-leaf" d="M154 ${y} Q112 ${y - 4} 106 ${y - 33} Q139 ${y - 38} 154 ${y}Z"/>`;
+  }).join("")}${path.map(([label], index) => {
+    const [x, y] = flowers[index];
+    return `<g class="tree-flower" data-opportunity="${index + 1}"><title>${index + 1}. ${esc(t(label))}</title><path class="tree-stem" d="M155 186 Q${x} 166 ${x} ${y}"/>${[[0, -14], [14, -4], [9, 12], [-9, 12], [-14, -4]].map(([dx, dy]) => `<circle class="tree-petal" cx="${x + dx}" cy="${y + dy}" r="10"/>`).join("")}<circle class="tree-center" cx="${x}" cy="${y}" r="11"/><text x="${x}" y="${y + 4}" text-anchor="middle">${index + 1}</text></g>`;
+  }).join("")}<path class="tree-pot" d="M111 226H199L188 278H123Z"/><path class="tree-pot-rim" d="M108 225H202V236H108Z"/><path class="tree-ground" d="M84 280H226"/></svg>`;
+}
+
+function bookingTree(booking) {
+  // Use the booking snapshot; later catalog edits must not upgrade an old tree.
+  const tier = booking.health_tier || booking.health_entitlements?.tier;
+  const path = experiencePaths[tier] || [];
+  const archived = booking.status === "Hoàn tất" || (booking.end && booking.end < today());
+  const pending = ["Chờ duyệt", "Danh sách chờ"].includes(booking.status);
+  return `<article class="journey-package-tree ${pending ? "tree-pending" : ""}" data-booking="${esc(booking.id)}" data-tier="${esc(tier || "unknown")}"><div class="row between"><strong>${esc(localized(booking, "package_name") || t("Gói đã đăng ký"))}</strong>${tag(archived ? "Đã kết thúc" : booking.status)}</div><figure>${opportunityPlant(tier)}<figcaption>${day(booking.start)} – ${day(booking.end)}</figcaption></figure>${path.length ? `<ol class="tree-opportunity-legend">${path.map(([label, description]) => `<li><strong>${esc(t(label))}</strong><span>${esc(t(description))}</span></li>`).join("")}</ol>` : `<p class="small muted">${esc(t("Cơ hội trải nghiệm của gói đang được đội ngũ cập nhật."))}</p>`}<details class="tree-entitlements"><summary>${esc(t("Quyền lợi đã đăng ký"))}</summary>${booking.health_entitlements ? `<ul>${snapshotBenefits(booking.health_entitlements).map((benefit) => `<li>${esc(t(benefit))}</li>`).join("")}</ul>` : `<p class="small muted">${esc(t("Xem biên nhận để biết quyền lợi của đăng ký này."))}</p>`}</details>${pending ? `<p class="small muted">${esc(t("Đăng ký đang chờ đội ngũ xác nhận."))}</p>` : ""}</article>`;
+}
+
+function snapshotBenefits(entitlements) {
+  const benefits = [];
+  if (entitlements.all_activities) benefits.push("Trải nghiệm tại nông trại");
+  if (entitlements.workshops) benefits.push("Tham gia workshop");
+  if (entitlements.talkshows) benefits.push("Tham gia talkshow");
+  if (entitlements.basic_screening) benefits.push("Sàng lọc huyết áp & nhịp tim");
+  if (entitlements.food_and_drinks) benefits.push("Đồ ăn & nước uống");
+  if (entitlements.monitoring_per_day > 0 && entitlements.monitoring_days > 0) benefits.push(t("Theo dõi chỉ số {times} lần/ngày trong {days} ngày", { times: entitlements.monitoring_per_day, days: entitlements.monitoring_days }));
+  if (entitlements.nutrition === "consultation") benefits.push("Tư vấn dinh dưỡng");
+  if (entitlements.nutrition === "weekly") benefits.push("Tư vấn dinh dưỡng mỗi tuần");
+  if (entitlements.expert_checkups) benefits.push("Chuyên gia khám định kỳ");
+  if (entitlements.priority === 1) benefits.push("Ưu tiên đặt lịch");
+  if (entitlements.priority === 2) benefits.push("Ưu tiên đặt lịch cao nhất", "Ưu tiên xử lý hồ sơ cao nhất");
+  return benefits;
+}
+
+function journeyStages(records) {
+  const enrolled = records.enrollments.filter((record) => !["Đã hủy", "Danh sách chờ"].includes(record.status));
+  const latest = [...records.practice].sort((a, b) => String(b.date).localeCompare(String(a.date)))[0];
+  const stages = [
+    ["Làm quen", records.gardens[0]?.focus || (enrolled[0] ? localized(lookup("activities", enrolled[0].activity_id)) : ""), "Chọn một hoạt động hoặc ghi lại điều bạn muốn học."],
+    ["Học và thực hành", latest ? `${latest.title}${latest.result ? " · " + latest.result : ""}` : records.learned.map((skill) => skill.title).join(" · "), "Nhật ký và kỹ năng được ghi nhận sẽ xuất hiện tại đây."],
+    ["Tạo thành quả", records.products.map((product) => localized(product)).join(" · "), "Lưu lại sản phẩm được tạo ra trong hành trình của bạn."],
+    ["Sẻ chia", records.shared.map((record) => localized(record)).join(" · "), "Bạn quyết định khi nào muốn chia sẻ câu chuyện và thành quả."],
+  ];
+  return `<ol class="personal-journey-stages">${stages.map(([label, value, description]) => `<li class="${value ? "has-evidence" : ""}"><h3>${esc(t(label))}</h3><p>${esc(value || t(description))}</p></li>`).join("")}</ol>`;
+}
+
+function personalTakeaways(profile, records) {
+  const items = [
+    ...records.learned.map((skill) => `<li><i class="fa-solid fa-check" aria-hidden="true"></i><span>${esc(skill.title)}<small>${esc(t("Xác nhận bởi {name}", { name: skill.verified_by }))}</small></span></li>`),
+    ...records.products.map((product) => `<li><i class="fa-solid fa-seedling" aria-hidden="true"></i><span>${esc(localized(product))}<small>${esc(product.quantity)} ${esc(product.unit)}</small></span></li>`),
+  ];
+  return `<section class="personal-takeaways"><h3><i class="fa-solid fa-seedling" aria-hidden="true"></i>${esc(t(state.user.role === "FAMILY" ? "Điều người thân mang về" : "Điều bạn mang về"))}</h3><p class="small muted">${esc(profile.name)}</p>${items.length ? `<ul>${items.join("")}</ul>` : `<p>${esc(t("Thành quả sẽ được lưu lại từ kỹ năng được xác nhận và sản phẩm của người học."))}</p>`}${records.practice.length ? `<p class="small muted">${esc(t("{count} nhật ký thực hành đã ghi nhận.", { count: records.practice.length }))}</p>` : ""}</section>`;
+}
+
+function personalJourney(profile) {
+  const records = personLearningRecords(profile);
+  const bookings = data("bookings").filter((booking) => booking.resident === profile.id && booking.status !== "Đã hủy").sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+  const story = records.gardens.find((garden) => garden.story || garden.story_en);
+  return `<section class="personal-journey section-title" data-profile="${esc(profile.id)}"><div class="learning-section-head"><div><span class="learning-kicker">${esc(t("Hành trình của {name}", { name: profile.name }))}</span><h2>${esc(t("Mỗi cơ hội, một nhánh cây."))}</h2><p class="small muted">${esc(t("Hoa đánh số tương ứng với cơ hội trải nghiệm; thành quả thực tế được ghi nhận riêng bên dưới."))}</p></div></div>${bookings.length ? `<div class="journey-package-trees">${bookings.map(bookingTree).join("")}</div><p class="small muted tree-path-note">${esc(t("Lộ trình được điều chỉnh theo sức khỏe, sở thích và lịch hoạt động."))}</p>` : `<div class="journey-seed"><figure>${opportunityPlant("none")}</figure><div><h3>${esc(t("Một hành trình đang nảy mầm"))}</h3><p>${esc(t("Chọn gói để khám phá cơ hội trải nghiệm của riêng mình."))}</p>${actionButton("Chọn gói đăng ký", "page-packages")}</div></div>`}<div class="personal-journey-body"><div>${story ? `<blockquote class="personal-story">${esc(localized(story, "story"))}</blockquote>` : ""}${personalTakeaways(profile, records)}</div>${journeyStages(records)}</div></section>`;
+}
+
+function journeyStart() {
+  return `<section class="journey-start journey-seed section-title" data-journey-state="no-profile"><figure>${opportunityPlant("none")}</figure><div><h2>${esc(t("Một hành trình đang nảy mầm"))}</h2><p class="muted">${esc(t("Tạo hồ sơ người học để bắt đầu hành trình."))}</p>${can("residents") ? actionButton("Tạo hồ sơ người học", "new", "residents") : ""}</div></section>`;
+}
+function dashboardPersonalJourney() {
+  const profile = selectedJourneyProfile();
+  if (!profile) return journeyStart();
+  return `${data("residents").length > 1 ? `<label class="field learning-profile-picker">${esc(t("Người học"))}<select id="dashboard-resident">${data("residents").map((person) => `<option value="${esc(person.id)}" ${person.id === profile.id ? "selected" : ""}>${esc(person.name)}</option>`).join("")}</select></label>` : ""}${personalJourney(profile)}`;
+}
+
+document.addEventListener("change", (event) => {
+  if (event.target.id === "dashboard-resident") {
+    state.journeyResident = event.target.value;
+    renderPage();
+  }
+});
+
+Object.assign(english, {
+  "Cơ hội trải nghiệm": "Experience opportunities",
+  "Làm quen": "Getting started",
+  "Thử một hoạt động yêu thích và làm quen một kỹ năng cùng người hướng dẫn.": "Try an activity you enjoy and explore a skill with a guide.",
+  "Học và thực hành": "Learn and practise",
+  "Thực hành một kỹ năng yêu thích qua những buổi học phù hợp.": "Practise a favourite skill in sessions suited to you.",
+  "Thành quả đầu tiên": "First creation",
+  "Từng bước làm một sản phẩm nhỏ và ghi lại điều mình học được.": "Work towards a small creation and record what you learn.",
+  "Lộ trình học": "Learning path",
+  "Theo đuổi một chủ đề yêu thích với lộ trình phù hợp sức khỏe và sở thích.": "Explore a favourite subject at a pace suited to your wellbeing and interests.",
+  "Thành quả riêng": "Personal creations",
+  "Tích lũy sản phẩm, nhật ký và nhận góp ý từ người hướng dẫn.": "Build a portfolio and journal with feedback from your guide.",
+  "Sẻ chia giá trị": "Share your value",
+  "Có cơ hội giới thiệu thành quả và chia sẻ kinh nghiệm trong workshop, talkshow.": "Explore opportunities to present your creations and share experience in workshops and talkshows.",
+  "Lộ trình được điều chỉnh theo sức khỏe, sở thích và lịch hoạt động.": "The path adapts to your wellbeing, interests and activity schedule.",
+  "Mỗi ngày, một điều có ý nghĩa": "Something meaningful every day",
+  "An tâm sống.": "Live with peace of mind.",
+  "Tiếp tục học.": "Keep learning.",
+  "Sẻ chia giá trị.": "Share your value.",
+  "Được chăm sóc, được làm điều mình yêu thích và được trân trọng những điều mình tạo ra. Một hành trình mới, theo nhịp sống của bạn.": "Receive care, do what you love and feel valued for what you create. A new journey, at your own pace.",
+  "Cây có {count} bông hoa, tương ứng {count} cơ hội trải nghiệm của gói.": "A tree with {count} flowers representing {count} experience opportunities in this package.",
+  "Mầm cây chờ một hành trình mới.": "A seedling waiting for a new journey.",
+  "Gói đã đăng ký": "Registered package",
+  "Đã kết thúc": "Ended",
+  "Cơ hội trải nghiệm của gói đang được đội ngũ cập nhật.": "Our team is updating this package's experience opportunities.",
+  "Quyền lợi đã đăng ký": "Registered benefits",
+  "Theo dõi chỉ số {times} lần/ngày trong {days} ngày": "Health monitoring {times} times a day for {days} days",
+  "Xem biên nhận để biết quyền lợi của đăng ký này.": "See your receipt for the benefits of this registration.",
+  "Đăng ký đang chờ đội ngũ xác nhận.": "Your registration is awaiting confirmation from our team.",
+  "Chọn một hoạt động hoặc ghi lại điều bạn muốn học.": "Choose an activity or note what you would like to learn.",
+  "Nhật ký và kỹ năng được ghi nhận sẽ xuất hiện tại đây.": "Recorded journal entries and verified skills will appear here.",
+  "Tạo thành quả": "Create something",
+  "Lưu lại sản phẩm được tạo ra trong hành trình của bạn.": "Save the creations you make along your journey.",
+  "Sẻ chia": "Share",
+  "Bạn quyết định khi nào muốn chia sẻ câu chuyện và thành quả.": "You decide when to share your stories and creations.",
+  "Xác nhận bởi {name}": "Verified by {name}",
+  "Điều người thân mang về": "What your loved one takes home",
+  "Điều bạn mang về": "What you take home",
+  "Thành quả sẽ được lưu lại từ kỹ năng được xác nhận và sản phẩm của người học.": "Verified skills and learner creations will be saved here.",
+  "{count} nhật ký thực hành đã ghi nhận.": "{count} practice journal entries recorded.",
+  "Hành trình của {name}": "{name}'s journey",
+  "Mỗi cơ hội, một nhánh cây.": "A branch for every opportunity.",
+  "Hoa đánh số tương ứng với cơ hội trải nghiệm; thành quả thực tế được ghi nhận riêng bên dưới.": "Numbered flowers represent experience opportunities; actual achievements are recorded separately below.",
+  "Một hành trình đang nảy mầm": "A journey is taking root",
+  "Chọn gói để khám phá cơ hội trải nghiệm của riêng mình.": "Choose a package to explore your own experience opportunities.",
 });

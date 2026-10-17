@@ -492,6 +492,21 @@ dialog {
   max-height: 90vh;
   box-shadow: 0 25px 100px #16382535;
 }
+dialog.account-detail-modal { width: 900px; max-width: calc(100vw - 24px); }
+.account-overview { overflow-wrap: anywhere; }
+.account-summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 20px 0; }
+.account-summary-grid > div { padding: 15px; background: #edf5ed; border-radius: 12px; }
+.account-summary-grid strong { display: block; font-size: 26px; color: #245f42; }
+.account-summary-grid span { font-size: 13px; }
+.account-detail-section { margin-top: 24px; }
+.account-activity-list article { padding: 14px 0; border-bottom: 1px solid #e2e9e0; }
+.account-activity-list article > span.small { display: block; margin-bottom: 6px; }
+.account-activity-list article p { white-space: pre-wrap; margin: 7px 0; }
+@media (max-width: 480px) {
+  .account-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-portal .page-head > div { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+  .admin-header .admin-header-actions { flex-wrap: wrap; justify-content: flex-end; }
+}
 dialog::backdrop {
   background: #112b2159;
   backdrop-filter: blur(3px);
@@ -961,4 +976,186 @@ label[hidden] {
   body {
     background: #fff;
   }
+}
+.homepage-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+  margin: 24px auto 48px;
+  padding: 36px 24px;
+  border: 1px solid #d8e2cc;
+  border-radius: var(--radius-card);
+  background: linear-gradient(115deg, #f8f5e9, #eaf1df);
+  box-shadow: var(--shadow);
+}
+.homepage-stats .homepage-stat {
+  min-width: 0;
+  padding: 12px 4px;
+  text-align: center;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+.original-site.learning-public .homepage-stats .homepage-stat strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3vw, 48px);
+  line-height: 1.15;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #2c6648;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  white-space: nowrap;
+}
+.homepage-stats .homepage-stat span {
+  display: block;
+  margin-top: 12px;
+  color: #526b50;
+  font-size: 17px;
+}
+@media (max-width: 700px) {
+  .homepage-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 32px 12px; }
+  .homepage-stats .homepage-stat:last-child { grid-column: 1 / -1; }
+}
+@media print {
+  .homepage-stats { background: white; border: 1px solid #183c30; }
+  .homepage-stats .homepage-stat strong, .homepage-stats .homepage-stat span { color: #183c30; -webkit-text-fill-color: #183c30; }
+}
+.event-calendar { padding: 24px; border: 1px solid #d8e2cc; border-radius: 24px; background: #fffef8; }
+.event-calendar-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+.event-calendar-toolbar h3 { margin: 0; text-transform: capitalize; color: #2c6648; }
+.event-calendar-weekdays, .event-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+.event-calendar-weekdays { text-align: center; margin-bottom: 10px; color: #526b50; }
+.event-calendar-day { min-height: 110px; min-width: 0; padding: 10px; border-radius: 12px; border: 1px solid #eceee5; display: flex; flex-direction: column; gap: 8px; }
+.event-calendar-day time { font-weight: 700; }
+.event-calendar-day.has-event { background: #eaf1df; border-color: #a9c19a; color: #285c40; }
+.event-calendar-day.is-today time { text-decoration: underline; text-underline-offset: 4px; }
+.event-calendar-summary { font-size: 12px; overflow-wrap: anywhere; }
+.event-calendar-day button { margin-top: auto; font-size: 12px; font-weight: 700; text-align: left; padding: 4px 0; text-decoration: underline; }
+.event-mobile-dot { display: none; }
+.forum-post h3 { font-family: var(--font-display); font-size: 1.3rem; margin-top: 16px; }
+.forum-content { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 700px) {
+  .event-calendar { padding: 12px; }
+  .event-calendar-grid, .event-calendar-weekdays { gap: 4px; }
+  .event-calendar-day { padding: 6px 3px; min-height: 76px; align-items: center; }
+  .event-calendar-summary { display: none; }
+  .event-calendar-day button { font-size: 0; width: 100%; min-height: 32px; text-align: center; }
+  .event-mobile-dot { display: inline; font-size: 15px; }
+  .event-calendar-toolbar .btn { font-size: 12px; padding: 8px; }
+}
+/* A familiar, readable community feed. */
+/* Personal learning paths: package opportunities and recorded achievements. */
+.dashboard-signature {
+  padding: 8px 0 28px;
+  border-bottom: 1px solid #dce5d8;
+  margin-bottom: 26px;
+}
+.original-site .dashboard-signature .pen-signature {
+  font-family: "Dancing Script", "Segoe Print", cursive;
+  font-size: clamp(32px, 3.4vw, 48px);
+  font-weight: 400;
+  line-height: 1.45;
+  color: #294e3b;
+  margin: 12px 0 14px;
+  letter-spacing: 0;
+}
+.pen-signature span { display: inline-block; margin-right: 12px; }
+.dashboard-signature p { max-width: 820px; color: #556959; margin: 0; line-height: 1.7; }
+.experience-opportunities { background: #edf3e6; padding: 18px; border-radius: 14px; }
+.experience-opportunities .registration-benefits strong { font-weight: 700; }
+.experience-opportunities p { margin: 14px 0 0; }
+.personal-journey { padding: 28px 0; border-top: 1px solid #dce5d8; }
+.personal-journey .learning-section-head { margin-bottom: 22px; }
+.journey-package-trees { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 285px), 1fr)); gap: 18px; }
+.journey-package-tree { min-width: 0; background: #fffef9; padding: 20px; border: 1px solid #dce5d8; border-radius: 18px; }
+.journey-package-tree > .row { align-items: flex-start; flex-wrap: wrap; gap: 10px; }
+.journey-package-tree > .row > strong { overflow-wrap: anywhere; }
+.journey-package-tree figure { background: #eaf0e1; margin: 18px 0; border-radius: 65px 65px 12px 12px; text-align: center; }
+.opportunity-tree { display: block; width: 100%; max-width: 310px; height: 255px; margin: auto; }
+.tree-stem { fill: none; stroke: #315c44; stroke-width: 3; stroke-linecap: round; }
+.tree-leaf { fill: #315c44; }
+.tree-petal { fill: #eacb92; }
+.tree-center { fill: #fffaf0; }
+.tree-flower text { fill: #315c44; font: 700 12px var(--font-body); }
+.tree-pot { fill: #c58c69; }
+.tree-pot-rim { fill: #b67b5b; }
+.tree-ground { fill: none; stroke: #cfdcc7; stroke-width: 2; stroke-linecap: round; }
+.tree-pending .opportunity-tree { opacity: .78; }
+.journey-package-tree figcaption { padding: 0 12px 15px; color: #556959; font-size: .85rem; }
+.original-site .tree-opportunity-legend { list-style: decimal; padding-left: 25px; margin: 0; display: grid; gap: 12px; }
+.tree-opportunity-legend li { padding-left: 4px; }
+.tree-opportunity-legend li::marker { color: #315c44; font-weight: 700; }
+.tree-opportunity-legend strong, .tree-opportunity-legend span { display: block; }
+.tree-opportunity-legend span { margin-top: 4px; color: #556959; font-size: .9rem; line-height: 1.6; }
+.tree-entitlements { margin-top: 18px; border-top: 1px solid #dce5d8; padding-top: 12px; }
+.tree-entitlements summary { cursor: pointer; color: #315c44; font-weight: 700; min-height: 32px; }
+.tree-entitlements ul { color: #556959; margin: 10px 0; padding-left: 22px; font-size: .9rem; }
+.tree-entitlements li { margin: 7px 0; }
+.journey-package-tree > p { margin: 12px 0 0; }
+.tree-path-note { margin: 12px 0 0; }
+.personal-journey-body { display: grid; grid-template-columns: 1fr 1.15fr; gap: 36px; margin-top: 28px; align-items: start; }
+.personal-story { font-family: var(--font-display); font-size: 1.25rem; line-height: 1.7; color: #315c44; border-left: 2px solid #b4c7a9; margin: 0 0 20px; padding: 0 0 0 18px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.personal-takeaways { border: 1px solid #dce5d8; border-radius: 14px; padding: 22px; background: #fffef9; }
+.personal-takeaways h3 { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.personal-takeaways h3 i { color: #315c44; }
+.personal-takeaways ul { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 14px; }
+.personal-takeaways li { display: flex; gap: 10px; overflow-wrap: anywhere; }
+.personal-takeaways li i { margin-top: 5px; color: #315c44; flex-shrink: 0; }
+.personal-takeaways li small { display: block; color: #556959; margin-top: 4px; }
+.personal-takeaways p:last-child { margin-bottom: 0; }
+.personal-journey-stages { list-style: none; margin: 0; padding: 0; }
+.personal-journey-stages li { position: relative; padding: 0 0 24px 24px; border-left: 1px solid #cfdcc7; }
+.personal-journey-stages li::before { content: ''; position: absolute; left: -5px; top: 7px; width: 9px; height: 9px; border-radius: 50%; background: #cfdcc7; }
+.personal-journey-stages .has-evidence::before { background: #315c44; }
+.personal-journey-stages h3 { margin: 0 0 7px; font-size: 1.05rem; }
+.personal-journey-stages p { color: #556959; margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; line-height: 1.7; }
+.journey-seed { display: flex; gap: 28px; align-items: center; background: #eaf0e1; border-radius: 18px; padding: 12px 26px; }
+.journey-seed figure { flex: 0 0 145px; margin: 0; }
+.journey-seed .opportunity-tree { height: 165px; }
+.journey-seed p { color: #556959; }
+.journey-start { background: #edf3e6; border-radius: 16px; padding: 22px; }
+@media (max-width: 700px) {
+  .personal-journey-body { grid-template-columns: 1fr; gap: 26px; }
+  .personal-journey { padding-top: 22px; }
+  .journey-package-tree { padding: 17px; }
+  .dashboard-signature .pen-signature span { display: block; }
+  .journey-seed { flex-direction: column; align-items: stretch; gap: 10px; padding: 18px; }
+  .journey-seed figure { flex-basis: auto; }
+  .tree-entitlements summary { min-height: 44px; }
+}
+
+.original-site.learning-public .forum-feed { width: 100%; max-width: 760px; margin: 0 auto; }
+.original-site.learning-public .forum-posts { display: flex; flex-direction: column; gap: 22px; }
+.original-site.learning-public .forum-compose, .original-site.learning-public .forum-post { padding: 24px; border-radius: 18px; background: #fffefb; border: 1px solid #dce5d8; box-shadow: 0 4px 18px rgb(40 75 50 / 5%); }
+.original-site.learning-public .forum-compose { margin-bottom: 24px; }
+.forum-compose-row, .forum-post-header { display: flex; align-items: center; gap: 14px; }
+.forum-avatar { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 52px; width: 52px; height: 52px; border-radius: 50%; background: #e4efdc; color: #2b6545; font-size: 19px; font-weight: 800; }
+.original-site.learning-public .forum-compose-prompt { flex: 1; min-width: 0; min-height: 54px; padding: 12px 18px; border: 1px solid #dce5d8; border-radius: 28px; background: #f1f5ec; text-align: left; color: #49624b; font: inherit; font-size: 18px; cursor: pointer; }
+.forum-compose-footer { display: flex; justify-content: space-between; align-items: center; gap: 16px; border-top: 1px solid #e3e9de; margin-top: 18px; padding-top: 16px; color: #647363; }
+.forum-author { flex: 1; min-width: 0; }
+.forum-author strong { display: block; font-size: 19px; line-height: 1.4; color: #294b36; overflow-wrap: anywhere; }
+.forum-author time { display: block; margin-top: 4px; font-size: 15px; color: #687467; }
+.original-site.learning-public .forum-post h3 { font-family: var(--font-body, sans-serif); font-size: 21px; line-height: 1.5; font-weight: 700; margin: 22px 0 10px; }
+.original-site.learning-public .forum-content { font-size: 19px; line-height: 1.75; margin: 0; color: #314a39; }
+.original-site.learning-public .forum-delete { min-height: 44px; flex-shrink: 0; }
+.forum-reaction-footer { border-top: 1px solid #e3e9de; margin-top: 20px; padding-top: 14px; }
+.forum-reaction-total { font-size: 14px; color: #647363; margin: 0 0 10px; }
+.forum-reactions { display: flex; flex-wrap: wrap; gap: 8px; }
+.forum-reaction-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; max-width: 100%; padding: 8px 12px; border: 1px solid #dce5d8; border-radius: 24px; background: #fffefb; color: #42573e; font: inherit; font-size: 14px; cursor: pointer; }
+.forum-reaction-emoji { font-size: 22px; line-height: 1; }
+.forum-reaction-count { font-size: 13px; min-width: 12px; font-weight: 700; }
+.forum-reaction-button:hover { background: #f0f6ed; border-color: #92b189; }
+.forum-reaction-button[aria-pressed="true"] { background: #e8f3e2; border-color: #548248; color: #245f42; font-weight: 700; }
+.forum-reaction-button:focus-visible { outline: 3px solid #548248; outline-offset: 3px; }
+.forum-reaction-button:disabled { opacity: .6; cursor: wait; }
+@media (max-width: 600px) {
+ .original-site.learning-public .forum-compose, .original-site.learning-public .forum-post { padding: 18px 16px; }
+ .forum-post-header { flex-wrap: wrap; gap: 10px; }
+ .forum-avatar { flex-basis: 46px; width: 46px; height: 46px; font-size: 17px; }
+ .forum-compose-footer { align-items: flex-start; }
+ .forum-compose-footer > span { font-size: 15px; }
+ .original-site.learning-public .forum-compose-prompt { padding: 10px 14px; font-size: 17px; }
+ .original-site.learning-public .forum-content { font-size: 18px; }
 }

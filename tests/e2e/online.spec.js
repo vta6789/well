@@ -11,7 +11,7 @@ test("English persists and a visitor registers a correctly priced day package", 
   await page.reload();
   await expect(page.getByRole("button", { name: "English", exact: true })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Online registration", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Register your Wellness Farm visit" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Register your Tinh Hoa Bình Mỹ visit" })).toBeVisible();
   const day = page.locator(".learning-package").filter({ hasText: "Day Package" });
   await expect(day).toContainText("450,000");
   await expect(page.locator(".learning-package").filter({ hasText: "Week Package" })).toContainText("2,000,000");
@@ -87,5 +87,5 @@ test("English public navigation translates empty states and full package benefit
   await expect(page.locator(".online-registration table")).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByRole("button", { name: "Tiếng Việt", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Đăng ký online tại Wellness Farm" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Đăng ký online tại Tinh Hoa Bình Mỹ" })).toBeVisible();
 });

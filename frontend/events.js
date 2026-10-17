@@ -140,6 +140,8 @@ document.addEventListener("click", async (e) => {
     }
     if (action === "new-user") return userForm();
     if (action === "edit-user") return userForm(id);
+    if (action === "user-overview") return await userOverview(id, button);
+    if (action === "reset-user-password") return adminPasswordForm(id);
     if (action === "password") return passwordForm();
     if (action === "print-report") return printRecord(id, "reports");
     if (action === "print-booking") return printRecord(id, "bookings");

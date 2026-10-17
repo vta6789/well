@@ -2,6 +2,10 @@
 let language = "vi";
 try { language = localStorage.getItem("wf_language") === "en" ? "en" : "vi"; } catch {}
 const english = {
+  "Bạn muốn chia sẻ điều gì?": "What would you like to share?", "Câu chuyện của bạn kết nối mọi người.": "Your stories bring people together.", "Cộng đồng": "Community",
+  "Diễn đàn cộng đồng": "Community forum", "Viết bài": "Write a post", "Đăng bài": "Publish post", "Xóa bài": "Delete post", "Tháng trước": "Previous month", "Tháng sau": "Next month", "Xem chi tiết": "View details", "CHIA SẺ & KẾT NỐI": "SHARE & CONNECT", "Đang tải bài viết…": "Loading posts…", "Đã đăng bài.": "Post published.", "Chia sẻ câu chuyện, kinh nghiệm và những điều bạn học được.": "Share your stories, experiences and what you have learned.", "Ngày tô xanh có hoạt động. Chọn xem chi tiết để đọc nội dung và đăng ký.": "Highlighted days have activities. View details to read more and register.",
+  "Đội ngũ": "Team", "Người dùng": "Users", "Bài viết": "Articles", "Buổi": "Sessions",
+  "Tinh Hoa Bình Mỹ qua những con số": "Tinh Hoa Bình Mỹ in numbers",
   "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.": "Your session has expired. Please sign in again.",
   "Không thể cập nhật dữ liệu. Vui lòng tải lại trang.": "Unable to update your data. Please reload the page.",
   "Trải nghiệm & hoạt động": "Experiences & activities", "Chăm sóc sức khỏe": "Wellbeing support", "Đặt lịch & hồ sơ": "Bookings & case processing",
@@ -9,7 +13,7 @@ const english = {
   "Đặt lịch theo thứ tự tiêu chuẩn": "Standard booking order", "Xử lý hồ sơ theo thứ tự tiêu chuẩn": "Standard case processing order", "Ưu tiên xử lý hồ sơ cao nhất": "Highest priority for case processing",
   "Trang chủ": "Home", "Workshop": "Workshops", "Nghệ nhân bạc": "Silver Artisans", "Đăng ký online": "Online registration", "Dự án": "Project",
   "Đăng nhập": "Sign in", "Tạo tài khoản": "Create account", "Trang quản trị": "Admin workspace", "Trang của tôi": "My dashboard", "Đăng xuất": "Sign out",
-  "LÀNG SỨC KHỎE BÌNH MỸ": "BINH MY WELLNESS VILLAGE", "Đến để học.": "Come to learn.", "Ở lại để": "Stay to", "tạo giá trị.": "create value.",
+  "TINH HOA BÌNH MỸ": "TINH HOA BÌNH MỸ", "Đến để học.": "Come to learn.", "Ở lại để": "Stay to", "tạo giá trị.": "create value.",
   "Chuyên gia chia sẻ kinh nghiệm. Người cao tuổi học, thực hành và tạo sản phẩm của riêng mình. Du khách đến để học hỏi và kết nối.": "Experts share their knowledge. Older learners practise and create their own products. Visitors come to learn and connect.",
   "Xem lịch workshop": "Explore workshops", "Chọn gói & đăng ký": "Choose a package", "Hoạt động, workshop và talkshow có trong cả ba gói.": "Activities, workshops and talkshows are included in every package.",
   "Khám phá hành trình": "Discover the journey", "Bình Mỹ · Một miền xanh": "Binh My · A green retreat", "Gieo một kỹ năng.": "Plant a skill.", "Gặt một hành trình.": "Grow a journey.", "Cho những khởi đầu mới": "For new beginnings",
@@ -24,11 +28,11 @@ const english = {
   "Sản phẩm từ hành trình học": "Creations from the learning journey", "Đặt tham quan vườn": "Request a garden visit", "Các câu chuyện đang được vun đắp": "Stories are growing", "Hồ sơ và sản phẩm chỉ xuất hiện khi học viên đồng ý công khai và quản trị viên đã duyệt.": "Profiles and products appear after the learner gives permission and our team approves them.",
   "Nền tảng học – làm – du lịch": "A place to learn, create and explore", "Chúng tôi kết nối kinh nghiệm của chuyên gia với khả năng sáng tạo của người cao tuổi. Mỗi buổi học dẫn đến thực hành, mỗi sản phẩm kể một câu chuyện, mỗi chuyến tham quan tạo thêm kết nối.": "We bring expert knowledge together with the creativity of older adults. Every session leads to practice, every product tells a story and every visit builds connections.",
   "SDG 4 · Học tập suốt đời": "SDG 4 · Lifelong learning", "Workshop và hoạt động thực hành phù hợp nhiều mức thể trạng, có trong cả ba gói.": "Workshops and practical activities for different activity levels, included in all three packages.", "SDG 8 · Tạo giá trị": "SDG 8 · Creating value", "Ghi nhận kỹ năng, giới thiệu sản phẩm và kết nối du khách với người tạo ra chúng.": "Recognise skills, showcase creations and connect visitors with their makers.",
-  "Học cùng nhau. Tạo giá trị cùng nhau. Khám phá Wellness Farm.": "Learn together. Create together. Discover Wellness Farm.", "Đăng ký học viên cao tuổi": "Register as an older learner",
+  "Học cùng nhau. Tạo giá trị cùng nhau. Khám phá Tinh Hoa Bình Mỹ.": "Learn together. Create together. Discover Tinh Hoa Bình Mỹ.", "Đăng ký học viên cao tuổi": "Register as an older learner",
   "Bảng tác động": "Community impact", "Workshop tháng này": "Workshops this month", "Lịch trong tháng": "Sessions scheduled this month", "Người học": "Learners", "Hồ sơ tham gia không trùng lặp": "Unique participating learner profiles", "Sản phẩm tạo ra": "Products created", "Bản ghi sản phẩm được ghi nhận": "Recorded creations", "Lượt khách": "Visitors", "Số người đã tham quan": "Completed visitor attendance",
   "Số liệu từ hệ thống; học viên tính theo hồ sơ đã đăng ký hoặc tham gia workshop, lượt khách chỉ tính chuyến đã tham quan.": "Figures from our records: learners are registered or attending profiles; visitors are counted after completed visits.",
   "Hoạt động giống nhau · Chăm sóc khác nhau theo gói.": "The same activities · Different care benefits by package.",
-  "CHUẨN BỊ CHO CHUYẾN ĐI": "PLAN YOUR VISIT", "Đăng ký online tại Wellness Farm": "Register your Wellness Farm visit", "Chọn gói Ngày, Tuần hoặc Tháng. Cả ba cùng có quyền tham gia trải nghiệm, workshop và talkshow; khác nhau về chăm sóc sức khỏe và mức ưu tiên.": "Choose a Day, Week or Month package. Every package includes experiences, workshops and talkshows, with different wellbeing support and priority levels.",
+  "CHUẨN BỊ CHO CHUYẾN ĐI": "PLAN YOUR VISIT", "Đăng ký online tại Tinh Hoa Bình Mỹ": "Register your Tinh Hoa Bình Mỹ visit", "Chọn gói Ngày, Tuần hoặc Tháng. Cả ba cùng có quyền tham gia trải nghiệm, workshop và talkshow; khác nhau về chăm sóc sức khỏe và mức ưu tiên.": "Choose a Day, Week or Month package. Every package includes experiences, workshops and talkshows, with different wellbeing support and priority levels.",
   "Gói Ngày": "Day Package", "Gói Tuần": "Week Package", "Gói Tháng": "Month Package", "1 ngày": "1 day", "7 ngày": "7 days", "30 ngày": "30 days", "Đăng ký gói này": "Register for this package",
   "Quyền lợi chung": "Included in every package", "Trải nghiệm tại nông trại": "Farm experiences", "Tham gia workshop": "Workshop participation", "Tham gia talkshow": "Talkshow participation", "Đồ ăn & nước uống": "Food & drinks",
   "So sánh chăm sóc sức khỏe": "Compare wellbeing support", "Quyền lợi": "Benefits", "Sàng lọc huyết áp & nhịp tim": "Blood pressure & heart rate screening", "Theo dõi chỉ số": "Health monitoring", "Tư vấn dinh dưỡng": "Nutrition advice", "Chuyên gia khám định kỳ": "Regular expert check-ups", "Ưu tiên đặt lịch": "Booking priority", "Ưu tiên xử lý hồ sơ": "Case processing priority",
@@ -36,7 +40,7 @@ const english = {
   "Lịch chăm sóc và chuyên gia được đội ngũ xác nhận khi tiếp nhận đăng ký.": "Our team confirms your care schedule and expert appointments when reviewing your registration.",
   "Đặt lịch trước chuyến đi": "Plan ahead", "Gửi đăng ký online. Đội ngũ sẽ xác nhận lịch và sức chứa trước chuyến đi của bạn.": "Register online. Our team will confirm dates and availability before your visit.",
   "Đăng ký tham gia": "Register to attend", "Vào danh sách chờ": "Join the waiting list", "Đã gồm trong gói": "Included in your package", "Chưa phân công": "To be assigned", "Nhẹ nhàng": "Gentle", "Vừa sức": "Moderate", "Cần hỗ trợ": "Support needed", "Đang cập nhật": "To be confirmed", "Đủ chỗ · nhận danh sách chờ": "Full · waiting list available", "Còn {count} chỗ": "{count} places available", "{count} kỹ năng đã học": "{count} skills learned",
-  "Chào mừng trở lại": "Welcome back", "Tạo tài khoản gia đình": "Create a family account", "Tạo tài khoản học viên cao tuổi": "Create an older learner account", "Tạo tài khoản để quản lý hồ sơ và đặt lịch cho người thân.": "Create an account to manage profiles and registrations for your family.", "Đăng ký để học, thực hành và ghi lại hành trình của bạn.": "Register to learn, practise and record your journey.", "Đăng nhập để tiếp tục hành trình cùng Wellness Farm.": "Sign in to continue your Wellness Farm journey.",
+  "Chào mừng trở lại": "Welcome back", "Tạo tài khoản gia đình": "Create a family account", "Tạo tài khoản học viên cao tuổi": "Create an older learner account", "Tạo tài khoản để quản lý hồ sơ và đặt lịch cho người thân.": "Create an account to manage profiles and registrations for your family.", "Đăng ký để học, thực hành và ghi lại hành trình của bạn.": "Register to learn, practise and record your journey.", "Đăng nhập để tiếp tục hành trình cùng Tinh Hoa Bình Mỹ.": "Sign in to continue your Tinh Hoa Bình Mỹ journey.",
   "Họ tên": "Full name", "Email": "Email", "Mật khẩu": "Password", "Tối thiểu 12 ký tự.": "At least 12 characters.", "Nếu quên mật khẩu, liên hệ quản trị viên; email khôi phục chưa kết nối.": "If you forgot your password, contact our team. Email recovery is not connected yet.", "Đã có tài khoản": "Already have an account", "Đăng ký": "Register", "Đóng": "Close", "Ngày sinh": "Date of birth", "Số điện thoại liên hệ": "Contact phone (optional)",
   "Tình trạng sức khỏe": "Health information", "Dị ứng / Thực phẩm cần tránh": "Allergies / foods to avoid", "Nhu cầu dinh dưỡng": "Dietary needs", "Khả năng di chuyển": "Mobility", "Tự đi lại": "Independent", "Xe lăn": "Wheelchair", "Liên hệ khẩn cấp": "Emergency contact", "Thói quen và nhu cầu đặc biệt": "Habits and special requirements",
   "Tôi đồng ý chia sẻ thông tin chăm sóc với các thành viên gia đình được cấp quyền.": "I agree to share care information with authorised family members.", "Sức khỏe cơ bản · tùy chọn": "Basic health · optional", "Chỉ ghi thông tin cần thiết để hỗ trợ thể trạng. Nội dung này không được công khai trên trang Nghệ nhân bạc.": "Only provide information needed to support your wellbeing. It is not published on the Silver Artisans page.",
@@ -51,6 +55,14 @@ const english = {
   "Thông tin đăng nhập không đúng.": "Incorrect email or password.", "Email hoặc điện thoại đã được sử dụng.": "This email or phone number is already registered.", "Email hoặc điện thoại không hợp lệ.": "Invalid email or phone number.", "Mật khẩu cần 12–128 ký tự; vai trò phải hợp lệ.": "Use a password with 12–128 characters and a valid account type.", "Không thể kết nối máy chủ.": "Unable to connect to the server.", "Không thể xử lý yêu cầu. Vui lòng thử lại.": "Unable to process your request. Please try again.", "Cần chọn người lưu trú.": "Please choose a visitor profile.", "Ngày đến không được ở quá khứ.": "Arrival cannot be in the past.", "Workshop đã đủ chỗ. Bạn có thể đăng ký danh sách chờ.": "This workshop is full. You can join the waiting list.", "Không có quyền thực hiện.": "You do not have permission for this action.",
 };
 Object.assign(english, {
+  "Thích": "Like", "Yêu thích": "Love", "Vui quá": "Joy", "Tuyệt vời": "Wonderful", "Truyền cảm hứng": "Inspiring",
+  "{count} cảm xúc": "{count} reactions",
+  "{label}: {count} lượt": "{label}: {count} reactions",
+  "Cảm xúc cho bài viết": "Reactions to this post",
+  "Bấm lại để bỏ cảm xúc": "Click again to remove your reaction",
+  "Đăng nhập để thả cảm xúc": "Sign in to react",
+  "Cảm xúc không hợp lệ.": "Invalid reaction.",
+  "Không tìm thấy bài viết.": "Post not found.",
   "Tư vấn dinh dưỡng mỗi tuần": "Weekly nutrition advice",
   "Ưu tiên đặt lịch cao nhất": "Highest booking priority",
   "Quyền lợi chăm sóc đã đăng ký": "Your registered care benefits",
@@ -120,7 +132,7 @@ Object.assign(english, {
 });
 Object.assign(english, {
   "Đến nội dung chính": "Skip to main content",
-  "Đang mở Wellness Farm…": "Opening Wellness Farm…",
+  "Đang mở Tinh Hoa Bình Mỹ…": "Opening Tinh Hoa Bình Mỹ…",
   "Chưa có dữ liệu": "No records yet",
   "Tạo bản ghi đầu tiên để bắt đầu theo dõi.": "Create your first record to get started.",
   "Bắt đầu bằng bản ghi đầu tiên của bạn.": "Start with your first record.",
@@ -182,7 +194,7 @@ Object.assign(english, {
   "Tác giả": "Author",
   "Liên Hệ Ban Quản Lý": "Contact our team",
   "Địa chỉ: Xã Bình Mỹ, TP. Hồ Chí Minh": "Address: Binh My, Ho Chi Minh City",
-  "© 2026 Wellness Farm. Tất cả quyền được bảo lưu.": "© 2026 Wellness Farm. All rights reserved.",
+  "© 2026 Tinh Hoa Bình Mỹ. Tất cả quyền được bảo lưu.": "© 2026 Tinh Hoa Bình Mỹ. All rights reserved.",
   "Sinh ngày {date}": "Born {date}",
   "Chưa nhập": "Not provided",
   "Hồ sơ sức khỏe được bảo vệ theo quyền truy cập.": "Health information is protected by access permissions.",
@@ -252,11 +264,11 @@ function languageSwitch() {
 }
 function updateLanguageDocument() {
   document.documentElement.lang = language;
-  document.title = language === "en" ? "Wellness Farm — Learn, create and explore" : "Wellness Farm — Học, thực hành và du lịch";
+  document.title = language === "en" ? "Tinh Hoa Bình Mỹ — Learn, create and explore" : "Tinh Hoa Bình Mỹ — Học, thực hành và du lịch";
   const skip = document.querySelector("a.skip");
   if (skip) skip.textContent = t("Đến nội dung chính");
   const description = document.querySelector('meta[name="description"]');
-  if (description) description.content = language === "en" ? "Learn, create and explore at Wellness Farm. Register online for Day, Week and Month packages with shared activities and different wellbeing support." : "Học, thực hành và du lịch tại Wellness Farm. Đăng ký online với gói Ngày, Tuần, Tháng: cùng hoạt động, khác quyền lợi chăm sóc sức khỏe.";
+  if (description) description.content = language === "en" ? "Learn, create and explore at Tinh Hoa Bình Mỹ. Register online for Day, Week and Month packages with shared activities and different wellbeing support." : "Học, thực hành và du lịch tại Tinh Hoa Bình Mỹ. Đăng ký online với gói Ngày, Tuần, Tháng: cùng hoạt động, khác quyền lợi chăm sóc sức khỏe.";
 }
 function translateStatic(element) {
   const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
@@ -276,4 +288,30 @@ async function setLanguage(next) {
   else shell();
   window.scrollTo({ top: position, behavior: "instant" });
 }
+Object.assign(english, {
+  "Xem hoạt động, quản lý quyền và hỗ trợ khôi phục tài khoản.": "Review activity, manage access and help recover accounts.",
+  "Đặt lại mật khẩu": "Reset password",
+  "Chi tiết tài khoản · {name}": "Account details · {name}",
+  "Đặt lại mật khẩu · {name}": "Reset password · {name}",
+  "Chưa có hoạt động được ghi nhận.": "No activity recorded yet.",
+  "Hoạt động của tài khoản và các hồ sơ người học liên kết.": "Activity for this account and its linked learner profiles.",
+  "Chưa có hồ sơ liên kết.": "No linked learner profiles yet.",
+  "Gói chưa hủy": "Packages not cancelled",
+  "Kỹ năng đã xác nhận": "Verified skills",
+  "Buổi đã tham gia": "Sessions attended",
+  "Gói đã đăng ký": "Registered packages",
+  "Bài viết diễn đàn": "Forum posts",
+  "Buổi phụ trách": "Sessions hosted",
+  "Hoạt động gần đây": "Recent activity",
+  "Đã đăng ký {count} buổi; chỉ tính đã tham gia khi có điểm danh.": "Registered for {count} sessions; attendance is counted only after check-in.",
+  "Mỗi mục hiển thị tối đa 50 bản ghi mới nhất; số tổng được tính trên toàn bộ dữ liệu. Nhật ký hiển thị 20 hoạt động gần nhất.": "Each section shows up to 50 recent records; totals use all records. The log shows the 20 most recent activities.",
+  "Mật khẩu hiện tại không thể xem lại. Đặt mật khẩu mới sẽ đăng xuất các phiên của tài khoản này.": "The current password cannot be retrieved. Resetting it signs out all sessions for this account.",
+  "Tài khoản đang khóa. Đặt lại mật khẩu không tự mở khóa tài khoản.": "This account is locked. Resetting its password does not unlock it.",
+  "Đã đặt lại mật khẩu": "Password reset",
+  "Gửi riêng mật khẩu mới cho người dùng và nhắc họ đổi sau khi đăng nhập.": "Send the new password privately and ask the user to change it after signing in.",
+  "Sao chép mật khẩu": "Copy password",
+  "Đã sao chép mật khẩu.": "Password copied.",
+  "Chọn mật khẩu và sao chép.": "Select the password and copy it.",
+  "Hãy dùng chức năng đổi mật khẩu của bạn.": "Use your own change-password option.",
+});
 updateLanguageDocument();

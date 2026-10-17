@@ -18,7 +18,7 @@ function adminDashboard() {
   const families = state.users
     .filter((u) => ["FAMILY", "SENIOR"].includes(u.role))
     .sort((a, b) => b.created_at.localeCompare(a.created_at));
-  return header("Quản trị hệ thống", "Quản lý tài khoản, tiếp nhận thông tin người dùng và điều phối hoạt động Wellness Farm.") +
+  return header("Quản trị hệ thống", "Quản lý tài khoản, tiếp nhận thông tin người dùng và điều phối hoạt động Tinh Hoa Bình Mỹ.") +
     `<div class="grid four">${metric("Người dùng", families.length, "Tài khoản gia đình đã đăng ký")}${metric("Chờ duyệt lưu trú", pendingBookings.length, "Đơn cần được tiếp nhận")}${metric("Yêu cầu cần xử lý", openRequests.length, "Yêu cầu đang chờ hoặc đang xử lý")}${metric("Hồ sơ lưu trú", data("residents").length, "Hồ sơ được gửi lên hệ thống")}</div>
     <div class="admin-quick-actions section-title">${actionButton("+ Tạo tài khoản nhân viên", "new-user", "", "")}${actionButton("Quản lý người dùng", "page-users")}${actionButton("Báo cáo vận hành", "page-analytics")}${actionButton("Nhật ký hệ thống", "page-audit")}</div>
     <section class="card section-title"><div class="admin-section-heading"><h2>Học – làm – du lịch</h2>${actionButton("Bảng tác động", "page-impact")}</div><p class="small muted">${data("activities").length} workshop · ${data("products").length} sản phẩm · ${data("expert_applications").filter((r) => r.status === "Chờ duyệt").length} hồ sơ chuyên gia chờ duyệt · ${data("tour_bookings").filter((r) => r.status === "Chờ duyệt").length} yêu cầu tham quan mới</p><div class="row">${actionButton("Quản lý workshop", "page-activities")}${actionButton("Duyệt chuyên gia", "page-expert_applications")}${actionButton("Duyệt nghệ nhân bạc", "page-gardens")}${actionButton("Duyệt sản phẩm", "page-products")}${actionButton("Tiếp nhận khách", "page-tour_bookings")}${actionButton("Xem trang công khai", "learning-public", "artisans")}</div></section>
@@ -63,12 +63,12 @@ function dashboard() {
       role === "FAMILY"
         ? "Gia đình an tâm, mỗi ngày."
         : "Chào một ngày an yên.",
-      `Xin chào ${state.user.name}. Đây là thông tin mới nhất tại Wellness Farm.`,
+      `Xin chào ${state.user.name}. Đây là thông tin mới nhất tại Tinh Hoa Bình Mỹ.`,
       can("bookings")
         ? actionButton("+ Đặt lịch lưu trú", "new", "bookings", "")
         : "",
     ) +
-    `<section class="hero-panel"><div class="eyebrow">CHĂM SÓC BẰNG SỰ THẤU HIỂU</div><h2>${role === "FAMILY" ? "Luôn gần bên, dù ở xa." : "Mỗi người một hành trình.<br>Mỗi ngày một niềm vui."}</h2><p>${role === "FAMILY" ? "Theo dõi lịch lưu trú, những hoạt động và báo cáo chăm sóc của người thân trong cùng một nơi." : "Kết nối lịch lưu trú, kế hoạch chăm sóc và hoạt động hôm nay để không bỏ sót những điều cần quan tâm."}</p><span class="tag">❧ Wellness Farm · Bình Mỹ</span></section><div class="grid four">${cards.join("")}</div>${dashboardSchedule()}<div class="grid two section-title"><section class="card"><div class="row between"><h2>Lưu trú gần đây</h2><button class="small" data-page="bookings">Xem tất cả ↗</button></div>${
+    `<section class="hero-panel"><div class="eyebrow">CHĂM SÓC BẰNG SỰ THẤU HIỂU</div><h2>${role === "FAMILY" ? "Luôn gần bên, dù ở xa." : "Mỗi người một hành trình.<br>Mỗi ngày một niềm vui."}</h2><p>${role === "FAMILY" ? "Theo dõi lịch lưu trú, những hoạt động và báo cáo chăm sóc của người thân trong cùng một nơi." : "Kết nối lịch lưu trú, kế hoạch chăm sóc và hoạt động hôm nay để không bỏ sót những điều cần quan tâm."}</p><span class="tag">❧ Tinh Hoa Bình Mỹ</span></section><div class="grid four">${cards.join("")}</div>${dashboardSchedule()}<div class="grid two section-title"><section class="card"><div class="row between"><h2>Lưu trú gần đây</h2><button class="small" data-page="bookings">Xem tất cả ↗</button></div>${
       bookings.length
         ? table(
             ["Người lưu trú", "Ngày đến", "Trạng thái"],
@@ -545,21 +545,23 @@ function userPage() {
   return (
     header(
       "Tài khoản & quyền",
-      "Tạo tài khoản nhân viên, cấp vai trò hoặc thu hồi quyền truy cập.",
+      "Xem hoạt động, quản lý quyền và hỗ trợ khôi phục tài khoản.",
       state.user.role === "ADMIN"
         ? actionButton("+ Tạo tài khoản", "new-user", "", "")
         : "",
     ) +
     `<div class="notice section-title">Nhân viên chăm sóc còn cần được quản lý phân công vào từng hồ sơ. Thay đổi quyền hoặc khóa tài khoản sẽ thu hồi các phiên đang đăng nhập.</div><div class="card">${table(
-      ["Họ tên", "Liên hệ", "Vai trò", "Trạng thái", "Thao tác"],
+      ["Họ tên", "Email", ...(state.user.role === "ADMIN" ? ["Mật khẩu"] : []), "Vai trò", "Trạng thái", "Thao tác", ...(state.user.role === "ADMIN" ? ["Chi tiết"] : [])],
       state.users.map((u) => [
         esc(u.name),
-        `${esc(u.email)}<br>${esc(u.phone)}`,
-        esc(roleNames[u.role]),
+        esc(u.email),
+        ...(state.user.role === "ADMIN" ? [u.id === state.user.id ? actionButton("Đổi mật khẩu", "password") : actionButton("Đặt lại mật khẩu", "reset-user-password", u.id)] : []),
+        esc(t(roleNames[u.role])),
         tag(u.active ? "Hoạt động" : "Đã khóa"),
         state.user.role === "ADMIN" && u.id !== state.user.id
           ? actionButton("Cấp quyền / khóa", "edit-user", u.id)
           : "—",
+        ...(state.user.role === "ADMIN" ? [actionButton("Chi tiết", "user-overview", u.id)] : []),
       ]),
     )}</div>`
   );

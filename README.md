@@ -1,4 +1,8 @@
-# Wellness Farm — học, thực hành và du lịch
+# Tinh Hoa Bình Mỹ — học, thực hành và du lịch
+
+Bài viết diễn đàn có 5 cảm xúc: Thích, Yêu thích, Vui quá, Tuyệt vời và Truyền cảm hứng. Người đăng nhập chọn một cảm xúc cho mỗi bài, có thể đổi hoặc bỏ; số lượt lưu trong SQLite và hiển thị công khai, còn lựa chọn cá nhân chỉ trả về cho chính tài khoản đó. Xóa bài sẽ xóa các cảm xúc đi kèm.
+
+Trang **Tài khoản & quyền** có cột Email, thao tác đặt lại mật khẩu và nút Chi tiết dành cho ADMIN. Chi tiết tổng hợp gói đăng ký, bài diễn đàn, kỹ năng đã xác nhận, thực hành, sản phẩm và điểm danh của tài khoản cùng các hồ sơ người học liên kết. Buổi phụ trách của chuyên gia được hiển thị riêng. Mỗi mục liệt kê tối đa 50 bản ghi mới nhất, còn tổng số dùng toàn bộ dữ liệu. Mật khẩu cũ không thể xem lại; đặt lại chỉ lưu bản băm và thu hồi phiên của tài khoản đích, không đổi vai trò hoặc mở khóa. Mật khẩu mới chỉ hiển thị trong hộp thoại sau thao tác và được xóa khi đóng.
 
 Phát triển tiếp từ `wellness_farm_web_app (1).html` theo hướng **học → tạo giá trị → du lịch**, với thông điệp “Đến để học. Ở lại để tạo giá trị.” Trang chủ, lịch workshop, Nghệ nhân bạc và đăng ký trải nghiệm dùng cùng màu xanh, font và ảnh nông trại của dự án. Trang quản trị riêng giữ menu bên trái và quyền quản lý dữ liệu cũ.
 
@@ -10,6 +14,9 @@ Phát triển tiếp từ `wellness_farm_web_app (1).html` theo hướng **học
 - **SENIOR** là học viên cao tuổi; **FAMILY** hỗ trợ người thân. **EXPERT** tổ chức workshop, theo dõi thực hành và xác nhận kỹ năng cho học viên trong workshop phụ trách, không được xem hồ sơ y tế. Người dùng gửi hồ sơ chuyên gia để admin/manager duyệt; duyệt xong cần đăng nhập lại.
 - Workshop có chủ đề, hình thức workshop/talkshow, chuyên gia phụ trách, mức vận động, lịch và số chỗ còn lại. Khi đủ chỗ, người dùng có thể đăng ký danh sách chờ; xác nhận từ danh sách chờ vẫn kiểm tra sức chứa.
 - Hành trình từng người gồm vườn riêng, kỹ năng đã học, nhật ký thực hành và sản phẩm. Kỹ năng do học viên ghi nhận cần chuyên gia hoặc quản lý xác nhận.
+- Các gói có phần **Cơ hội trải nghiệm**: Ngày làm quen; Tuần học, thực hành và tạo thành quả đầu tiên; Tháng có lộ trình học, thành quả riêng và cơ hội chia sẻ trong workshop/talkshow. Lộ trình được điều chỉnh theo sức khỏe, sở thích và lịch hoạt động.
+- Bảng điều hành người học/gia đình có signature viết tay **“An tâm sống. Tiếp tục học. Sẻ chia giá trị.”** và hành trình theo từng hồ sơ. Mỗi lượt đăng ký chưa hủy có một cây: Ngày 1 hoa, Tuần 2 hoa, Tháng 3 hoa; số trên hoa khớp với chú giải cơ hội trải nghiệm. Hoa biểu thị cơ hội, không phải chứng nhận đã hoàn thành. Trạng thái chờ duyệt/đã kết thúc và quyền lợi theo bản ghi đăng ký được hiển thị riêng.
+- **Điều bạn/người thân mang về** lấy kỹ năng có người xác nhận và sản phẩm thật từ đúng hồ sơ. Các giai đoạn Làm quen, Học và thực hành, Tạo thành quả, Sẻ chia dùng dữ liệu đã ghi nhận; mục Sẻ chia chỉ ghi nhận câu chuyện/sản phẩm đã đồng ý công khai và được duyệt. Font viết tay Dancing Script được lưu tại máy cùng giấy phép OFL, không cần kết nối Internet khi xem trang.
 - Trang **Nghệ nhân bạc** chỉ hiển thị câu chuyện và sản phẩm khi có đồng ý công khai và được duyệt. Thay đổi nội dung cần duyệt lại. Không công khai thông tin liên hệ hoặc sức khỏe. Khách gửi yêu cầu tham quan để admin xác nhận; lượt khách chỉ tính sau khi đã tham quan.
 - Bảng tác động dùng số liệu thật: workshop trong tháng, số hồ sơ học viên đã đăng ký/tham gia, bản ghi sản phẩm và lượt khách đã tham quan. Không thêm số liệu minh họa vào dữ liệu vận hành.
 - **Sức khỏe cơ bản** là phần tùy chọn thu gọn. Dữ liệu và chức năng chăm sóc cũ vẫn được giữ cho vai trò có quyền.
@@ -199,6 +206,16 @@ Cookie đăng nhập và xóa phiên đều có `Secure` khi bật chế độ n
 Font Plus Jakarta Sans được phân phối cùng giấy phép trong `assets/fonts/LICENSE.txt`; dùng `npm run vendor:fonts` nếu cần lấy lại font từ package Fontsource. Ảnh nông trại được lưu từ URL Unsplash đã có trong dự án.
 
 Giao diện dùng **Lora** cho tiêu đề và **Nunito Sans** cho nội dung, có bộ ký tự tiếng Việt và được lưu trong `assets/fonts/` cùng giấy phép. `npm run vendor:fonts` tái tạo cả ba bộ font từ các package Fontsource. Nền kem/xanh lá, khung ảnh vòm, thẻ nổi và các họa tiết cây lá được khai báo trong `original-input.css`. Hiệu ứng chuyển trang, xuất hiện khi cuộn và số liệu tổng quan nằm trong `frontend/bootstrap.js`; tự tắt khi thiết bị bật giảm chuyển động. Điều hướng bằng bàn phím và bản in luôn hiển thị nội dung ngay.
+
+### Mã nguồn và tài liệu dự án
+
+- `output/documents/`: các bản tài liệu dự án và Lean Canvas đã hoàn thiện.
+- `output/vcf1/`: sơ đồ giải pháp bổ sung sau VCF1, gồm bản HTML và ảnh để chèn vào báo cáo.
+- `output/prototypes/`: bản mô phỏng hành trình giá trị; dữ liệu minh họa được ghi rõ trong giao diện.
+- `screenshots/`: ảnh minh họa giao diện và kết quả kiểm thử trên máy tính, điện thoại.
+- `Mo-link-demo.cmd` và `demo-link.ps1`: mở đường chia sẻ tạm thời tới máy chủ tại máy tính. Địa chỉ có thể thay đổi khi mở lại; cần giữ máy tính và đường chia sẻ hoạt động.
+
+Kho Git chỉ đồng bộ mã nguồn, tài nguyên và tài liệu dự án. Cơ sở dữ liệu, thông tin đăng nhập, tệp `.env`, thư viện đã cài, thư mục tạm và bài thực hành CTF riêng được loại khỏi Git. Tài khoản cùng dữ liệu vận hành nằm trong `data/` tại máy đang chạy; tải kho GitHub không khôi phục những dữ liệu này.
 
 ### Cảnh báo dependency của công cụ build
 

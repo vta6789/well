@@ -12,6 +12,7 @@ for family, weights, variants in [
     ("plus-jakarta-sans", [300, 400, 500, 600, 700, 800], ["normal"]),
     ("nunito-sans", [400, 600, 700, 800], ["normal"]),
     ("lora", [400, 500, 600], ["normal", "italic"]),
+    ("dancing-script", [400], ["normal"]),
 ]:
     source = root / "node_modules/@fontsource" / family
     for weight in weights:

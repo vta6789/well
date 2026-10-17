@@ -6,7 +6,7 @@ const updateSources = {
   calendar: ["activities", "enrollments", "bookings", "visits", "care"],
   enrollments: ["enrollments", "activities"],
   notifications: ["reports", "requests", "care", "bookings", "incidents"],
-  journey: ["enrollments", "gardens", "skills", "practice", "products"],
+  journey: ["residents", "bookings", "enrollments", "gardens", "skills", "practice", "products"],
   basic_health: ["residents", "vitals", "medications", "meals"],
   analytics: ["bookings", "payments", "rooms"],
   impact: ["activities", "enrollments", "products", "tour_bookings"],

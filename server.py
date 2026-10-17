@@ -56,12 +56,17 @@ DB = DATA / "wellness.sqlite3"
 LOCK = threading.RLock()
 from backend.policy import ROLES, OPS, CLINICAL, FINANCE, STATES
 from backend.learning import LEARNERS, LEARNING_KINDS, public_learning
+from backend.accounts import account_overview
+from backend.forum import reaction_summary, set_reaction
 from backend.packages import migrate_packages
 
 ATTEMPTS = {}
 
 
 class WellnessHTTPServer(ThreadingHTTPServer):
+    # The tunnel fetches scripts, fonts and API data concurrently. Windows
+    # rejects excess connections when the default five-slot backlog fills.
+    request_queue_size = 128
     # Windows otherwise permits several HTTP servers to share one local port.
     allow_reuse_address = os.name != "nt"
 
@@ -112,6 +117,11 @@ def init_db():
         CREATE INDEX IF NOT EXISTS records_kind ON records(kind);
         CREATE TABLE IF NOT EXISTS audit(id TEXT PRIMARY KEY,user_id TEXT,user_name TEXT,action TEXT,kind TEXT,record_id TEXT,at TEXT);
         CREATE TABLE IF NOT EXISTS mfa(user_id TEXT PRIMARY KEY REFERENCES users(id),secret TEXT NOT NULL,enabled INTEGER DEFAULT 0,last_step INTEGER DEFAULT -1);
+        CREATE TABLE IF NOT EXISTS forum_reactions(
+          post_id TEXT NOT NULL REFERENCES records(id) ON DELETE CASCADE,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          reaction TEXT NOT NULL CHECK(reaction IN ('like','love','haha','clap','inspire')),
+          PRIMARY KEY(post_id,user_id));
         """)
         if not db.execute("SELECT 1 FROM records WHERE kind='packages'").fetchone():
             for name, price, days, desc in [
@@ -219,6 +229,9 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         self.handle_request("POST")
 
+    def do_DELETE(self):
+        self.handle_request("DELETE")
+
     def do_PATCH(self):
         self.handle_request("PATCH")
 
@@ -320,6 +333,16 @@ class Handler(BaseHTTPRequestHandler):
                 if not isinstance(body, dict):
                     raise APIError(400, "Nội dung không hợp lệ.")
             with LOCK, connect() as db:
+                if path == "/api/forum" and method == "GET":
+                    try:
+                        viewer, _ = self.session(db)
+                    except APIError as error:
+                        if error.status != 401:
+                            raise
+                        viewer = None
+                    authors = {r["id"]: r["name"] for r in db.execute("SELECT id,name FROM users WHERE active=1")}
+                    posts = sorted(rows(db, "forum_posts"), key=lambda p: p["created_at"], reverse=True)
+                    return self.send(200, [{"id": p["id"], "title": p["title"], "content": p["content"], "author": authors[p["owner"]], "created_at": p["created_at"], "owner": p["owner"], **reaction_summary(db, p["id"], viewer["id"] if viewer else None)} for p in posts if p["owner"] in authors][:100])
                 if path in ["/api/login", "/api/register"] and method == "POST":
                     return self.auth(db, path, body)
                 if path == "/api/public" and method == "GET":
@@ -349,6 +372,24 @@ class Handler(BaseHTTPRequestHandler):
                 if path == "/api/me" and method == "GET":
                     return self.send(200, {"user": user,
                                            "csrf": session["csrf"], "demo": DEMO})
+                if path == "/api/forum" and method == "POST":
+                    title = text_field(body, "title", True, 150)
+                    content = text_field(body, "content", True, 5000)
+                    record = insert(db, "forum_posts", user["id"], None, {"title": title, "content": content})
+                    audit(db, user, "Đăng bài diễn đàn", "forum_posts", record)
+                    return self.send(201, {"id": record})
+                if path.startswith("/api/forum/") and path.endswith("/reaction") and method == "POST":
+                    target = path[len("/api/forum/"):-len("/reaction")]
+                    result = set_reaction(db, user, target, body.get("reaction"))
+                    audit(db, user, "Cập nhật cảm xúc bài viết", "forum_posts", target)
+                    return self.send(200, result)
+                if path.startswith("/api/forum/") and method == "DELETE":
+                    record = get_record(db, path.rsplit("/", 1)[1], "forum_posts")
+                    if record["owner"] != user["id"] and user["role"] not in ["ADMIN", "MANAGER"]:
+                        raise APIError(403, "Bạn chỉ được xóa bài viết của mình.")
+                    db.execute("DELETE FROM records WHERE id=? AND kind='forum_posts'", (record["id"],))
+                    audit(db, user, "Xóa bài diễn đàn", "forum_posts", record["id"])
+                    return self.send(200, {"ok": True})
                 if path == "/api/logout" and method == "POST":
                     db.execute(
                         "DELETE FROM sessions WHERE token=?", (session["token"],)
@@ -391,6 +432,29 @@ class Handler(BaseHTTPRequestHandler):
                     if method == "POST":
                         require(user, ["ADMIN"])
                         return self.create_user(db, body, user)
+                if path.startswith("/api/users/") and path.endswith("/overview") and method == "GET":
+                    target = path[len("/api/users/"):-len("/overview")]
+                    overview = account_overview(db, user, target)
+                    audit(db, user, "Xem chi tiết tài khoản", "users", target)
+                    return self.send(200, overview)
+                if path.startswith("/api/users/") and path.endswith("/password") and method == "POST":
+                    require(user, ["ADMIN"])
+                    target = path[len("/api/users/"):-len("/password")]
+                    if target == user["id"]:
+                        raise APIError(400, "Hãy dùng chức năng đổi mật khẩu của bạn.")
+                    account = db.execute("SELECT * FROM users WHERE id=?", (target,)).fetchone()
+                    if not account:
+                        raise APIError(404, "Không tìm thấy tài khoản.")
+                    password = str(body.get("password", ""))
+                    if not 12 <= len(password) <= 128:
+                        raise APIError(400, "Mật khẩu cần 12–128 ký tự.")
+                    db.execute("UPDATE users SET password=? WHERE id=?", (password_hash(password), target))
+                    db.execute("DELETE FROM sessions WHERE user_id=?", (target,))
+                    for key in list(ATTEMPTS):
+                        if key[1] == account["email"]:
+                            ATTEMPTS.pop(key, None)
+                    audit(db, user, "Đặt lại mật khẩu, thu hồi mọi phiên", "users", target)
+                    return self.send(200, {"ok": True})
                 if path.startswith("/api/users/") and method == "PATCH":
                     require(user, ["ADMIN"])
                     target = path.rsplit("/", 1)[1]
@@ -610,7 +674,7 @@ class Handler(BaseHTTPRequestHandler):
         recent.append(current_time)
         address_attempts.append(current_time)
         if path == "/api/register":
-            account_type = "SENIOR" if body.get("account_type") == "SENIOR" else "FAMILY"
+            account_type = "FAMILY"
             self.create_user(db, dict(body, role=account_type), None, respond=False)
         row = db.execute(
             "SELECT * FROM users WHERE email=? AND active=1",

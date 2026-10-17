@@ -1,0 +1,31 @@
+const { test, expect } = require('@playwright/test');
+test('calendar details and forum publishing work on each screen size', async ({ page }) => {
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.route('**/api/public', async route => {
+  const response = await route.fetch(); const body = await response.json();
+  const d = new Date(); d.setDate(Math.min(d.getDate()+1,28));
+  body.workshops = [{id:'calendar-event',name:'Chăm cây buổi sáng',date:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`,time:'09:00',description:'Thực hành chăm cây trong vườn.',location:'Vườn xanh',capacity:20,remaining:12,type:'Workshop',topic:'Nông nghiệp'}];
+  await route.fulfill({response,json:body});
+ });
+ await page.goto('/');
+ await expect(page.locator('.event-calendar-day.has-event')).toHaveCount(1);
+ await page.locator('[data-action="learning-event-day"]').click();
+ await expect(page.locator('#modal')).toContainText('Chăm cây buổi sáng');
+ await page.keyboard.press('Escape');
+ await page.locator('.forum-compose-prompt').click();
+ await page.locator('#auth-form input[name="email"]').fill('admin@e2e.test');
+ await page.locator('#auth-password').fill('Admin-e2e-test-12345');
+ await page.locator('#auth-password').press('Enter');
+ await expect(page.locator('#forum-form')).toBeVisible();
+ const title = 'Câu chuyện khu vườn ' + Date.now();
+ await page.locator('#forum-form [name="title"]').fill(title);
+ await page.locator('#forum-form [name="content"]').fill('Hôm nay cả nhà cùng chăm cây. <script>window.bad=true</script>');
+ await page.locator('#forum-form [type="submit"]').click();
+ await expect(page.locator('#forum-posts')).toContainText(title);
+ expect(await page.evaluate(() => window.bad)).toBeUndefined();
+ expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+ await page.reload();
+ await page.locator('.project-user-menu summary').click();
+ await page.locator('[data-action="learning-community"]').click();
+ await expect(page.locator('#forum-posts')).toContainText(title);
+});

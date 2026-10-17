@@ -94,6 +94,140 @@ class WellnessTests(unittest.TestCase):
         self.assertEqual(status, 200, result)
         return result
 
+    def test_admin_account_overview_access_and_attribution(self):
+        path = 'users/FAMILY/overview'
+        for client, status in [(Client(self.port), 401), (self.family, 403), (self.manager, 403), (self.nurse, 403)]:
+            self.assertEqual(client.request(path)[0], status)
+        self.assertEqual(self.admin.request('users/missing/overview')[0], 404)
+        with server.connect() as db:
+            linked = server.insert(db, 'residents', 'ADMIN', None, {'name': 'Linked learner', 'family_ids': ['FAMILY']})
+            other = server.insert(db, 'residents', 'MANAGER', None, {'name': 'Other learner', 'family_ids': []})
+            event = server.insert(db, 'activities', 'EXPERT', None, {'name': 'Herbs', 'expert_id': 'EXPERT', 'date': date.today().isoformat()})
+            pending = server.insert(db, 'activities', 'ADMIN', None, {'name': 'Pending'})
+            for profile in [self.resident['id'], linked]:
+                server.insert(db, 'enrollments', 'ADMIN', profile, {'activity_id': event, 'status': 'Đã tham gia'})
+            server.insert(db, 'enrollments', 'FAMILY', self.resident['id'], {'activity_id': pending, 'status': 'Danh sách chờ'})
+            server.insert(db, 'skills', 'EXPERT', self.resident['id'], {'title': 'Verified skill', 'status': 'Đã học', 'verified_by': 'Expert'})
+            server.insert(db, 'skills', 'FAMILY', other, {'title': 'Other learner skill', 'status': 'Đã học', 'verified_by': 'Expert'})
+            server.insert(db, 'products', 'EXPERT', linked, {'name': 'Herb pot', 'quantity': 2})
+            server.insert(db, 'practice', 'FAMILY', self.resident['id'], {'title': 'Practice'})
+            server.insert(db, 'bookings', 'FAMILY', self.resident['id'], {'package_name': 'Day', 'status': 'Chờ duyệt'})
+            server.insert(db, 'bookings', 'FAMILY', self.resident['id'], {'package_name': 'Cancelled', 'status': 'Đã hủy'})
+            server.insert(db, 'forum_posts', 'FAMILY', None, {'title': 'My post', 'content': 'Content'})
+            server.insert(db, 'forum_posts', 'MANAGER', None, {'title': 'Other post', 'content': 'Private'})
+        status, overview = self.admin.request(path)
+        self.assertEqual(status, 200)
+        self.assertEqual(overview['counts'], {'bookings': 1, 'posts': 1, 'skills': 1, 'practice': 1, 'products': 1, 'attended_events': 1, 'registered_events': 1, 'hosted_events': 0})
+        self.assertEqual(len(overview['profiles']), 2)
+        self.assertEqual(len(overview['bookings']), 2)
+        serialized = json.dumps(overview)
+        for forbidden in ['password', 'csrf', 'token', 'Other post', 'Other learner skill']:
+            self.assertNotIn(forbidden, serialized)
+        _, expert = self.admin.request('users/EXPERT/overview')
+        self.assertEqual(expert['counts']['skills'], 0)
+        self.assertEqual(expert['counts']['products'], 0)
+        self.assertEqual(expert['counts']['hosted_events'], 1)
+
+    def test_admin_password_reset_permissions_and_session_revocation(self):
+        path = 'users/FAMILY/password'
+        password = 'New-account-test-12345'
+        for client in [self.family, self.manager, self.nurse]:
+            self.assertEqual(client.request(path, 'POST', {'password': password})[0], 403)
+        self.assertEqual(self.admin.request(path, 'POST', {'password': password}, csrf=False)[0], 403)
+        self.assertEqual(self.admin.request('users/ADMIN/password', 'POST', {'password': password})[0], 400)
+        self.assertEqual(self.admin.request('users/missing/password', 'POST', {'password': password})[0], 404)
+        self.assertEqual(self.admin.request(path, 'POST', {'password': 'short'})[0], 400)
+        self.assertEqual(self.family.request('me')[0], 200)
+        self.assertEqual(self.admin.request(path, 'POST', {'password': password}), (200, {'ok': True}))
+        self.assertEqual(self.family.request('me')[0], 401)
+        self.assertEqual(self.admin.request('me')[0], 200)
+        self.assertEqual(self.nurse.request('me')[0], 200)
+        with server.connect() as db:
+            user = db.execute("SELECT * FROM users WHERE id='FAMILY'").fetchone()
+            self.assertNotEqual(user['password'], password)
+            self.assertTrue(server.password_ok(password, user['password']))
+            self.assertEqual(user['role'], 'FAMILY')
+            self.assertEqual(user['active'], 1)
+            self.assertNotIn(password, str(db.execute('SELECT * FROM audit').fetchall()))
+        login = Client(self.port)
+        self.assertEqual(login.request('login', 'POST', {'email': 'family@test.example', 'password': 'long-test-password'})[0], 401)
+        self.assertEqual(login.request('login', 'POST', {'email': 'family@test.example', 'password': password})[0], 200)
+        self.assertNotIn('password', json.dumps(self.admin.request('users')[1]))
+
+    def test_admin_password_reset_preserves_locked_status(self):
+        with server.connect() as db:
+            db.execute("UPDATE users SET active=0 WHERE id='FAMILY'")
+        password = 'Locked-account-test-12345'
+        self.assertEqual(self.admin.request('users/FAMILY/password', 'POST', {'password': password})[0], 200)
+        with server.connect() as db:
+            self.assertEqual(db.execute("SELECT active FROM users WHERE id='FAMILY'").fetchone()[0], 0)
+        self.assertEqual(Client(self.port).request('login', 'POST', {'email': 'family@test.example', 'password': password})[0], 401)
+
+    def test_forum_reaction_lifecycle_and_permissions(self):
+        _, post = self.family.request('forum', 'POST', {'title': 'Herbs', 'content': 'My garden.'})
+        path = 'forum/' + post['id'] + '/reaction'
+        guest = Client(self.port)
+        self.assertEqual(guest.request(path, 'POST', {'reaction': 'love'})[0], 401)
+        self.assertEqual(self.family.request(path, 'POST', {'reaction': 'love'}, csrf=False)[0], 403)
+        self.assertEqual(self.family.request(path, 'POST', {'reaction': 'love'}, origin=False)[0], 403)
+        for choice in ['unknown', None, ['like']]:
+            self.assertEqual(self.family.request(path, 'POST', {'reaction': choice})[0], 400)
+        self.assertEqual(self.family.request('forum/missing/reaction', 'POST', {'reaction': 'like'})[0], 404)
+        self.assertEqual(self.family.request('forum/' + self.resident['id'] + '/reaction', 'POST', {'reaction': 'like'})[0], 404)
+        for _ in range(2):
+            status, result = self.family.request(path, 'POST', {'reaction': 'love', 'user_id': 'ADMIN'})
+            self.assertEqual(status, 200)
+            self.assertEqual(result['reaction_total'], 1)
+            self.assertEqual(result['my_reaction'], 'love')
+        self.manager.request(path, 'POST', {'reaction': 'clap'})
+        _, changed = self.family.request(path, 'POST', {'reaction': 'inspire'})
+        self.assertEqual(changed['reaction_total'], 2)
+        self.assertEqual(changed['reactions']['love'], 0)
+        self.assertEqual(changed['reactions']['inspire'], 1)
+        self.assertEqual(changed['reactions']['clap'], 1)
+        anonymous = guest.request('forum')[1][0]
+        self.assertEqual(anonymous['my_reaction'], '')
+        self.assertEqual(anonymous['reaction_total'], 2)
+        self.assertNotIn('user_id', json.dumps(anonymous))
+        self.assertEqual(self.family.request('forum')[1][0]['my_reaction'], 'inspire')
+        self.assertEqual(self.manager.request('forum')[1][0]['my_reaction'], 'clap')
+        _, removed = self.family.request(path, 'POST', {'reaction': ''})
+        self.assertEqual(removed['reaction_total'], 1)
+        self.assertEqual(removed['my_reaction'], '')
+        self.family.request('forum/' + post['id'], 'DELETE', {})
+        with server.connect() as db:
+            self.assertEqual(db.execute('SELECT count(*) FROM forum_reactions WHERE post_id=?', (post['id'],)).fetchone()[0], 0)
+
+    def test_forum_reactions_remain_unique_and_reject_locked_accounts(self):
+        _, post = self.family.request('forum', 'POST', {'title': 'Herbs', 'content': 'My garden.'})
+        path = 'forum/' + post['id'] + '/reaction'
+        with ThreadPoolExecutor(max_workers=6) as pool:
+            results = list(pool.map(lambda _: self.manager.request(path, 'POST', {'reaction': 'like'}), range(6)))
+        self.assertTrue(all(status == 200 for status, _ in results))
+        self.assertEqual(self.manager.request('forum')[1][0]['reaction_total'], 1)
+        with server.connect() as db:
+            db.execute("UPDATE users SET active=0 WHERE id='MANAGER'")
+        self.assertEqual(self.manager.request(path, 'POST', {'reaction': 'love'})[0], 401)
+        with server.connect() as db:
+            db.execute("UPDATE users SET active=0 WHERE id='FAMILY'")
+        self.assertEqual(self.admin.request(path, 'POST', {'reaction': 'clap'})[0], 404)
+        self.assertEqual(Client(self.port).request('forum')[1], [])
+
+    def test_forum_ownership_and_public_read(self):
+        guest = Client(self.port)
+        payload = {'title': 'Một ngày ở vườn', 'content': 'Cùng gia đình chăm cây.'}
+        self.assertEqual(guest.request('forum', 'POST', payload)[0], 401)
+        self.assertEqual(self.family.request('forum', 'POST', payload, csrf=False)[0], 403)
+        status, post = self.family.request('forum', 'POST', payload)
+        self.assertEqual(status, 201, post)
+        status, posts = guest.request('forum')
+        self.assertEqual(status, 200)
+        self.assertEqual(posts[0]['title'], payload['title'])
+        self.assertNotIn('email', posts[0])
+        self.assertEqual(self.nurse.request('forum/' + post['id'], 'DELETE', {})[0], 403)
+        self.assertEqual(self.family.request('forum/' + post['id'], 'DELETE', {})[0], 200)
+        self.assertEqual(guest.request('forum')[1], [])
+
     def test_server_price_and_state(self):
         b = self.booking()
         self.assertEqual(b['total'], self.packages[0]['price'])
@@ -244,7 +378,7 @@ class WellnessTests(unittest.TestCase):
         senior = Client(self.port)
         status, result = senior.request('register', 'POST', {'name': 'Senior learner', 'email': 'new-senior@test.example', 'password': 'senior-test-password', 'account_type': 'SENIOR', 'role': 'ADMIN'})
         self.assertEqual(status, 200, result)
-        self.assertEqual(result['user']['role'], 'SENIOR')
+        self.assertEqual(result['user']['role'], 'FAMILY')
 
     def test_package_entitlements_are_server_calculated_and_immutable(self):
         for tier, price, priority in [('day', 450000, 0), ('week', 2000000, 1), ('month', 9000000, 2)]:

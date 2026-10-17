@@ -34,7 +34,7 @@ test("senior joins workshops, shares an approved portfolio and books a garden vi
     await page.locator('#record-form button[type="submit"]').click();
     await expect(page.getByRole("dialog")).not.toBeVisible();
     const me = await (await page.context().request.get(origin + "/api/me")).json();
-    expect(me.user.role).toBe("SENIOR");
+    expect(me.user.role).toBe("FAMILY");
     const headers = { Origin: origin, "X-CSRF-Token": me.csrf };
     const profiles = await (await page.context().request.get(origin + "/api/residents")).json();
     const resident = profiles[0];

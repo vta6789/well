@@ -1,0 +1,64 @@
+const { test, expect } = require('@playwright/test');
+test.use({ reducedMotion: 'reduce' });
+
+test('forum reactions support sign-in, change, removal and persistence across devices', async ({ page, playwright }, info) => {
+  const origin = 'http://127.0.0.1:8123';
+  const author = await playwright.request.newContext({ baseURL: origin });
+  const reader = await playwright.request.newContext({ baseURL: origin });
+  const stamp = `${Date.now()}-${info.project.name}`;
+  const password = 'Reaction-user-test-12345';
+  const email = `reaction-reader-${stamp}@example.test`;
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  const postRequest = async (client, csrf, path, data) => {
+    const response = await client.post(`/api/${path}`, { headers: { Origin: origin, 'X-CSRF-Token': csrf }, data });
+    expect(response.ok(), await response.text()).toBe(true);
+    return response.json();
+  };
+  try {
+    const writer = await postRequest(author, '', 'register', { name: 'Người kể chuyện', email: `reaction-author-${stamp}@example.test`, password });
+    const viewer = await postRequest(reader, '', 'register', { name: 'Người đọc', email, password });
+    const title = `Một chậu cây, một niềm vui ${stamp}`;
+    const created = await postRequest(author, writer.csrf, 'forum', { title, content: 'Hôm nay tôi tự chăm chậu húng quế và kể lại cho cháu nghe. Một điều nhỏ nhưng rất có ý nghĩa.' });
+    await page.goto('/');
+    const post = page.locator(`.forum-post[data-post-id="${created.id}"]`);
+    await expect(post.locator('.forum-reaction-button')).toHaveCount(5);
+    if (info.project.name === 'mobile') await page.setViewportSize({ width: 320, height: 844 });
+    await post.locator('[data-reaction="love"]').click();
+    await expect(page.locator('#auth-form')).toBeVisible();
+    await page.locator('#auth-form [name="email"]').fill(email);
+    await page.locator('#auth-password').fill(password);
+    await page.locator('#auth-password').press('Enter');
+    await expect(post.locator('[data-reaction="love"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(post.locator('.forum-reaction-total')).toHaveText('1 cảm xúc');
+    await expect(post.locator('[data-reaction="love"]')).toBeFocused();
+    await post.locator('[data-reaction="clap"]').click();
+    await expect(post.locator('[data-reaction="clap"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(post.locator('[data-reaction="love"] .forum-reaction-count')).toHaveText('0');
+    await expect(post.locator('.forum-reaction-total')).toHaveText('1 cảm xúc');
+    await post.locator('[data-reaction="clap"]').click();
+    await expect(post.locator('.forum-reaction-total')).toHaveText('0 cảm xúc');
+    await expect(post.locator('[aria-pressed="true"]')).toHaveCount(0);
+    await post.locator('[data-reaction="inspire"]').focus();
+    await post.locator('[data-reaction="inspire"]').press('Space');
+    await expect(post.locator('[data-reaction="inspire"]')).toHaveAttribute('aria-pressed', 'true');
+    const persisted = (await (await reader.get('/api/forum')).json()).find(item => item.id === created.id);
+    expect(persisted.my_reaction).toBe('inspire');
+    expect(persisted.reaction_total).toBe(1);
+    await postRequest(author, writer.csrf, `forum/${created.id}/reaction`, { reaction: 'love' });
+    await page.reload();
+    await page.locator('.project-user-menu summary').click();
+    await page.locator('[data-action="learning-community"]').click();
+    await expect(post.locator('.forum-reaction-total')).toHaveText('2 cảm xúc');
+    await expect(post.locator('[data-reaction="inspire"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(post.locator('[data-reaction="love"]')).toHaveAttribute('aria-pressed', 'false');
+    await expect(post.locator('[data-reaction="love"] .forum-reaction-count')).toHaveText('1');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await post.screenshot({ path: `screenshots/forum-reactions-${info.project.name}.png` });
+    await page.getByRole('button', { name: 'English', exact: true }).click();
+    await expect(post.getByRole('button', { name: 'Inspiring: 1 reactions', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await post.getByRole('button', { name: 'Wonderful: 0 reactions', exact: true }).click();
+    await expect(post.getByRole('button', { name: 'Wonderful: 1 reactions', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    expect(errors).toEqual([]);
+  } finally { await author.dispose(); await reader.dispose(); }
+});

@@ -15,19 +15,24 @@ function finishCounters() {
 
 function animateCounter(element) {
   const value = element.textContent.trim();
-  if (!/^\d+$/.test(value) || Number(value) === 0 || motionPreference.matches) return;
+  const target = element.dataset.countTarget ? Number(element.dataset.countTarget) : Number(value);
+  const custom = Boolean(element.dataset.countTarget);
+  const suffix = element.dataset.countSuffix || "";
+  const format = (number) => custom ? new Intl.NumberFormat(language === "en" ? "en-US" : "vi-VN").format(number) + suffix : String(number);
+  if ((!custom && !/^\d+$/.test(value)) || !Number.isFinite(target) || target <= 0 || motionPreference.matches) return;
   const started = performance.now();
   const counter = { value, frame: 0 };
   activeCounters.set(element, counter);
   element.setAttribute("aria-label", value);
+  if (custom) element.textContent = format(1);
   const tick = (time) => {
     if (!element.isConnected || motionPreference.matches) {
       element.textContent = value;
       activeCounters.delete(element);
       return;
     }
-    const progress = Math.min(Math.max((time - started) / 750, 0), 1);
-    element.textContent = String(Math.round(Number(value) * (1 - Math.pow(1 - progress, 3))));
+    const progress = Math.min(Math.max((time - started) / (custom ? 1800 : 750), 0), 1);
+    element.textContent = format(Math.max(custom ? 1 : 0, Math.round(target * (1 - Math.pow(1 - progress, 3)))));
     if (progress < 1) counter.frame = requestAnimationFrame(tick);
     else {
       element.textContent = value;
@@ -122,7 +127,7 @@ async function init() {
     if (localStorage.getItem("wf_large_text") === "1")
       document.documentElement.classList.add("large-text");
   } catch {}
-  $("#app").innerHTML = '<div class="loading">❧ Đang mở Wellness Farm…</div>';
+  $("#app").innerHTML = '<div class="loading">❧ Đang mở Tinh Hoa Bình Mỹ…</div>';
   try {
     const result = await api("me");
     state.user = result.user;

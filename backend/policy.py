@@ -1,6 +1,6 @@
 """Roles and booking lifecycle shared by domain validation and HTTP routes."""
 
-ROLES = ["FAMILY", "SENIOR", "EXPERT", "RECEPTION", "NURSE", "DOCTOR", "ACCOUNTANT", "MANAGER", "ADMIN"]
+ROLES = ["FAMILY", "EXPERT", "RECEPTION", "NURSE", "ACCOUNTANT", "MANAGER", "ADMIN"]
 OPS = ["RECEPTION", "MANAGER", "ADMIN"]
 CLINICAL = ["NURSE", "DOCTOR", "MANAGER", "ADMIN"]
 FINANCE = ["ACCOUNTANT", "MANAGER", "ADMIN"]

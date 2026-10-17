@@ -22,15 +22,16 @@ const today = () => {
 };
 const roleNames = {
   FAMILY: "Gia đình",
-  SENIOR: "Học viên cao tuổi",
+  SENIOR: "Gia đình",
   EXPERT: "Chuyên gia",
   RECEPTION: "Lễ tân",
   NURSE: "Điều dưỡng",
-  DOCTOR: "Bác sĩ",
+  DOCTOR: "Điều dưỡng",
   ACCOUNTANT: "Kế toán",
   MANAGER: "Quản lý",
   ADMIN: "Quản trị viên",
 };
+const assignableRoles = Object.entries(roleNames).filter(([role]) => !["SENIOR", "DOCTOR"].includes(role));
 const state = {
   user: null,
   csrf: "",
